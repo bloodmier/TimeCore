@@ -1,0 +1,54 @@
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import { db } from './config/db.js';
+import cookieParser from "cookie-parser";
+import { runWarmup } from "./lib/warmup.js";
+
+
+
+dotenv.config();
+const app = express();
+
+const corsOptions = {
+    origin: [process.env.FRONTEND_ORIGIN, 'http://localhost:5173'].filter(Boolean),
+    methods: ['GET','POST','PATCH','PUT','DELETE','OPTIONS'],
+    allowedHeaders: ['Content-Type','Authorization'],
+    credentials: true,  
+    maxAge: 86400, 
+  };
+
+
+app.use(cors(corsOptions));
+app.options(/.*/, cors(corsOptions));
+app.use(express.json());
+app.use(cookieParser());
+
+
+app.get('/db-check', async (req, res) => {
+    try {
+        const [rows] = await db.query('SELECT 1');
+        res.json({ success: true, message: 'DB connection OK', rows });
+        console.log('DB connection successful:', rows);
+    } catch (err) {
+        res
+            .status(500)
+            .json({ success: false, message: 'DB connection failed' + err.message });
+        console.log('DB connection failed:', err.message);
+    }
+});
+
+const port = process.env.PORT || 5000;
+app.listen(port, ()=>console.log("server is running on http://localhost:5000"));
+
+await runWarmup();
+setInterval(async () => {
+  try {
+    const conn = await db.getConnection();
+    await conn.ping();
+    conn.release();
+    console.log("[DB ping] OK");
+  } catch (err) {
+    console.error("[DB ping] failed:", err.message);
+  }
+}, 60000);
