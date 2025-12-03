@@ -1,0 +1,447 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "TimeCore API",
+    "version": "1.0.0",
+    "description": "Backend API documentation for the TimeCore project. All endpoints use JSON for requests and responses."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000/api",
+      "description": "Local development"
+    }
+  ],
+  "paths": {
+    "/users": {
+      "post": {
+        "tags": ["Users"],
+        "summary": "Register a new user",
+        "description": "Public endpoint used from the registration form. All new users get role `user` automatically.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserRegisterRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRegisterResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing or invalid fields"
+          },
+          "409": {
+            "description": "Email already exists"
+          },
+          "500": {
+            "description": "Unexpected server or database error"
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Login with email and password",
+        "description": "Authenticates a user and sets a JWT access token in the `tc_access` HttpOnly cookie. The token is not returned in the JSON body.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "headers": {
+              "Set-Cookie": {
+                "description": "HttpOnly cookie `tc_access` containing the JWT access token.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing or invalid fields"
+          },
+          "401": {
+            "description": "Invalid email or password"
+          },
+          "403": {
+            "description": "User account is disabled or deleted"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "tags": ["Authentication"],
+        "summary": "Get current authenticated user",
+        "description": "Returns the currently authenticated user based on the `tc_access` HttpOnly cookie.",
+        "responses": {
+          "200": {
+            "description": "Current user information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid authentication cookie"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Logout",
+        "description": "Clears the `tc_access` HttpOnly cookie and logs the user out.",
+        "responses": {
+          "200": {
+            "description": "Logged out successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/auth/forgot-password": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Start password reset flow",
+        "description": "Public endpoint. Generates a password reset token and sends (or logs) a reset link for the given email.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ForgotPasswordRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Generic success message (email existence is not revealed)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing or invalid email"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/auth/reset-password": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Complete password reset",
+        "description": "Validates a password reset token, sets a new password, marks the token as used and issues a new `tc_access` cookie.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password has been reset successfully",
+            "headers": {
+              "Set-Cookie": {
+                "description": "HttpOnly cookie `tc_access` containing the new JWT access token.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or expired token, or weak password"
+          },
+          "403": {
+            "description": "User account is disabled or deleted"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/tenants": {
+      "get": {
+        "tags": ["Tenants"],
+        "summary": "List all tenants",
+        "description": "Public endpoint that returns all tenants (companies). Used on the registration form so the user can select which company they belong to.",
+        "responses": {
+          "200": {
+            "description": "List of tenants",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Tenant"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error while fetching tenants"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "UserRegisterRequest": {
+        "type": "object",
+        "required": ["name", "email", "password", "tenantId"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "User Name"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "user@example.com"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "example": "Password123!"
+          },
+          "tenantId": {
+            "type": "integer",
+            "example": 1
+          }
+        }
+      },
+      "UserRegisterResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "User created successfully"
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 4
+          },
+          "name": {
+            "type": "string",
+            "example": "User Name"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "user@example.com"
+          },
+          "tenant_id": {
+            "type": "integer",
+            "example": 1
+          },
+          "role": {
+            "type": "string",
+            "example": "user"
+          },
+          "is_active": {
+            "type": "integer",
+            "example": 1
+          }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "required": ["email", "password"],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "user@example.com"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "example": "Password123!"
+          }
+        }
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Login successful"
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          }
+        }
+      },
+      "MeResponse": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "example": 4
+              },
+              "tenantId": {
+                "type": "integer",
+                "example": 1
+              },
+              "role": {
+                "type": "string",
+                "example": "user"
+              },
+              "email": {
+                "type": "string",
+                "format": "email",
+                "example": "user@example.com"
+              }
+            }
+          }
+        }
+      },
+      "ForgotPasswordRequest": {
+        "type": "object",
+        "required": ["email"],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "user@example.com"
+          }
+        }
+      },
+      "ResetPasswordRequest": {
+        "type": "object",
+        "required": ["token", "password"],
+        "properties": {
+          "token": {
+            "type": "string",
+            "example": "rawResetTokenFromEmailOrLog"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "example": "NewPassword123!"
+          }
+        }
+      },
+      "Tenant": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "example": "TimeCore AB"
+          },
+          "org_number": {
+            "type": "string",
+            "example": "559123-4567"
+          }
+        }
+      },
+      "MessageResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Some informational message"
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Users",
+      "description": "User registration and management"
+    },
+    {
+      "name": "Authentication",
+      "description": "Login, logout and password reset"
+    },
+    {
+      "name": "Tenants",
+      "description": "Company / tenant information"
+    }
+  ]
+}

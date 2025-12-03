@@ -4,11 +4,18 @@ import dotenv from 'dotenv';
 import { db } from './config/db.js';
 import cookieParser from "cookie-parser";
 import { runWarmup } from "./lib/warmup.js";
+import { fileURLToPath } from "url";
+import path from "path";
 
-
+//routes
+import userRoutes from "./routes/userRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
 
 dotenv.config();
 const app = express();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const corsOptions = {
     origin: [process.env.FRONTEND_ORIGIN, 'http://localhost:5173'].filter(Boolean),
@@ -23,6 +30,14 @@ app.use(cors(corsOptions));
 app.options(/.*/, cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
+
+
+
+
+//Routes
+app.use("/", express.static(path.join(__dirname, "docs")));
+app.use("/api/users", userRoutes);
+app.use("/api/auth", authRoutes);
 
 
 app.get('/db-check', async (req, res) => {
