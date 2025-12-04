@@ -67,10 +67,12 @@ export async function login(req, res) {
         .status(401)
         .json({ message: "Invalid email or password" });
     }
-
+   
+    
     const tokenPayload = {
       sub: user.id,            
       tenantId: user.tenant_id,
+      name:user.name,
       role: user.role,
       email: user.email,
     };
@@ -116,7 +118,8 @@ export async function getMe(req, res) {
   if (!req.user) {
     return res.status(401).json({ message: "Not authenticated" });
   }
-
+  console.log(req.user);
+  
   return res.status(200).json({
     user: req.user,
   });

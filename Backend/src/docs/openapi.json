@@ -363,6 +363,10 @@
                 "type": "integer",
                 "example": 1
               },
+              "name": {
+                "type": "string",
+                "example": "Arne"
+              },
               "role": {
                 "type": "string",
                 "example": "user"

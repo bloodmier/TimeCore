@@ -24,7 +24,7 @@ export function ThemeToggleButton() {
   }
 
   return (
-    <Button variant="outline" size="sm" onClick={toggleTheme} className="ml-auto">
+    <Button variant="outline" size="sm" onClick={toggleTheme} className="ml-auto" aria-label="Toggle color theme" title="Toggle color theme" >
       {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
     </Button>
   )

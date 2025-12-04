@@ -1,17 +1,23 @@
+// src/services/baseService.ts
 import type { AxiosRequestConfig } from "axios";
 import axios from "axios";
 
 
-// GET
-export const getData = async <T>( url: string,token?: string,config?: AxiosRequestConfig): Promise<T> => {
-  const headers: Record<string, string> = {
-    ...(config?.headers as Record<string, string> ?? {}),
-  };
-  if (token) headers.Authorization = `Bearer ${token}`;
+const api = axios.create({
+  baseURL: "http://localhost:5000/api", 
+  withCredentials: true,                
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
-  const response = await axios.get<T>(url, {
+// GET
+export const getData = async <T>(
+  url: string,
+  config?: AxiosRequestConfig
+): Promise<T> => {
+  const response = await api.get<T>(url, {
     ...(config ?? {}),
-    headers,
   });
   return response.data;
 };
@@ -19,37 +25,23 @@ export const getData = async <T>( url: string,token?: string,config?: AxiosReque
 // POST
 export const postData = async <T>(
   url: string,
-  payload: any,
-  token?: string,
+  payload?: any,
   config?: AxiosRequestConfig
 ): Promise<T> => {
-  const headers: Record<string, string> = {
-    ...(config?.headers as Record<string, string> ?? {}),
-  };
-  if (token) headers.Authorization = `Bearer ${token}`;
-
-  const response = await axios.post<T>(url, payload, {
+  const response = await api.post<T>(url, payload, {
     ...(config ?? {}),
-    headers,
   });
   return response.data;
 };
 
-// PATCH
+// PUT
 export const putData = async <T>(
   url: string,
-  payload: any,
-  token?: string,
+  payload?: any,
   config?: AxiosRequestConfig
 ): Promise<T> => {
-  const headers: Record<string, string> = {
-    ...(config?.headers as Record<string, string> ?? {}),
-  };
-  if (token) headers.Authorization = `Bearer ${token}`;
-
-  const response = await axios.put<T>(url, payload, {
+  const response = await api.put<T>(url, payload, {
     ...(config ?? {}),
-    headers,
   });
   return response.data;
 };
@@ -57,17 +49,10 @@ export const putData = async <T>(
 // DELETE
 export const deleteData = async <T>(
   url: string,
-  token?: string,
   config?: AxiosRequestConfig
 ): Promise<T> => {
-  const headers: Record<string, string> = {
-    ...(config?.headers as Record<string, string> ?? {}),
-  };
-  if (token) headers.Authorization = `Bearer ${token}`;
-
-  const response = await axios.delete<T>(url, {
+  const response = await api.delete<T>(url, {
     ...(config ?? {}),
-    headers,
   });
   return response.data;
 };

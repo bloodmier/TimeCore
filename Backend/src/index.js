@@ -10,6 +10,7 @@ import path from "path";
 //routes
 import userRoutes from "./routes/userRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
+import tenantsRoutes from "./routes/tenantRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -18,7 +19,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const corsOptions = {
-    origin: [process.env.FRONTEND_ORIGIN, 'http://localhost:5173'].filter(Boolean),
+    origin: [process.env.FRONTEND_ORIGIN, 'http://localhost:5173',"http://localhost:4173"].filter(Boolean),
     methods: ['GET','POST','PATCH','PUT','DELETE','OPTIONS'],
     allowedHeaders: ['Content-Type','Authorization'],
     credentials: true,  
@@ -38,6 +39,7 @@ app.use(cookieParser());
 app.use("/", express.static(path.join(__dirname, "docs")));
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/tenants", tenantsRoutes);
 
 
 app.get('/db-check', async (req, res) => {

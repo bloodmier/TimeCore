@@ -5,7 +5,6 @@ import {
   Clock,
   CalendarRange,
   ShieldCheck,
-  UserCog,
 } from "lucide-react";
 
 

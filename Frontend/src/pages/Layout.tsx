@@ -1,17 +1,33 @@
-import { NavLink, Outlet } from "react-router-dom"
+import { Link, NavLink, Outlet } from "react-router-dom"
 import { useState } from "react"
 import { Menu, X } from "lucide-react"
 import { ThemeToggleButton } from "../components/ui/ThemeToggleButton"
 import reactLogo from "../assets/react.svg"
+import { useAuth } from "../context/AuthContext"
+
 export function Layout() {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const {isAuthenticated,logout} = useAuth()
 
   const theme =
     (localStorage.getItem("theme") as "light" | "dark") || "light"
 
   const NavLinks = ({ onClick }: { onClick?: () => void }) => (
     <>
-      <NavLink
+     {isAuthenticated ?
+     <NavLink
+        to="/login"
+        onClick={logout}
+        className={({ isActive }) =>
+          `text-sm font-medium md:text-center ${
+            isActive ? "text-primary" : "text-muted-foreground"
+          } hover:text-primary transition-colors`
+        }
+      >
+        Logout
+      </NavLink>
+     :
+     <NavLink
         to="/login"
         onClick={onClick}
         className={({ isActive }) =>
@@ -22,8 +38,10 @@ export function Layout() {
       >
         Login
       </NavLink>
+     
+     } 
 
-      <NavLink
+     {isAuthenticated && <NavLink
         to="/account"
         onClick={onClick}
         className={({ isActive }) =>
@@ -34,6 +52,7 @@ export function Layout() {
       >
         Account
       </NavLink>
+}
     </>
   )
 
@@ -45,14 +64,20 @@ export function Layout() {
         } backdrop-blur`}
       >
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <a href="/" className="flex items-center gap-2">
+          <Link 
+          to="/" 
+          className="flex items-center gap-2"
+          aria-label="Home page"
+          title="Home page"
+          >
             {theme === "light" ? (
-              <img src={reactLogo} className="h-10" />
+              <img src={reactLogo} className="h-10" alt="TimeCore logo" loading="lazy" />
             ) : (
-              <img src={reactLogo} className="h-10" />
+              <img src={reactLogo} className="h-10" alt="TimeCore logo" loading="lazy"/>
             )}
-          </a>
-          <nav className="hidden md:flex gap-6 items-center">
+          </Link>
+          <div className="flex items-center gap-6">
+          <nav className="flex max-md:hidden gap-6  items-center">
             <NavLinks />
           </nav>
           <div className="flex items-center gap-2">
@@ -63,6 +88,7 @@ export function Layout() {
               {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
             <ThemeToggleButton />
+          </div>
           </div>
         </div>
         {mobileOpen && (

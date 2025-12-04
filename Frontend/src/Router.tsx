@@ -16,6 +16,10 @@ import { AdminInvoiceMain } from "./pages/Admin/AdminInvoiceMain";
 import { TimeRegisterSickpage } from "./pages/Timeregister/TimeRegisterSickpage";
 import { TimeRegisterVacationpage } from "./pages/Timeregister/TimeRegisterVacationpage";
 import { AccountOverviewpage } from "./pages/AccountOverviewpage";
+import { RequireAuth } from "./auth/RequireAuth";
+import { CreateAccount } from "./pages/CreateAccount";
+import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
+import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 
 export const Router = createBrowserRouter([
   {
@@ -31,6 +35,18 @@ export const Router = createBrowserRouter([
         path: "/login",
         element: <Loginpage />,
       },
+      {
+        path: "/create-account",
+        element: <CreateAccount />,
+      },
+      {
+        path: "/forgot-password",
+        element: <ForgotPasswordPage />,
+      },
+      {
+        path: "/reset-password",
+        element: <ResetPasswordPage />,
+      },
     ],
   },
   {
@@ -41,7 +57,9 @@ export const Router = createBrowserRouter([
       {
         path: "/account",
         element: (
+          <RequireAuth>
             <AccountLayout />
+          </RequireAuth>
         ),
         children: [
           {
@@ -94,19 +112,17 @@ export const Router = createBrowserRouter([
           },
           {
             path: "/account/admin",
-            element: (
-                <AdminLayout />
-            ),
+            element: <AdminLayout />,
             children: [
               { index: true, element: <Navigate to="summary" replace /> },
-              { path: "summary", element: <AdminTimeOverviewInfinite/> },
+              { path: "summary", element: <AdminTimeOverviewInfinite /> },
               {
                 path: "statistics",
                 element: <AdminStatisticsVeiw />,
               },
               {
                 path: "invoice",
-                element: <AdminInvoiceMain/>,
+                element: <AdminInvoiceMain />,
               },
             ],
           },
