@@ -40,19 +40,28 @@ export async function login(req, res) {
       return res.status(400).json({ message: "Invalid email format" });
     }
     const [rows] = await db.query(
-      `SELECT id, name, email, tenant_id, password_hash, is_active, deleted_at, role
-       FROM users
-       WHERE email = ?
-       LIMIT 1`,
+      `SELECT 
+    u.id,
+    u.name,
+    u.email,
+    u.tenant_id,
+    u.password_hash,
+    u.is_active,
+    u.deleted_at,
+    u.role,
+    u.avatar_url,
+    t.name AS tenant_name
+    FROM users u
+    LEFT JOIN tenants t ON t.id = u.tenant_id
+    WHERE u.email = ?
+    LIMIT 1`,
       [email]
     );
 
     const user = rows[0];
-
+    
     if (!user) {
-      return res
-        .status(401)
-        .json({ message: "Invalid email or password" });
+      return res.status(401).json({ message: "Invalid email or password" });
     }
 
     if (!user.is_active || user.deleted_at) {
@@ -63,18 +72,17 @@ export async function login(req, res) {
 
     const isMatch = await bcrypt.compare(password, user.password_hash);
     if (!isMatch) {
-      return res
-        .status(401)
-        .json({ message: "Invalid email or password" });
+      return res.status(401).json({ message: "Invalid email or password" });
     }
-   
-    
+
     const tokenPayload = {
-      sub: user.id,            
+      sub: user.id,
       tenantId: user.tenant_id,
-      name:user.name,
+      tenantName: user.tenant_name,
+      name: user.name,
       role: user.role,
       email: user.email,
+      avatarUrl: user.avatar_url,
     };
 
     const accessToken = signAccessToken(tokenPayload);
@@ -83,7 +91,7 @@ export async function login(req, res) {
 
     res.cookie("tc_access", accessToken, {
       httpOnly: true,
-      secure: isProd,         // true in production (HTTPS)
+      secure: isProd, // true in production (HTTPS)
       sameSite: isProd ? "strict" : "lax",
       maxAge: 60 * 60 * 1000, // 1 hour (should match JWT expiry)
       path: "/",
@@ -96,7 +104,9 @@ export async function login(req, res) {
         name: user.name,
         email: user.email,
         tenant_id: user.tenant_id,
+        tenantName: user.tenant_name,
         role: user.role,
+        avatarUrl: user.avatar_url,
       },
     });
   } catch (err) {
@@ -107,29 +117,65 @@ export async function login(req, res) {
   }
 }
 
-
 /**
  * GET /api/auth/me
  *
  * Return the currently authenticated user based on the JWT cookie.
  * This route is protected with the requireAuth middleware.
  */
+
 export async function getMe(req, res) {
-  if (!req.user) {
-    return res.status(401).json({ message: "Not authenticated" });
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    const userId = req.user.id ?? req.user.sub;
+
+    const [rows] = await db.query(
+      `SELECT 
+        u.id,
+        u.name,
+        u.email,
+        u.tenant_id,
+        u.role,
+        u.avatar_url,
+        t.name AS tenant_name
+       FROM users u
+       LEFT JOIN tenants t ON t.id = u.tenant_id
+       WHERE u.id = ?
+       LIMIT 1`,
+      [userId]
+    );
+
+    const user = rows[0];
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json({
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        tenantId: user.tenant_id,
+        tenantName: user.tenant_name,
+        avatarUrl: user.avatar_url,
+      },
+    });
+  } catch (error) {
+    console.error("getMe error:", error);
+    return res.status(500).json({ message: "Internal server error" });
   }
-  console.log(req.user);
-  
-  return res.status(200).json({
-    user: req.user,
-  });
 }
+
 
 /**
  * POST /api/auth/logout
  *
  * Logs out the current user by clearing the authentication cookie.
- * 
+ *
  */
 export async function logout(req, res) {
   try {
@@ -200,8 +246,7 @@ export async function forgotPassword(req, res) {
       .update(rawToken)
       .digest("hex");
 
-    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); 
-
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
 
     await db.query(
       `INSERT INTO password_reset_tokens
@@ -251,13 +296,8 @@ export async function resetPassword(req, res) {
       });
     }
 
-    // 1. Hash provided token
-    const tokenHash = crypto
-      .createHash("sha256")
-      .update(token)
-      .digest("hex");
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
 
-    // 2. Find matching reset token that is not used and not expired
     const [rows] = await db.query(
       `SELECT prt.id, prt.user_id, prt.expires_at, prt.used_at,
               u.email, u.is_active, u.deleted_at, u.tenant_id, u.role, u.name
@@ -284,10 +324,8 @@ export async function resetPassword(req, res) {
         .json({ message: "User account is disabled or deleted" });
     }
 
-    // 3. Hash the new password
     const newPasswordHash = await bcrypt.hash(password, 10);
 
-    // 4. Update user's password
     await db.query(
       `UPDATE users
        SET password_hash = ?, updated_at = NOW()
@@ -295,7 +333,6 @@ export async function resetPassword(req, res) {
       [newPasswordHash, record.user_id]
     );
 
-    // 5. Mark token as used
     await db.query(
       `UPDATE password_reset_tokens
        SET used_at = NOW()
@@ -303,12 +340,12 @@ export async function resetPassword(req, res) {
       [record.id]
     );
 
-    // 6. (Optional) Log user in immediately by setting new JWT cookie
     const tokenPayload = {
       sub: record.user_id,
       tenantId: record.tenant_id,
       role: record.role,
       email: record.email,
+      avatarUrl: user.avatar_url,
     };
 
     const accessToken = signAccessToken(tokenPayload);
@@ -330,6 +367,7 @@ export async function resetPassword(req, res) {
         email: record.email,
         tenant_id: record.tenant_id,
         role: record.role,
+        avatarUrl: user.avatar_url,
       },
     });
   } catch (err) {
@@ -337,5 +375,108 @@ export async function resetPassword(req, res) {
     return res
       .status(500)
       .json({ message: "Internal server error during password reset" });
+  }
+}
+
+/**
+ * POST /api/auth/change-password
+ *
+ * Allows a logged-in user to change their password by providing
+ * the current password and a new password.
+ *
+ * Expected body:
+ * {
+ *   "currentPassword": "OldPassword123!",
+ *   "newPassword": "NewPassword123!"
+ * }
+ */
+export async function changePassword(req, res) {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res
+        .status(400)
+        .json({ message: "Current password and new password are required" });
+    }
+
+    if (!isValidPassword(newPassword)) {
+      return res.status(400).json({
+        message: "Password must be at least 8 characters long",
+      });
+    }
+
+    if (!req.user) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    const userId = req.user.id;
+
+
+    const [rows] = await db.query(
+      `SELECT id, password_hash, is_active, deleted_at, tenant_id, email, role, name
+       FROM users
+       WHERE id = ?
+       LIMIT 1`,
+      [userId]
+    );
+
+    const user = rows[0];
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (!user.is_active || user.deleted_at) {
+      return res
+        .status(403)
+        .json({ message: "User account is disabled or deleted" });
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password_hash);
+    if (!isMatch) {
+      return res
+        .status(401)
+        .json({ message: "Current password is incorrect" });
+    }
+
+    const newPasswordHash = await bcrypt.hash(newPassword, 10);
+
+    await db.query(
+      `UPDATE users
+       SET password_hash = ?, updated_at = NOW()
+       WHERE id = ?`,
+      [newPasswordHash, userId]
+    );
+
+    const tokenPayload = {
+      sub: user.id,
+      tenantId: user.tenant_id,
+      role: user.role,
+      email: user.email,
+      name: user.name,
+      avatarUrl: req.user.avatarUrl ?? null,
+      tenantName: req.user.tenantName ?? null,
+    };
+
+    const accessToken = signAccessToken(tokenPayload);
+    const isProd = process.env.NODE_ENV === "production";
+
+    res.cookie("tc_access", accessToken, {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: isProd ? "strict" : "lax",
+      maxAge: 60 * 60 * 1000,
+      path: "/",
+    });
+
+    return res.status(200).json({
+      message: "Password changed successfully",
+    });
+  } catch (err) {
+    console.error("Error in changePassword:", err);
+    return res
+      .status(500)
+      .json({ message: "Internal server error during password change" });
   }
 }

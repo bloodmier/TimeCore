@@ -70,11 +70,11 @@ export const ForgotPasswordPage = () => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm mb-1">Email</label>
+            <label className="block text-sm mb-1" htmlFor="email">Email</label>
             <input
               type="email"
               required
-              className="w-full border rounded px-3 py-2 text-sm bg-white text-black"
+              className="w-full border rounded px-3 py-2 text-sm "
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -100,7 +100,7 @@ export const ForgotPasswordPage = () => {
         <button
           type="button"
           onClick={() => navigate("/login")}
-          className="mt-4 w-full text-sm text-blue-600 underline"
+          className="mt-4 w-full text-sm text-primary underline"
         >
           Back to login
         </button>

@@ -94,7 +94,7 @@ export function Layout() {
         {mobileOpen && (
           <div className="md:hidden mt-2 border border-border bg-background rounded-lg shadow-lg">
             <div className="flex flex-col gap-3 px-6 py-4">
-              <NavLinks onClick={() => setMobileOpen(false)} />
+              <NavLinks onClick={() => setMobileOpen(false)} aria-label="Open main menu"/>
             </div>
           </div>
         )}

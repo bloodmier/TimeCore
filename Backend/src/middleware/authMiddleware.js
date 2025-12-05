@@ -25,13 +25,15 @@ export function requireAuth(req, res, next) {
     }
 
     const payload = verifyAccessToken(token);
- 
+    
     req.user = {
       id: payload.sub,
       tenantId: payload.tenantId,
+      tenantName: payload.tenantName,
       name:payload.name,
       role: payload.role,
       email: payload.email,
+      avatarUrl: payload.avatarUrl ?? null,
     };
 
     return next();

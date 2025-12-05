@@ -1,4 +1,4 @@
-import { NavLink } from "react-router";
+import { NavLink } from "react-router-dom";
 
 import {
   LayoutDashboard,
@@ -6,12 +6,16 @@ import {
   CalendarRange,
   ShieldCheck,
 } from "lucide-react";
+import type { ApiUser } from "../models/common";
 
 
-type Props = { className?: string };
-export const AccountMenu = ({ className }: Props) => {
+type Props = { 
+  className?: string
+  user:ApiUser 
+};
+export const AccountMenu = ({ className,user }: Props) => {
 
-
+const role = user?.role
 
   const base = "flex gap-2 px-4 py-2 rounded-[var(--radius-lg)] transition";
   const active =
@@ -49,7 +53,8 @@ export const AccountMenu = ({ className }: Props) => {
           <CalendarRange className="h-6 w-6" /> Time overview
         </NavLink>
       </li>
-      <li>
+        {role === "admin" &&  
+        <li>
         <NavLink
           to="admin"
           className={({ isActive }) => `${base} ${isActive ? active : idle}`}
@@ -57,6 +62,8 @@ export const AccountMenu = ({ className }: Props) => {
           <ShieldCheck className="h-6 w-6" /> Admin
         </NavLink>
       </li>
+        }
+      
     </ul>
   );
 };

@@ -43,7 +43,6 @@ export const ResetPasswordPage = () => {
       return;
     }
 
-
     if (password.length < 8) {
       setError("Password must be at least 8 characters.");
       return;
@@ -105,22 +104,34 @@ export const ResetPasswordPage = () => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm mb-1">New password</label>
+            <label
+              htmlFor="password"
+              className="block text-sm mb-1"
+            >
+              New password
+            </label>
             <input
+              id="password"
               type="password"
               required
-              className="w-full border rounded px-3 py-2 text-sm bg-white text-black"
+              className="w-full border rounded px-3 py-2 text-sm bg-background text-foreground"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
 
           <div>
-            <label className="block text-sm mb-1">Confirm new password</label>
+            <label
+              htmlFor="confirmPassword"
+              className="block text-sm mb-1"
+            >
+              Confirm new password
+            </label>
             <input
+              id="confirmPassword"
               type="password"
               required
-              className="w-full border rounded px-3 py-2 text-sm bg-white text-black"
+              className="w-full border rounded px-3 py-2 text-sm bg-background text-foreground"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
             />
@@ -146,7 +157,7 @@ export const ResetPasswordPage = () => {
         <button
           type="button"
           onClick={() => navigate("/login")}
-          className="mt-4 w-full text-sm text-blue-600 underline"
+          className="mt-4 w-full text-sm text-primary underline"
         >
           Back to login
         </button>

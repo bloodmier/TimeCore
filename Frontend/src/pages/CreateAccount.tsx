@@ -217,7 +217,7 @@ export const CreateAccount = () => {
 
         <Link
           to="/login"
-          className="mt-4 w-full text-sm text-blue-700 dark:text-blue-300 hover:underline text-center block"
+          className="mt-4 w-full text-sm text-primary hover:underline text-center block"
         >
           Already have an account? Log in
         </Link>

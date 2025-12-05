@@ -11,6 +11,13 @@ import bcrypt from "bcryptjs";
 import { db } from "../config/db.js";
 import { isValidEmail, isValidPassword } from "../utils/validation.js";
 
+import sharp from "sharp";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 /**
  * Create a new user.
  *
@@ -95,3 +102,110 @@ export async function createUser(req, res) {
     });
   }
 }
+
+/**
+ * PUT /api/users/me/avatar
+ *
+ * Update the currently authenticated user's avatar.
+ * Expects:
+ *   - Auth cookie (requireAuth middleware)
+ *   - multipart/form-data with "avatar" (image file)
+ */
+export async function updateAvatar(req, res) {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    const userId = req.user.id;
+
+    const avatarsDir = path.join(__dirname, "..", "uploads", "avatars");
+    if (!fs.existsSync(avatarsDir)) {
+      fs.mkdirSync(avatarsDir, { recursive: true });
+    }
+
+    const [existingUserRows] = await db.query(
+      `SELECT avatar_url
+       FROM users
+       WHERE id = ?
+       LIMIT 1`,
+      [userId]
+    );
+
+    const oldAvatarUrl = existingUserRows[0]?.avatar_url ?? null;
+
+    const timestamp = Date.now();
+    const fileName = `user-${userId}-${timestamp}.webp`;
+    const filePath = path.join(avatarsDir, fileName);
+
+    await sharp(req.file.buffer)
+      .resize(512, 512, {
+        fit: "cover",
+        position: "centre",
+      })
+      .toFormat("webp")
+      .webp({ quality: 80 })
+      .toFile(filePath);
+
+    const avatarUrl = `/uploads/avatars/${fileName}`;
+
+    await db.query(
+      `UPDATE users
+       SET avatar_url = ?, updated_at = NOW()
+       WHERE id = ?`,
+      [avatarUrl, userId]
+    );
+
+    if (oldAvatarUrl && oldAvatarUrl !== avatarUrl) {
+      try {
+        const oldPath = path.join(
+          __dirname,
+          "..",
+          oldAvatarUrl.startsWith("/") ? oldAvatarUrl.substring(1) : oldAvatarUrl
+        );
+        if (fs.existsSync(oldPath)) {
+          fs.unlinkSync(oldPath);
+        }
+      } catch (cleanupErr) {
+        console.warn("Failed to remove old avatar file:", cleanupErr.message);
+      }
+    }
+
+    const [rows] = await db.query(
+      `SELECT id, name, email, tenant_id, role, avatar_url
+       FROM users
+       WHERE id = ?
+       LIMIT 1`,
+      [userId]
+    );
+
+    const user = rows[0];
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found after update" });
+    }
+
+    return res.status(200).json({
+      message: "Avatar updated",
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        tenant_id: user.tenant_id,
+        role: user.role,
+        avatarUrl: user.avatar_url,
+      },
+    });
+  } catch (err) {
+    console.error("Error in updateAvatar:", err);
+    return res
+      .status(500)
+      .json({ message: "Internal server error while updating avatar" });
+  }
+}
+
+

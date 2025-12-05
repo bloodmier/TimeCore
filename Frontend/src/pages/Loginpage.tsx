@@ -98,7 +98,7 @@ export const Loginpage = () => {
 
         <Link
           to="/forgot-password"
-          className="text-sm text-blue-600 hover:underline block text-center mt-3"
+          className="text-sm text-primary hover:underline block text-center mt-3"
         >
           Forgot your password?
         </Link>

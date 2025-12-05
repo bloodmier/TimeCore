@@ -16,9 +16,11 @@ export interface ApiLoginResponse {
 export interface ApiMeUser {
   id: number;
   tenantId: number;
+  tenantName:string;
   name:string;
   role: string;
   email: string;
+  avatarUrl?: string | null;
 }
 
 export interface ApiMeResponse {
@@ -45,3 +47,11 @@ export interface ApiResetPasswordResponse {
 }
 
 export type ApiLogoutResponse = ApiMessageResponse;
+
+
+export interface ApiChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
+export type ApiChangePasswordResponse = ApiMessageResponse;

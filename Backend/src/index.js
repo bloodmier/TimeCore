@@ -37,10 +37,10 @@ app.use(cookieParser());
 
 //Routes
 app.use("/", express.static(path.join(__dirname, "docs")));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/tenants", tenantsRoutes);
-
 
 app.get('/db-check', async (req, res) => {
     try {

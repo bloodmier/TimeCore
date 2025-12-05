@@ -15,7 +15,7 @@ import { UserTimeOverviewInfinite } from "./pages/Timeoverview/UserTimeOverviewI
 import { AdminInvoiceMain } from "./pages/Admin/AdminInvoiceMain";
 import { TimeRegisterSickpage } from "./pages/Timeregister/TimeRegisterSickpage";
 import { TimeRegisterVacationpage } from "./pages/Timeregister/TimeRegisterVacationpage";
-import { AccountOverviewpage } from "./pages/AccountOverviewpage";
+import { AccountOverviewPage } from "./pages/AccountOverviewpage";
 import { RequireAuth } from "./auth/RequireAuth";
 import { CreateAccount } from "./pages/CreateAccount";
 import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
@@ -64,11 +64,11 @@ export const Router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <AccountOverviewpage />,
+            element: <AccountOverviewPage />,
           },
           {
             path: "/account/overview",
-            element: <AccountOverviewpage />,
+            element: <AccountOverviewPage />,
           },
           {
             path: "/account/timeregister",

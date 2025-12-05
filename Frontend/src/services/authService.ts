@@ -9,6 +9,8 @@ import type {
   ApiResetPasswordRequest,
   ApiResetPasswordResponse,
   ApiLogoutResponse,
+  ApiChangePasswordRequest,
+  ApiChangePasswordResponse,
 } from "../models/auth";
 
 export const AuthService = {
@@ -23,6 +25,9 @@ export const AuthService = {
 
   resetPassword: (payload: ApiResetPasswordRequest) =>
     postData<ApiResetPasswordResponse>("/auth/reset-password", payload),
+
+  changePassword: (payload: ApiChangePasswordRequest) =>
+    postData<ApiChangePasswordResponse>("/auth/change-password", payload),
 
   logout: () =>
     postData<ApiLogoutResponse>("/auth/logout"),

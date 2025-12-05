@@ -50,6 +50,52 @@
         }
       }
     },
+    "/users/me/avatar": {
+      "put": {
+        "tags": ["Users"],
+        "summary": "Update current user's avatar",
+        "description": "Authenticated endpoint. Accepts an image file, resizes and optimizes it on the server, and updates the user's `avatarUrl`.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["avatar"],
+                "properties": {
+                  "avatar": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Profile image file to upload (e.g. JPG, PNG). The server will resize and store it."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Avatar updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserAvatarUpdateResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "No file uploaded or invalid file type/size"
+          },
+          "401": {
+            "description": "Missing or invalid authentication cookie"
+          },
+          "500": {
+            "description": "Internal server error while processing or saving the avatar"
+          }
+        }
+      }
+    },
     "/auth/login": {
       "post": {
         "tags": ["Authentication"],
@@ -227,6 +273,60 @@
         }
       }
     },
+    "/auth/change-password": {
+  "post": {
+    "tags": ["Authentication"],
+    "summary": "Change password (authenticated)",
+    "description": "Allows a logged-in user to change their password by providing the current password and a new password.",
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "required": ["currentPassword", "newPassword"],
+            "properties": {
+              "currentPassword": {
+                "type": "string",
+                "format": "password",
+                "example": "OldPassword123!"
+              },
+              "newPassword": {
+                "type": "string",
+                "format": "password",
+                "example": "NewPassword123!"
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "Password changed successfully",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MessageResponse"
+            }
+          }
+        }
+      },
+      "400": {
+        "description": "Missing fields or weak password"
+      },
+      "401": {
+        "description": "Not authenticated or wrong current password"
+      },
+      "403": {
+        "description": "User account is disabled or deleted"
+      },
+      "500": {
+        "description": "Internal server error"
+      }
+    }
+  }
+},
     "/tenants": {
       "get": {
         "tags": ["Tenants"],
@@ -291,6 +391,18 @@
           }
         }
       },
+      "UserAvatarUpdateResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Avatar updated"
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          }
+        }
+      },
       "User": {
         "type": "object",
         "properties": {
@@ -311,6 +423,12 @@
             "type": "integer",
             "example": 1
           },
+          "tenantName": {
+            "type": "string",
+            "nullable": true,
+            "example": "TimeCore AB",
+            "description": "Name of the tenant/company the user belongs to."
+          },
           "role": {
             "type": "string",
             "example": "user"
@@ -318,6 +436,12 @@
           "is_active": {
             "type": "integer",
             "example": 1
+          },
+          "avatarUrl": {
+            "type": "string",
+            "nullable": true,
+            "example": "/uploads/avatars/user-4-1733393023.webp",
+            "description": "Public URL to the user's profile image. Can be null if no avatar is set."
           }
         }
       },
@@ -363,6 +487,12 @@
                 "type": "integer",
                 "example": 1
               },
+              "tenantName": {
+                "type": "string",
+                "nullable": true,
+                "example": "TimeCore AB",
+                "description": "Name of the tenant/company the user belongs to (from JWT payload)."
+              },
               "name": {
                 "type": "string",
                 "example": "Arne"
@@ -375,6 +505,12 @@
                 "type": "string",
                 "format": "email",
                 "example": "user@example.com"
+              },
+              "avatarUrl": {
+                "type": "string",
+                "nullable": true,
+                "example": "/uploads/avatars/user-4-1733393023.webp",
+                "description": "Public URL to the user's profile image from the JWT payload."
               }
             }
           }

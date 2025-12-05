@@ -13,6 +13,7 @@ type AuthContextType = {
   user: ApiUser | null;
   isAuthenticated: boolean;
   loading: boolean;
+  setUser: (user: ApiUser | null) => void;
   login: (
     email: string,
     password: string
@@ -36,8 +37,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           name: res.user.name, 
           email: res.user.email,
           tenant_id: res.user.tenantId,
+          tenantName:res.user.tenantName,
           role: res.user.role,
           is_active: 1,
+          avatarUrl: res.user.avatarUrl ?? null,
         });
       } catch (err) {
         console.error("Failed to load current user", err);
@@ -53,6 +56,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (email: string, password: string) => {
     try {
       const res = await AuthService.login({ email, password });
+      console.log(res);
+      
       setUser(res.user);
       return { ok: true };
     } catch (error) {
@@ -86,8 +91,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           name: res.user.name, 
           email: res.user.email,
           tenant_id: res.user.tenantId,
+          tenantName:res.user.tenantName,
           role: res.user.role,
           is_active: 1,
+          avatarUrl: res.user.avatarUrl ?? null,
         });
     } catch (err) {
       console.error("refreshMe error", err);
@@ -104,6 +111,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         login,
         logout,
         refreshMe,
+        setUser,
       }}
     >
       {children}
