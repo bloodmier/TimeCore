@@ -170,6 +170,45 @@
         }
       }
     },
+    "/auth/refresh": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Refresh access token",
+        "description": "Refreshes the short-lived access token using the long-lived `tc_refresh` HttpOnly cookie. Issues a new `tc_access` cookie and returns the authenticated user.",
+        "requestBody": {
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "description": "Access token refreshed successfully",
+            "headers": {
+              "Set-Cookie": {
+                "description": "HttpOnly cookie `tc_access` containing the new JWT access token.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, invalid, or expired refresh token cookie"
+          },
+          "403": {
+            "description": "User account is disabled or deleted"
+          },
+          "500": {
+            "description": "Internal server error while refreshing the token"
+          }
+        }
+      }
+    },
     "/auth/logout": {
       "post": {
         "tags": ["Authentication"],
@@ -245,7 +284,7 @@
         "responses": {
           "200": {
             "description": "Password has been reset successfully",
-            "headers": {
+          "headers": {
               "Set-Cookie": {
                 "description": "HttpOnly cookie `tc_access` containing the new JWT access token.",
                 "schema": {
@@ -274,59 +313,59 @@
       }
     },
     "/auth/change-password": {
-  "post": {
-    "tags": ["Authentication"],
-    "summary": "Change password (authenticated)",
-    "description": "Allows a logged-in user to change their password by providing the current password and a new password.",
-    "requestBody": {
-      "required": true,
-      "content": {
-        "application/json": {
-          "schema": {
-            "type": "object",
-            "required": ["currentPassword", "newPassword"],
-            "properties": {
-              "currentPassword": {
-                "type": "string",
-                "format": "password",
-                "example": "OldPassword123!"
-              },
-              "newPassword": {
-                "type": "string",
-                "format": "password",
-                "example": "NewPassword123!"
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Change password (authenticated)",
+        "description": "Allows a logged-in user to change their password by providing the current password and a new password.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["currentPassword", "newPassword"],
+                "properties": {
+                  "currentPassword": {
+                    "type": "string",
+                    "format": "password",
+                    "example": "OldPassword123!"
+                  },
+                  "newPassword": {
+                    "type": "string",
+                    "format": "password",
+                    "example": "NewPassword123!"
+                  }
+                }
               }
             }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password changed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing fields or weak password"
+          },
+          "401": {
+            "description": "Not authenticated or wrong current password"
+          },
+          "403": {
+            "description": "User account is disabled or deleted"
+          },
+          "500": {
+            "description": "Internal server error"
           }
         }
       }
     },
-    "responses": {
-      "200": {
-        "description": "Password changed successfully",
-        "content": {
-          "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/MessageResponse"
-            }
-          }
-        }
-      },
-      "400": {
-        "description": "Missing fields or weak password"
-      },
-      "401": {
-        "description": "Not authenticated or wrong current password"
-      },
-      "403": {
-        "description": "User account is disabled or deleted"
-      },
-      "500": {
-        "description": "Internal server error"
-      }
-    }
-  }
-},
     "/tenants": {
       "get": {
         "tags": ["Tenants"],

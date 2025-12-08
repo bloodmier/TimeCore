@@ -8,7 +8,7 @@
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import { db } from "../config/db.js";
-import { signAccessToken } from "../utils/jwt.js";
+import { signAccessToken,signRefreshToken,verifyRefreshToken } from "../utils/jwt.js";
 import { sendPasswordResetEmail } from "../lib/mail.js";
 import { isValidEmail, isValidPassword } from "../utils/validation.js";
 
@@ -86,7 +86,7 @@ export async function login(req, res) {
     };
 
     const accessToken = signAccessToken(tokenPayload);
-
+    const refreshToken = signRefreshToken({ sub: user.id });
     const isProd = process.env.NODE_ENV === "production";
 
     res.cookie("tc_access", accessToken, {
@@ -95,6 +95,14 @@ export async function login(req, res) {
       sameSite: isProd ? "strict" : "lax",
       maxAge: 60 * 60 * 1000, // 1 hour (should match JWT expiry)
       path: "/",
+    });
+
+       res.cookie("tc_refresh", refreshToken, {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: isProd ? "strict" : "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000, 
+      path: "/", 
     });
 
     return res.status(200).json({
@@ -114,6 +122,104 @@ export async function login(req, res) {
     return res
       .status(500)
       .json({ message: "Internal server error during login" });
+  }
+}
+
+/**
+ * POST /api/auth/refresh
+ *
+ * Refresh the short-lived access token using a long-lived refresh token.
+ *
+ * This endpoint:
+ * - Reads the HttpOnly "tc_refresh" cookie from the request.
+ * - Verifies and decodes the refresh JWT.
+ * - Looks up the user in the database and checks that the account is still active.
+ * - Issues a new short-lived access token (JWT) and sets it as an HttpOnly "tc_access" cookie.
+ */
+
+export async function refreshAccessToken(req, res) {
+  console.log("jag körs");
+  
+  try {
+    const refreshToken = req.cookies?.tc_refresh;
+
+    if (!refreshToken) {
+      return res.status(401).json({ message: "No refresh token" });
+    }
+
+    let payload;
+    try {
+      payload = verifyRefreshToken(refreshToken);
+    } catch (err) {
+      console.error("Refresh token error:", err.message);
+      return res.status(401).json({ message: "Invalid refresh token" });
+    }
+
+    const [rows] = await db.query(
+      `SELECT 
+        u.id,
+        u.name,
+        u.email,
+        u.tenant_id,
+        u.is_active,
+        u.deleted_at,
+        u.role,
+        u.avatar_url,
+        t.name AS tenant_name
+      FROM users u
+      LEFT JOIN tenants t ON t.id = u.tenant_id
+      WHERE u.id = ?
+      LIMIT 1`,
+      [payload.sub]
+    );
+
+    const user = rows[0];
+
+    if (!user || !user.is_active || user.deleted_at) {
+      return res
+        .status(403)
+        .json({ message: "User account is disabled or deleted" });
+    }
+
+    const tokenPayload = {
+      sub: user.id,
+      tenantId: user.tenant_id,
+      tenantName: user.tenant_name,
+      name: user.name,
+      role: user.role,
+      email: user.email,
+      avatarUrl: user.avatar_url,
+    };
+
+    const newAccessToken = signAccessToken(tokenPayload);
+
+    const isProd = process.env.NODE_ENV === "production";
+
+    res.cookie("tc_access", newAccessToken, {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: isProd ? "strict" : "lax",
+      maxAge: 60 * 60 * 1000,
+      path: "/",
+    });
+
+    return res.status(200).json({
+      message: "Access token refreshed",
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        tenant_id: user.tenant_id,
+        tenantName: user.tenant_name,
+        role: user.role,
+        avatarUrl: user.avatar_url,
+      },
+    });
+  } catch (err) {
+    console.error("Error in refreshAccessToken:", err);
+    return res
+      .status(500)
+      .json({ message: "Internal server error during token refresh" });
   }
 }
 

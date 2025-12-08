@@ -1,5 +1,5 @@
 /**
- * JWT helper functions for signing and verifying access tokens.
+ * JWT helper functions for signing and verifying access & refresh tokens.
  *
  * Uses:
  * - jsonwebtoken
@@ -8,9 +8,19 @@
  * Required env vars:
  * - JWT_ACCESS_SECRET
  * - JWT_ACCESS_EXPIRES (e.g. "1h", "15m", "7d")
+ * - JWT_REFRESH_SECRET
+ * - JWT_REFRESH_EXPIRES (e.g. "7d", "30d")
  */
 
 import jwt from "jsonwebtoken";
+
+// Access token config
+const accessSecret = process.env.JWT_ACCESS_SECRET;
+const accessExpiresIn = process.env.JWT_ACCESS_EXPIRES || "1h";
+
+// Refresh token config
+const refreshSecret = process.env.JWT_REFRESH_SECRET;
+const refreshExpiresIn = process.env.JWT_REFRESH_EXPIRES || "7d";
 
 /**
  * Create a signed JWT access token for a given user.
@@ -19,14 +29,11 @@ import jwt from "jsonwebtoken";
  * @returns {string} Signed JWT string.
  */
 export function signAccessToken(payload) {
-  const secret = process.env.JWT_ACCESS_SECRET;
-  const expiresIn = process.env.JWT_ACCESS_EXPIRES || "1h";
-
-  if (!secret) {
+  if (!accessSecret) {
     throw new Error("JWT_ACCESS_SECRET is not set");
   }
 
-  return jwt.sign(payload, secret, { expiresIn });
+  return jwt.sign(payload, accessSecret, { expiresIn: accessExpiresIn });
 }
 
 /**
@@ -37,11 +44,38 @@ export function signAccessToken(payload) {
  * @throws {Error} If token is invalid or expired.
  */
 export function verifyAccessToken(token) {
-  const secret = process.env.JWT_ACCESS_SECRET;
-
-  if (!secret) {
+  if (!accessSecret) {
     throw new Error("JWT_ACCESS_SECRET is not set");
   }
 
-  return jwt.verify(token, secret);
+  return jwt.verify(token, accessSecret);
+}
+
+/**
+ * Create a signed JWT refresh token.
+ *
+ * @param {object} payload - Minimal data, usually { sub: userId }.
+ * @returns {string} Signed JWT string.
+ */
+export function signRefreshToken(payload) {
+  if (!refreshSecret) {
+    throw new Error("JWT_REFRESH_SECRET is not set");
+  }
+
+  return jwt.sign(payload, refreshSecret, { expiresIn: refreshExpiresIn });
+}
+
+/**
+ * Verify and decode a JWT refresh token.
+ *
+ * @param {string} token - Refresh token string from client.
+ * @returns {object} Decoded payload if valid.
+ * @throws {Error} If token is invalid or expired.
+ */
+export function verifyRefreshToken(token) {
+  if (!refreshSecret) {
+    throw new Error("JWT_REFRESH_SECRET is not set");
+  }
+
+  return jwt.verify(token, refreshSecret);
 }

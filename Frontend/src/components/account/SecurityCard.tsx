@@ -1,4 +1,10 @@
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "../ui/card";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
@@ -36,7 +42,7 @@ export const SecurityCard = ({
   loading,
   error,
   message,
-}:SecurityCardProps) => {
+}: SecurityCardProps) => {
   return (
     <Card className="mt-6">
       <CardHeader
@@ -64,11 +70,18 @@ export const SecurityCard = ({
       {showPasswordForm && (
         <CardContent>
           <form onSubmit={onSubmit} className="flex flex-col gap-4 pt-4">
-              {(error || message) && (
-                <p className="text-sm text-muted-foreground text-center bg-red-500/50 rounded-2xl p-2">
-                  {error ?? message}
-                </p>
-              )}
+           
+            {(error || message) && (
+              <p
+                className={`text-sm text-center rounded-2xl p-2 ${
+                  error
+                    ? "bg-red-500/80 text-white"
+                    : "bg-green-500/80 text-white"
+                }`}
+              >
+                {error ?? message}
+              </p>
+            )}
             <div className="space-y-1.5">
               <Label htmlFor="current-password">Current password</Label>
               <Input
@@ -112,7 +125,6 @@ export const SecurityCard = ({
                 {loading ? "Saving..." : "Change password"}
               </Button>
             </div>
-
           </form>
         </CardContent>
       )}

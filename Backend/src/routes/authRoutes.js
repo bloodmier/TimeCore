@@ -5,7 +5,7 @@
  */
 
 import express from "express";
-import { login, getMe,logout,forgotPassword,resetPassword,changePassword } from "../controller/authController.js";
+import { login, getMe,logout,forgotPassword,resetPassword,changePassword,refreshAccessToken } from "../controller/authController.js";
 import { requireAuth } from "../middleware/authMiddleware.js";
 
 
@@ -46,4 +46,12 @@ router.post("/reset-password", resetPassword);
  * Change password for logged in users.
  */
 router.post("/change-password", requireAuth, changePassword);
+
+/**
+ * POST /api/auth/refresh
+ * Refreshtoken when expired
+ */
+router.post("/refresh", refreshAccessToken);
+
+
 export default router;

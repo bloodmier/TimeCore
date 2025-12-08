@@ -1,4 +1,3 @@
-// warmup.js
 import { db } from "../config/db.js";
 
 /**

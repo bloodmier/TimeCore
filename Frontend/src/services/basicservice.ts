@@ -1,15 +1,85 @@
 // src/services/baseService.ts
-import type { AxiosRequestConfig } from "axios";
+import type {AxiosError, AxiosRequestConfig, AxiosResponse} from "axios";
 import axios from "axios";
 
+const API_BASE_URL =
+  import.meta.env.VITE_BACKEND_URL ?? "http://localhost:5000/api";
+
+// ---- REFRESH TOKEN HANDLING ----------------------------------------------
+
+type RetriableConfig = AxiosRequestConfig & { _retry?: boolean };
+
+let isRefreshing = false;
+let subscribers: Array<(success: boolean) => void> = [];
+
+function subscribe(cb: (success: boolean) => void) {
+  subscribers.push(cb);
+}
+
+function notifySubscribers(success: boolean) {
+  subscribers.forEach((cb) => cb(success));
+  subscribers = [];
+}
+
+// ---- AXIOS INSTANCE -------------------------------------------------------
 
 const api = axios.create({
-  baseURL: "http://localhost:5000/api", 
-  withCredentials: true,                
+  baseURL: API_BASE_URL,
+  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },
 });
+
+// ---- RESPONSE INTERCEPTOR -------------------------------------------------
+
+api.interceptors.response.use(
+  (response: AxiosResponse) => response,
+  async (error: AxiosError) => {
+    const status = error.response?.status;
+    const originalRequest = error.config as RetriableConfig;
+
+    if (originalRequest?.url?.includes("/auth/refresh")) {
+      return Promise.reject(error);
+    }
+
+    if (status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      if (!isRefreshing) {
+        isRefreshing = true;
+
+        try {
+          await api.post("/auth/refresh");
+
+          isRefreshing = false;
+          notifySubscribers(true);
+
+          return api(originalRequest);
+        } catch (err) {
+          console.error("→ Refresh FAILED", err);
+          isRefreshing = false;
+          notifySubscribers(false);
+          return Promise.reject(err);
+        }
+      }
+
+      return new Promise((resolve, reject) => {
+        subscribe((success) => {
+          if (success) {
+            resolve(api(originalRequest));
+          } else {
+            reject(error);
+          }
+        });
+      });
+    }
+
+    return Promise.reject(error);
+  }
+);
+
+// ---- BASIC CRUD HELPERS ---------------------------------------------------
 
 // GET
 export const getData = async <T>(
