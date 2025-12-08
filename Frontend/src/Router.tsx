@@ -67,11 +67,11 @@ export const Router = createBrowserRouter([
             element: <AccountOverviewPage />,
           },
           {
-            path: "/account/overview",
+            path: "overview",
             element: <AccountOverviewPage />,
           },
           {
-            path: "/account/timeregister",
+            path: "timeregister",
             element: <TimeRegisterLayoutpage />,
             children: [
               {
@@ -79,25 +79,25 @@ export const Router = createBrowserRouter([
                 element: <Navigate to="labor" replace />,
               },
               {
-                path: "/account/timeregister/labor",
+                path: "labor",
                 element: <TimeRegisterpage />,
               },
               {
-                path: "/account/timeregister/sick",
+                path: "sick",
                 element: <TimeRegisterSickpage />,
               },
               {
-                path: "/account/timeregister/vacation",
+                path: "vacation",
                 element: <TimeRegisterVacationpage />,
               },
               {
-                path: "/account/timeregister/templates",
+                path: "templates",
                 element: <TimeRegisterTemplatesPage />,
               },
             ],
           },
           {
-            path: "/account/timeoverveiw",
+            path: "timeoverveiw",
             element: <TimeOverveiwLayout />,
             children: [
               {
@@ -111,7 +111,7 @@ export const Router = createBrowserRouter([
             ],
           },
           {
-            path: "/account/admin",
+            path: "admin",
             element: <AdminLayout />,
             children: [
               { index: true, element: <Navigate to="summary" replace /> },

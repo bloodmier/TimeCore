@@ -281,6 +281,7 @@ export async function forgotPassword(req, res) {
  * }
  */
 export async function resetPassword(req, res) {
+
   try {
     const { token, password } = req.body;
 
@@ -345,7 +346,7 @@ export async function resetPassword(req, res) {
       tenantId: record.tenant_id,
       role: record.role,
       email: record.email,
-      avatarUrl: user.avatar_url,
+      avatarUrl: record.avatar_url,
     };
 
     const accessToken = signAccessToken(tokenPayload);
@@ -367,7 +368,7 @@ export async function resetPassword(req, res) {
         email: record.email,
         tenant_id: record.tenant_id,
         role: record.role,
-        avatarUrl: user.avatar_url,
+        avatarUrl: record.avatar_url,
       },
     });
   } catch (err) {

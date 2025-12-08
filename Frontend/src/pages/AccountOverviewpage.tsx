@@ -36,21 +36,19 @@ export const AccountOverviewPage = () => {
     passwordMessage,
   } = useAccount();
 
-  // Avatar state
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [savingAvatar, setSavingAvatar] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
-  // Password state
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState<string | null>(null);
 
-  // Load avatar from user
+
   useEffect(() => {
     if (user?.avatarUrl && !selectedFile) {
       setPreviewUrl(resolveAvatarUrl(user.avatarUrl));

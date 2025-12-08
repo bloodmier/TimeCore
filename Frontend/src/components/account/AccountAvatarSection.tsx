@@ -40,6 +40,7 @@ export const AccountAvatarSection = ({
           type="button"
           onClick={onAvatarClick}
           className="relative rounded-full border border-border p-1"
+          aria-label="Change profile picture"
         >
           <Avatar className="h-28 w-28">
             {previewUrl && (

@@ -5,11 +5,7 @@ import { Label } from "../ui/label";
 import type { FormEvent } from "react";
 
 const header = `
-  relative !p-4 rounded-t-xl border-b bg-[var(--background)]
-  border-[color-mix(in_oklch,var(--foreground)_12%,transparent)]
-  shadow-sm overflow-hidden flex justify-between items-center
-  before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_top_left,var(--primary)_0,transparent_55%)] before:opacity-35
-  after:absolute after:bottom-0 after:left-0 after:h-[3px] after:w-full after:bg-[var(--secondary)]
+  relative !p-4 rounded-xl border-b bg-[var(--background)]
 `;
 
 interface SecurityCardProps {
@@ -49,7 +45,7 @@ export const SecurityCard = ({
         <div className="relative z-10">
           <CardTitle>Security</CardTitle>
           <CardDescription>
-            Change your password while you&apos;re logged in.
+            Change your password while you're logged in.
           </CardDescription>
         </div>
 
@@ -68,6 +64,11 @@ export const SecurityCard = ({
       {showPasswordForm && (
         <CardContent>
           <form onSubmit={onSubmit} className="flex flex-col gap-4 pt-4">
+              {(error || message) && (
+                <p className="text-sm text-muted-foreground text-center bg-red-500/50 rounded-2xl p-2">
+                  {error ?? message}
+                </p>
+              )}
             <div className="space-y-1.5">
               <Label htmlFor="current-password">Current password</Label>
               <Input
@@ -103,7 +104,7 @@ export const SecurityCard = ({
               </div>
             </div>
 
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between pb-5">
               <p className="text-xs text-muted-foreground">
                 Password must be at least 8 characters long.
               </p>
@@ -112,11 +113,6 @@ export const SecurityCard = ({
               </Button>
             </div>
 
-            {(error || message) && (
-              <p className="text-xs text-muted-foreground">
-                {error ?? message}
-              </p>
-            )}
           </form>
         </CardContent>
       )}

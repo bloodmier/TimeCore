@@ -84,6 +84,9 @@ export function Layout() {
             <button
               className="inline-flex items-center justify-center rounded-md p-2 md:hidden border border-border"
               onClick={() => setMobileOpen((prev) => !prev)}
+              aria-label={mobileOpen ? "Close main menu" : "Open main menu"}
+              aria-expanded={mobileOpen}
+              aria-controls="main-nav"
             >
               {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>

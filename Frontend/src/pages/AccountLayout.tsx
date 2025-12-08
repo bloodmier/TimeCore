@@ -19,7 +19,12 @@ export const AccountLayout = () => {
   return (
     <div className="rounded-(--radius-xl) w-full min-h-0 bg-(--color-background-lighter) text-(--color-foreground) md:mx-auto ">
       <div className="mx-auto w-full flex min-h-0">
-        <aside className="rounded-bl-xl rounded-br-xl hidden md:flex w-64 shrink-0 flex-col border border-(--color-sidebar-border) p-4 gap-2 sticky top-0 bg-(--color-sidebar) text-(--color-sidebar-foreground)">
+        <aside className="max-md:hidden          
+    w-64 shrink-0 flex flex-col 
+    rounded-bl-xl rounded-br-xl
+    border border-(--color-sidebar-border)
+    p-4 gap-2 sticky top-0
+    bg-(--color-sidebar) text-(--color-sidebar-foreground)">
           <div className="mb-6 min-w-0">
             <div className="font-semibold truncate">{user.name}</div>
             <div className="text-sm opacity-70 truncate">

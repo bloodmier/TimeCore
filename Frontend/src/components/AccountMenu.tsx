@@ -27,7 +27,7 @@ const role = user?.role
     <ul className={`flex flex-col gap-1 ${className ?? ""}`}>
       <li>
         <NavLink
-          to="/account/overview"
+          to="overview"
           end
           className={({ isActive }) => `${base} ${isActive ? active : idle}`}
         >

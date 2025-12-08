@@ -141,7 +141,7 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border ;
   }
 
   body {
@@ -155,7 +155,7 @@
   input[type="tel"],
   select,
   textarea {
-    @apply bg-background text-foreground;
+    @apply border border-input bg-background text-foreground;
   }
 }
 
@@ -187,6 +187,7 @@
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
+
   .scrollbar-none::-webkit-scrollbar {
     display: none;
   }
