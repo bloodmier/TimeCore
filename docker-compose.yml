@@ -1,0 +1,16 @@
+services:
+  backend:
+    build: ./Backend
+    container_name: timecore_backend
+    ports:
+      - "5202:5000"
+    env_file:
+      - ./Backend/.env
+    restart: unless-stopped
+
+  frontend:
+    build: ./Frontend
+    container_name: timecore_frontend
+    ports:
+      - "5201:80"
+    restart: unless-stopped
