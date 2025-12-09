@@ -1,0 +1,14 @@
+name: Deploy TimeCore
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Kör deploy-script på servern
+        run: /opt/deploy-timecore.sh
