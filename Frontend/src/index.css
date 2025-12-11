@@ -139,13 +139,25 @@
   --sidebar-ring: oklch(0.55 0.03 264.364);
 }
 
+
+
 @layer base {
   * {
     @apply border-border ;
   }
+  html {
+    scrollbar-gutter: stable both-edges;
+    scrollbar-color: rgba(128, 128, 128, 0.35) transparent;
+    scrollbar-width: thin;
+  }
 
   body {
+    overflow-y: scroll;
     @apply bg-background text-foreground;
+  }
+  body[data-scroll-locked] {
+    --removed-body-scroll-bar-size: 0 !important;
+    margin-right: 0 !important; /* extra safety */
   }
 
   input[type="text"],
@@ -158,6 +170,7 @@
     @apply border border-input bg-background text-foreground;
   }
 }
+
 
 @layer utilities {
   .theme-chart {
@@ -346,3 +359,125 @@ select:-webkit-autofill:focus {
   box-shadow: 0 0 0px 1000px var(--background) inset;
   caret-color: var(--foreground);
 }
+
+
+.tc-logo {
+  position: relative;
+  display: inline-block;
+  color: var(--color-foreground); 
+}
+
+
+.tc-logo-gray {
+  filter: grayscale(1) brightness(0.9);
+}
+
+.tc-logo-fill {
+  clip-path: polygon(100% 0, 100% 0, 100% 100%, 100% 100%);;
+  animation: timecore-fill-wavy 5s ease-out forwards;
+}
+
+@keyframes timecore-fill-wavy {
+  0% {
+    clip-path: polygon(
+      100% 0,
+      100% 100%,
+      100% 100%,
+      100% 0
+    );
+  }
+
+  30% {
+    clip-path: polygon(
+      100% 0,
+      100% 100%,
+      90% 100%,
+      92% 75%,
+      88% 50%,
+      93% 25%,
+      90% 0
+    );
+  }
+
+  60% {
+    clip-path: polygon(
+      100% 0,
+      100% 100%,
+      65% 100%,
+      70% 75%,
+      60% 50%,
+      72% 25%,
+      65% 0
+    );
+  }
+
+  85% {
+    clip-path: polygon(
+      100% 0,
+      100% 100%,
+      25% 100%,
+      30% 75%,
+      20% 50%,
+      32% 25%,
+      25% 0
+    );
+  }
+
+  100% {
+    /* allt synligt – färglagret fyller loggan helt */
+    clip-path: polygon(
+      100% 0,
+      100% 100%,
+      0 100%,
+      0 75%,
+      0 50%,
+      0 25%,
+      0 0
+    );
+  }
+}
+
+
+.tc-logo::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  color: transparent;
+  -webkit-background-clip: text;
+          background-clip: text;
+  background-image: linear-gradient(
+    90deg,
+    var(--color-foreground) 0%,
+    var(--color-foreground) 25%,
+    var(--color-foreground) 55%,
+    #ff00ff,
+    #0390e2,
+    #00ff95,
+    #fb19fb,
+    #8800ff
+    
+  );
+  background-size: 300% 100%;
+
+  animation: tc-rgb-sweep 3s ease-out forwards;
+  opacity: 1;
+}
+
+@keyframes tc-rgb-sweep {
+  0% {
+    background-position: 0% 50%;
+    opacity: 1;
+  }
+  70% {
+    background-position: 100% 50%;
+    opacity: 1;
+  }
+  100% {
+    background-position: 100% 50%;
+    opacity: 0;
+  }
+}
+
+
+

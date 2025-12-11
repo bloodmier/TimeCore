@@ -1,3 +1,12 @@
+/**
+ * useAccount
+ *
+ * Manages account-related actions for the authenticated user.
+ * - Exposes the current user from AuthContext
+ * - Handles avatar upload and updates the user state
+ * - Handles password change and exposes loading/error/message state
+ */
+
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { accountService } from "../services/accountService";

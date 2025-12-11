@@ -10,8 +10,8 @@
  */
 
 import express from "express";
-import { getTenants } from "../controller/tenantController.js";
-import { requireAuth, requireAdmin } from "../middleware/authMiddleware.js";
+import { getTenants,getCompany } from "../controller/tenantController.js";
+import { requireAuth } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -22,5 +22,6 @@ const router = express.Router();
  * Access: Admin only.
  */
 router.get("/", getTenants);
+router.get("/company",requireAuth, getCompany);
 
 export default router;

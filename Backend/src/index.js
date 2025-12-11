@@ -6,11 +6,13 @@ import cookieParser from "cookie-parser";
 import { runWarmup } from "./lib/warmup.js";
 import { fileURLToPath } from "url";
 import path from "path";
+import { requireAuth } from "./middleware/authMiddleware.js";
 
 //routes
 import userRoutes from "./routes/userRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import tenantsRoutes from "./routes/tenantRoutes.js";
+import timereportRoutes from "./routes/timereport.js";
 
 dotenv.config();
 const app = express();
@@ -41,6 +43,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/tenants", tenantsRoutes);
+app.use('/api/timereport', requireAuth , timereportRoutes);
 
 app.get('/db-check', async (req, res) => {
     try {

@@ -391,8 +391,1064 @@
         }
       }
     }
+    ,
+    "/tenants/company": {
+  "get": {
+    "summary": "Get company customer ID for current tenant",
+    "description": "Returns the customer ID associated with the tenant of the authenticated user. This ID represents the company operating the system and is used for billing and ownership logic.",
+    "tags": ["Tenants"],
+    "security": [
+      {
+        "bearerAuth": []
+      }
+    ],
+    "responses": {
+      "200": {
+        "description": "Company customer ID retrieved successfully",
+        "content": {
+          "application/json": {
+            "example": {
+              "customerId": 1
+            }
+          }
+        }
+      },
+      "500": {
+        "description": "No company customer configured or internal server error",
+        "content": {
+          "application/json": {
+            "examples": {
+              "noCompany": {
+                "summary": "No company customer configured",
+                "value": {
+                  "error": "No company customer configured"
+                }
+              },
+              "internalError": {
+                "summary": "Unexpected error",
+                "value": {
+                  "message": "Internal server error while fetching companyid"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+    ,    "/timereport/addtime": {
+      "post": {
+        "tags": ["Time Reports"],
+        "summary": "Create one or more time reports",
+        "description": "Creates one or multiple time_report rows with optional line items. Accepts either a single object or an array of objects.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/TimeReportCreateRequest"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/TimeReportCreateRequest"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Time reports created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimeReportCreateResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error or empty payload"
+          },
+          "500": {
+            "description": "Failed to insert time reports"
+          }
+        }
+      }
+    },
+    "/timereport/getregisterdtime": {
+      "post": {
+        "tags": ["Projects"],
+        "summary": "Get projects for a customer",
+        "description": "Returns all projects belonging to a given customer id.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["customerId"],
+                "properties": {
+                  "customerId": {
+                    "type": "integer",
+                    "example": 42
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "List of projects for the given customer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Project"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/timereport/getallcustomers": {
+      "get": {
+        "tags": ["Customers"],
+        "summary": "Get all customers",
+        "description": "Returns all customers without filters. Used when selecting where to book time.",
+        "responses": {
+          "200": {
+            "description": "List of customers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Customer"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/timereport/searchcustomers": {
+      "get": {
+        "tags": ["Customers"],
+        "summary": "Search customers by company name",
+        "description": "Searches customers by the `company` field using a LIKE query.",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search term for company name."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of matching customers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Customer"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/timereport/getCategories": {
+      "get": {
+        "tags": ["Time Reports"],
+        "summary": "Get time report categories",
+        "description": "Returns all time_report_categories that can be used when booking time.",
+        "responses": {
+          "200": {
+            "description": "List of categories",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "Consulting"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Failed to fetch categories"
+          }
+        }
+      }
+    },
+    "/timereport/labor-templates": {
+  "get": {
+    "tags": ["Time Reports"],
+    "summary": "Get labor text templates",
+    "description": "Returns predefined labor (work_labor) text templates.",
+    "responses": {
+      "200": {
+        "description": "List of labor templates",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/LaborTemplate"
+              }
+            }
+          }
+        }
+      },
+      "500": {
+        "description": "Failed to fetch labor templates"
+      }
+    }
+  },
+
+  "post": {
+    "tags": ["Time Reports"],
+    "summary": "Create a new labor text template",
+    "description": "Creates a user-specific labor template to use as a quick-fill option in time reports.",
+    "security": [
+      { "cookieAuth": [] }
+    ],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "#/components/schemas/LaborTemplateCreate"
+          }
+        }
+      }
+    },
+    "responses": {
+      "201": {
+        "description": "Labor template created",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/LaborTemplate"
+            }
+          }
+        }
+      },
+      "400": {
+        "description": "Invalid input (missing name or description)"
+      },
+      "401": {
+        "description": "Unauthorized"
+      }
+    }
+  }
+},
+   "/timereport/labor-templates/{id}": {
+  "delete": {
+    "summary": "Delete labor template",
+    "description": "Deletes a user-owned labor template. Global templates cannot be deleted.",
+    "tags": ["Time Reports"],
+    "security": [
+      { "cookieAuth": [] }
+    ],
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer"
+        },
+        "description": "ID of the labor template to delete"
+      }
+    ],
+    "responses": {
+      "204": {
+        "description": "Template deleted"
+      },
+      "404": {
+        "description": "Template not found or does not belong to user"
+      },
+      "401": {
+        "description": "Unauthorized"
+      }
+    }
+  }
+},
+    "/timereport/customer/owners": {
+      "get": {
+        "tags": ["Customers"],
+        "summary": "Get owner companies",
+        "description": "Returns customers where billing_owner = 1. Used as owners for end-customers.",
+        "responses": {
+          "200": {
+            "description": "List of owner companies",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Customer"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/timereport/customer/quick-add": {
+      "post": {
+        "tags": ["Customers"],
+        "summary": "Quick create end-customer under owner",
+        "description": "Creates a new end-customer connected to an owner customer. Also sets bill_direct depending on a backend env variable.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomerQuickAddRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Customer created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerQuickAddResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload or owner not eligible"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/timereport/customer/recent": {
+      "get": {
+        "tags": ["Customers"],
+        "summary": "Get recently used customers for current user",
+        "description": "Returns up to 10 recently used customers based on time_report_user_company_usage for the authenticated user.",
+        "responses": {
+          "200": {
+            "description": "List of recent customers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Customer"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/timereport/customer/touch": {
+      "post": {
+        "tags": ["Customers"],
+        "summary": "Touch customer usage",
+        "description": "Updates last_used for a customer and the user/customer usage table for the authenticated user.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["customerId"],
+                "properties": {
+                  "customerId": {
+                    "type": "integer",
+                    "example": 42
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Customer usage updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimpleOkResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid customerId"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/timereport/draft/save": {
+      "post": {
+        "tags": ["Time Reports"],
+        "summary": "Save a new time report draft",
+        "description": "Creates a new draft in time_report_draft with optional items in time_report_item_draft for the current user.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TimeReportDraftSaveRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Draft created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "draftId": {
+                      "type": "integer",
+                      "example": 15
+                    },
+                    "itemsSaved": {
+                      "type": "integer",
+                      "example": 3
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Failed to save draft"
+          }
+        }
+      }
+    },
+    "/timereport/draft/update/{id}": {
+      "put": {
+        "tags": ["Time Reports"],
+        "summary": "Update existing time report draft",
+        "description": "Updates header and items for an existing draft belonging to the current user.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Id of the draft to update."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TimeReportDraftSaveRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Draft updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimpleOkResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Failed to update draft"
+          }
+        }
+      }
+    },
+    "/timereport/drafts": {
+      "get": {
+        "tags": ["Time Reports"],
+        "summary": "List drafts for current user",
+        "description": "Returns drafts for the authenticated user with optional search, date filtering, sorting and pagination. Items are included in the response.",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Optional search term for customer company."
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Filter drafts with date >= this value."
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Filter drafts with date <= this value."
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["modified", "date", "created_date", "company_name", "category_name"],
+              "default": "modified"
+            }
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["asc", "desc"],
+              "default": "desc"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 50
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of drafts with items",
+            "headers": {
+              "Cache-Control": {
+                "description": "Set to no-store to disable caching.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TimeReportDraft"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Failed to fetch drafts"
+          }
+        }
+      }
+    },
+    "/timereport/drafts/{id}": {
+      "get": {
+        "tags": ["Time Reports"],
+        "summary": "Get single draft by id",
+        "description": "Returns a single draft with its items.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Draft found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimeReportDraft"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Draft not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/timereport/drafts/{id}/items": {
+      "get": {
+        "tags": ["Time Reports"],
+        "summary": "Get draft items by draft id",
+        "description": "Returns only the items for a specific draft id.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of draft items",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TimeReportDraftItem"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad draft id"
+          },
+          "500": {
+            "description": "Failed to fetch draft items"
+          }
+        }
+      }
+    },
+    "/timereport/draft/delete": {
+      "post": {
+        "tags": ["Time Reports"],
+        "summary": "Delete a single draft",
+        "description": "Deletes a draft and its items for the current user.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["draftId"],
+                "properties": {
+                  "draftId": {
+                    "type": "integer",
+                    "example": 15
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Draft deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimpleOkResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Failed to delete draft"
+          }
+        }
+      }
+    },
+    "/timereport/drafts/clear": {
+      "post": {
+        "tags": ["Time Reports"],
+        "summary": "Clear all drafts for current user",
+        "description": "Deletes all drafts and their items for the authenticated user.",
+        "responses": {
+          "200": {
+            "description": "Drafts cleared",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimpleOkResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Failed to clear drafts"
+          }
+        }
+      }
+    },
+    "/timereport/template/save": {
+      "post": {
+        "tags": ["Time Reports"],
+        "summary": "Save time report template",
+        "description": "Saves a time report template for the current user. If the user already has 10 templates, the oldest one is overwritten.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TimeReportTemplateSaveRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Template created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimeReportTemplateSaveResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Existing template replaced because user already had 10 templates",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimeReportTemplateSaveResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Failed to save template"
+          }
+        }
+      }
+    },
+    "/timereport/template/all": {
+      "get": {
+        "tags": ["Time Reports"],
+        "summary": "Get all templates for current user",
+        "description": "Returns all time report templates for the authenticated user.",
+        "responses": {
+          "200": {
+            "description": "List of templates",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TimeReportTemplate"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Failed to get templates"
+          }
+        }
+      }
+    },
+    "/timereport/template/{id}": {
+      "get": {
+        "tags": ["Time Reports"],
+        "summary": "Get template by id",
+        "description": "Returns a specific template belonging to the current user.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Template found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TimeReportTemplate"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Failed to get template"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Time Reports"],
+        "summary": "Delete template by id",
+        "description": "Deletes a template belonging to the current user.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Template deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimpleOkResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Failed to delete template"
+          }
+        }
+      }
+    },
+    "/timereport/articles": {
+      "get": {
+        "tags": ["Articles"],
+        "summary": "Search or list articles",
+        "description": "Returns articles for use as line items. If q is empty, the latest articles are returned.",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search term for article name, art_nr or description."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of articles",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Article"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Failed to fetch articles"
+          }
+        }
+      }
+    },
+    "/timereport/{id}/items": {
+      "put": {
+        "tags": ["Time Reports"],
+        "summary": "Replace all line items for a time report",
+        "description": "Deletes existing items and inserts the provided items for the given time_report id.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Id of the time_report."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["items"],
+                "properties": {
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/TimeReportLineItemInput"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Items replaced successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimpleOkResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad report id or no items"
+          },
+          "500": {
+            "description": "Failed to update items"
+          }
+        }
+      },
+      "get": {
+        "tags": ["Time Reports"],
+        "summary": "Get items for a time report",
+        "description": "Returns all items for the given time_report id.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of items for the time report",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TimeReportItem"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad report id"
+          },
+          "500": {
+            "description": "Failed to fetch items"
+          }
+        }
+      }
+    }
+
   },
   "components": {
+  "securitySchemes": {
+    "bearerAuth": {
+      "type": "http",
+      "scheme": "bearer",
+      "bearerFormat": "JWT"
+    }
+  },
     "schemas": {
       "UserRegisterRequest": {
         "type": "object",
@@ -606,9 +1662,629 @@
             "example": "Some informational message"
           }
         }
-      }
+      },
+            "Customer": {
+        "type": "object",
+        "description": "Customer record used when selecting where to book time.",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 42
+          },
+          "customer_id": {
+            "type": "string",
+            "nullable": true,
+            "example": "CUST-1001",
+            "description": "External/customer number if used."
+          },
+          "company": {
+            "type": "string",
+            "example": "Acme AB"
+          },
+          "last_used": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "example": "2025-12-08T10:15:00Z"
+          },
+          "billing_owner": {
+            "type": "integer",
+            "example": 1,
+            "description": "1 if this is an owner/billing company."
+          },
+          "customer_owner": {
+            "type": "integer",
+            "nullable": true,
+            "example": 1,
+            "description": "Owner customer id if this is an end-customer."
+          },
+          "bill_direct": {
+            "type": "integer",
+            "example": 0,
+            "description": "1 if invoices should be billed directly to this customer."
+          },
+          "include_attachments_on_send": {
+            "type": "integer",
+            "example": 0
+          },
+          "email": {
+            "type": "string",
+            "nullable": true,
+            "example": "info@acme.se"
+          },
+          "hourly_rate": {
+            "type": "number",
+            "format": "float",
+            "nullable": true,
+            "example": 950.0
+          },
+          "currency": {
+            "type": "string",
+            "example": "SEK"
+          },
+          "language": {
+            "type": "string",
+            "example": "sv"
+          }
+        }
+      },
+      "Project": {
+        "type": "object",
+        "description": "Project for a given customer.",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 3
+          },
+          "customer_id": {
+            "type": "integer",
+            "example": 42
+          },
+          "projectname": {
+            "type": "string",
+            "example": "Website redesign"
+          },
+          "last_active": {
+            "type": "string",
+            "format": "date",
+            "example": "2025-12-01"
+          },
+          "status": {
+            "type": "string",
+            "example": "active"
+          },
+          "archived_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "deleted_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "Article": {
+        "type": "object",
+        "description": "Article (material/product) used as a line item.",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 10
+          },
+          "art_nr": {
+            "type": "string",
+            "nullable": true,
+            "example": "ART-100"
+          },
+          "name": {
+            "type": "string",
+            "example": "Consulting hour"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "example": "Senior consulting hour"
+          },
+          "purchase_price": {
+            "type": "number",
+            "format": "float",
+            "nullable": true,
+            "example": 450.0
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "TimeReportLineItemInput": {
+        "type": "object",
+        "description": "Line item attached to a time report or draft.",
+        "properties": {
+          "article_id": {
+            "type": "integer",
+            "nullable": true,
+            "example": 10
+          },
+          "amount": {
+            "type": "integer",
+            "example": 2
+          },
+          "description": {
+            "type": "string",
+            "example": "Consulting hours"
+          },
+          "purchasePrice": {
+            "type": "number",
+            "format": "float",
+            "nullable": true,
+            "example": 450.0,
+            "description": "Purchase price per unit (optional)."
+          }
+        }
+      },
+      "TimeReportCreateRequest": {
+        "type": "object",
+        "description": "Payload for creating a single time report. The API also accepts an array of these objects.",
+        "required": ["customer_id", "work_labor", "category", "date", "hours"],
+        "properties": {
+          "customer_id": {
+            "type": "integer",
+            "example": 42,
+            "description": "Customer id from the customer table."
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 150,
+            "example": "Worked on initial design"
+          },
+          "work_labor": {
+            "type": "string",
+            "maxLength": 500,
+            "example": "UI/UX design and planning"
+          },
+          "category": {
+            "type": "integer",
+            "example": 1,
+            "description": "Foreign key to time_report_categories.id"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "example": "2025-12-08"
+          },
+          "hours": {
+            "type": "number",
+            "format": "float",
+            "example": 2.5
+          },
+          "billable": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "If omitted, DB default is used."
+          },
+          "project_id": {
+            "type": "integer",
+            "nullable": true,
+            "example": 3
+          },
+          "draft_id": {
+            "type": "integer",
+            "nullable": true,
+            "example": 15,
+            "description": "Optional draft id to copy items from and then delete the draft."
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimeReportLineItemInput"
+            },
+            "description": "Optional line items for this time report. If omitted and draft_id is set, items are copied from the draft."
+          }
+        }
+      },
+      "TimeReportCreateResponse": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "Time reports created successfully"
+          }
+        }
+      },
+      "TimeReportDraftItem": {
+        "type": "object",
+        "properties": {
+          "article_id": {
+            "type": "integer",
+            "nullable": true,
+            "example": 10
+          },
+          "amount": {
+            "type": "integer",
+            "example": 1
+          },
+          "description": {
+            "type": "string",
+            "example": "Consulting hour"
+          },
+          "purchasePrice": {
+            "type": "number",
+            "format": "float",
+            "nullable": true,
+            "example": 450.0
+          }
+        }
+      },
+      "TimeReportDraft": {
+        "type": "object",
+        "description": "Draft version of a time report, including optional items.",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 15
+          },
+          "user": {
+            "type": "integer",
+            "example": 4
+          },
+          "customer_id": {
+            "type": "string",
+            "example": "42"
+          },
+          "note": {
+            "type": "string",
+            "example": "Draft note"
+          },
+          "work_labor": {
+            "type": "string",
+            "example": "Planned work"
+          },
+          "category": {
+            "type": "integer",
+            "example": 1
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "example": "2025-12-08"
+          },
+          "hours": {
+            "type": "number",
+            "format": "float",
+            "example": 3.0
+          },
+          "billable": {
+            "type": "integer",
+            "nullable": true,
+            "example": 1
+          },
+          "project_id": {
+            "type": "integer",
+            "nullable": true,
+            "example": 3
+          },
+          "created_date": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-12-08T09:15:00Z"
+          },
+          "modified": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-12-08T09:30:00Z"
+          },
+          "company_name": {
+            "type": "string",
+            "nullable": true,
+            "example": "Acme AB"
+          },
+          "category_name": {
+            "type": "string",
+            "nullable": true,
+            "example": "Consulting"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimeReportDraftItem"
+            }
+          }
+        }
+      },
+      "TimeReportDraftSaveRequest": {
+        "type": "object",
+        "description": "Payload for creating or updating a time report draft.",
+        "required": ["customer_id", "work_labor", "category", "date", "hours"],
+        "properties": {
+          "customer_id": {
+            "type": "integer",
+            "example": 42
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 150
+          },
+          "work_labor": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "category": {
+            "type": "integer",
+            "example": 1
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "example": "2025-12-08"
+          },
+          "hours": {
+            "type": "number",
+            "format": "float",
+            "example": 2.5
+          },
+          "billable": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "project_id": {
+            "type": "integer",
+            "nullable": true
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimeReportLineItemInput"
+            }
+          }
+        }
+      },
+      "TimeReportTemplate": {
+        "type": "object",
+        "description": "Saved time report template (max 10 per user).",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 7
+          },
+          "user": {
+            "type": "integer",
+            "example": 4
+          },
+          "name": {
+            "type": "string",
+            "example": "Standard consulting day"
+          },
+          "customer_id": {
+            "type": "string",
+            "example": "42"
+          },
+          "note": {
+            "type": "string",
+            "example": "Standard note"
+          },
+          "work_labor": {
+            "type": "string",
+            "example": "Consulting work"
+          },
+          "category": {
+            "type": "integer",
+            "example": 1
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "example": "2025-12-08"
+          },
+          "hours": {
+            "type": "number",
+            "format": "float",
+            "example": 8.0
+          },
+          "billable": {
+            "type": "integer",
+            "example": 1
+          },
+          "project_id": {
+            "type": "integer",
+            "nullable": true
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimeReportLineItemInput"
+            }
+          },
+          "created_date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "modified": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "TimeReportTemplateSaveRequest": {
+        "type": "object",
+        "description": "Payload for saving or replacing a time report template.",
+        "required": ["name", "customerId", "workDescription", "category", "date", "hours"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Standard consulting day"
+          },
+          "customerId": {
+            "type": "string",
+            "example": "42"
+          },
+          "note": {
+            "type": "string",
+            "example": "Template note"
+          },
+          "workDescription": {
+            "type": "string",
+            "example": "Consulting and project management"
+          },
+          "category": {
+            "type": "integer",
+            "example": 1
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "example": "2025-12-08"
+          },
+          "hours": {
+            "type": "number",
+            "format": "float",
+            "example": 8.0
+          },
+          "billable": {
+            "type": "boolean",
+            "example": true
+          },
+          "projectId": {
+            "type": "integer",
+            "nullable": true
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimeReportLineItemInput"
+            }
+          }
+        }
+      },
+      "TimeReportTemplateSaveResponse": {
+        "type": "object",
+        "properties": {
+          "templateId": {
+            "type": "integer",
+            "example": 7
+          },
+          "replaced": {
+            "type": "boolean",
+            "example": false,
+            "description": "True if an old template was overwritten because the user already had 10 templates."
+          }
+        }
+      },
+      "TimeReportItem": {
+        "type": "object",
+        "description": "Line item stored for a finalized time report.",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 100
+          },
+          "time_report_id": {
+            "type": "integer",
+            "example": 55
+          },
+          "article_id": {
+            "type": "integer",
+            "nullable": true
+          },
+          "amount": {
+            "type": "integer",
+            "example": 2
+          },
+          "description": {
+            "type": "string",
+            "example": "Consulting hours"
+          }
+        }
+      },
+      "SimpleOkResponse": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "nullable": true,
+            "example": "Customer usage touched"
+          }
+        }
+      },
+      "CustomerQuickAddRequest": {
+        "type": "object",
+        "required": ["company", "owner_id"],
+        "properties": {
+          "company": {
+            "type": "string",
+            "example": "New end customer AB"
+          },
+          "owner_id": {
+            "type": "integer",
+            "example": 1,
+            "description": "Customer id of the billing owner."
+          }
+        }
+      },
+      "CustomerQuickAddResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 123
+          },
+          "company": {
+            "type": "string",
+            "example": "New end customer AB"
+          },
+          "billing_owner": {
+            "type": "integer",
+            "example": 0
+          },
+          "customer_owner": {
+            "type": "integer",
+            "example": 1
+          },
+          "bill_direct": {
+            "type": "integer",
+            "example": 1
+          }
+        }
+      },
+      "LaborTemplate": {
+        "type": "object",
+      "properties": {
+    "id": { "type": "integer", "example": 1 },
+    "user": { "type": "integer", "nullable": true },
+    "name": { "type": "string", "example": "Consulting" },
+    "extended_description": {
+      "type": "string",
+      "example": "General consulting work."
     }
+  }
+},
+
+"LaborTemplateCreate": {
+  "type": "object",
+  "required": ["name", "extended_description"],
+  "properties": {
+    "name": { "type": "string", "example": "Installation" },
+    "extended_description": {
+      "type": "string",
+      "example": "Installed fiber switches and structured cabling."
+    }
+  }
+}
+
+    },
   },
+  
   "tags": [
     {
       "name": "Users",
@@ -621,6 +2297,23 @@
     {
       "name": "Tenants",
       "description": "Company / tenant information"
+    }
+    ,
+        {
+      "name": "Time Reports",
+      "description": "Time reporting, drafts, templates and line items"
+    },
+    {
+      "name": "Customers",
+      "description": "Customer search, owner companies and quick create for time reporting"
+    },
+    {
+      "name": "Projects",
+      "description": "Projects per customer used in time reporting"
+    },
+    {
+      "name": "Articles",
+      "description": "Article search for materials and products"
     }
   ]
 }

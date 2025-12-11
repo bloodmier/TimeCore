@@ -5,3 +5,7 @@ export interface ApiTenant {
 }
 
 export type ApiTenantsResponse = ApiTenant[];
+
+export interface ApiTenantCompanyID {
+    customerId: number;
+}
