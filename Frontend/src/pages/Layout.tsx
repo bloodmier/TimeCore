@@ -69,22 +69,19 @@ export function Layout() {
             aria-label="Home page"
             title="Home page"
           >
-           <div className="relative inline-block w-15 h-15">
-  {/* Grå logga – bakgrund, statisk */}
-  <img
-    src={Logo}
-    alt="TimeCore logo"
-    className="absolute h-15 inset-0  object-contain tc-logo-gray"
-  />
-
-  {/* Färg-logga – ligger ovanpå och fylls från höger */}
-  <img
-    src={Logo}
-    alt=""
-    aria-hidden="true"
-    className="absolute inset-0  h-15 object-contain tc-logo-fill"
-  />
-</div>
+            <div className="relative inline-block w-15 h-15">
+              <img
+                src={Logo}
+                alt="TimeCore logo"
+                className="absolute h-15 inset-0  object-contain tc-logo-gray"
+              />
+              <img
+                src={Logo}
+                alt=""
+                aria-hidden="true"
+                className="absolute inset-0  h-15 object-contain tc-logo-fill"
+              />
+            </div>
             <h1
               className="tc-logo text-4xl font-extrabold tracking-tight"
               data-text="TimeCore"

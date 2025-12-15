@@ -424,7 +424,6 @@ select:-webkit-autofill:focus {
   }
 
   100% {
-    /* allt synligt – färglagret fyller loggan helt */
     clip-path: polygon(
       100% 0,
       100% 100%,

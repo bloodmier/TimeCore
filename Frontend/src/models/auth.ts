@@ -23,6 +23,8 @@ export interface ApiMeUser {
   avatarUrl?: string | null;
 }
 
+export type CurrentUser = ApiMeUser;
+
 export interface ApiMeResponse {
   user: ApiMeUser;
 }
