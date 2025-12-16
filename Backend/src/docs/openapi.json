@@ -1438,7 +1438,118 @@
           }
         }
       }
+    },
+      "/time-reports": {
+  "get": {
+    "tags": ["Time Reports – Overview"],
+    "summary": "List time reports for current user",
+    "description": "Returns paginated time reports owned by the authenticated user.",
+    "security": [{ "cookieAuth": [] }],
+    "parameters": [
+      { "name": "start", "in": "query", "schema": { "type": "string", "format": "date" } },
+      { "name": "end", "in": "query", "schema": { "type": "string", "format": "date" } },
+      { "name": "q", "in": "query", "schema": { "type": "string" } },
+      { "name": "billed", "in": "query", "schema": { "type": "boolean" } },
+      { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 50 } },
+      { "name": "cursor", "in": "query", "schema": { "type": "string" } }
+    ],
+    "responses": {
+      "200": {
+        "description": "Time reports list",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "items": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/TimeReportOverviewItem" }
+                },
+                "nextCursor": { "type": "string", "nullable": true }
+              }
+            }
+          }
+        }
+      },
+      "401": { "description": "Unauthorized" }
     }
+  }
+}
+,
+"/time-reports/summary": {
+  "get": {
+    "tags": ["Time Reports – Overview"],
+    "summary": "Get time report summary for current user",
+    "description": "Returns aggregated time reporting statistics for the authenticated user.",
+    "security": [{ "cookieAuth": [] }],
+    "parameters": [
+      { "name": "start", "in": "query", "schema": { "type": "string", "format": "date" } },
+      { "name": "end", "in": "query", "schema": { "type": "string", "format": "date" } },
+      { "name": "q", "in": "query", "schema": { "type": "string" } },
+      { "name": "billed", "in": "query", "schema": { "type": "boolean" } }
+    ],
+    "responses": {
+      "200": {
+        "description": "Summary data",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/TimeReportSummary" }
+          }
+        }
+      }
+    }
+  }
+}
+,
+"/time-reports/{id}": {
+  "put": {
+    "tags": ["Time Reports – Overview"],
+    "summary": "Update time report",
+    "description": "Updates a time report owned by the authenticated user.",
+    "security": [{ "cookieAuth": [] }],
+    "parameters": [
+      { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+    ],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": { "$ref": "#/components/schemas/TimeReportUpdateRequest" }
+        }
+      }
+    },
+    "responses": {
+      "200": { "description": "Updated" },
+      "404": { "description": "Not found" }
+    }
+  },
+  "delete": {
+    "tags": ["Time Reports"],
+    "summary": "Delete time report",
+    "description": "Deletes a time report owned by the authenticated user.",
+    "security": [{ "cookieAuth": [] }],
+    "parameters": [
+      { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+    ],
+    "responses": {
+      "200": {
+        "description": "Deleted",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": { "type": "boolean" },
+                "deletedId": { "type": "integer" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 
   },
   "components": {
@@ -2278,11 +2389,10 @@
     "extended_description": {
       "type": "string",
       "example": "Installed fiber switches and structured cabling."
+          }
+        }
+      }
     }
-  }
-}
-
-    },
   },
   
   "tags": [
@@ -2302,6 +2412,10 @@
         {
       "name": "Time Reports",
       "description": "Time reporting, drafts, templates and line items"
+    },
+    {
+    "name": "Time Reports – Overview",
+    "description": "List, update, delete and summarize reported time for the authenticated user."
     },
     {
       "name": "Customers",

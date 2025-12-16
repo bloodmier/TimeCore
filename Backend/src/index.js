@@ -12,7 +12,8 @@ import { requireAuth } from "./middleware/authMiddleware.js";
 import userRoutes from "./routes/userRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import tenantsRoutes from "./routes/tenantRoutes.js";
-import timereportRoutes from "./routes/timereport.js";
+import timereportRoutes from "./routes/timereportRoutes.js";
+import timereportsRouter from "./routes/time-reportsRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -44,6 +45,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/tenants", tenantsRoutes);
 app.use('/api/timereport', requireAuth , timereportRoutes);
+app.use('/api/time-reports', requireAuth , timereportsRouter);
 
 app.get('/db-check', async (req, res) => {
     try {

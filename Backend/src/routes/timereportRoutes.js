@@ -25,8 +25,10 @@ import {
   getDraftItems,
   updateDraft,
   postLaborTemplates,
-  deleteLaborTemplates
-} from "../controller/timereport.js";
+  deleteLaborTemplates,
+} from "../controller/timereportController.js";
+
+
 
 const r = Router();
 
@@ -157,5 +159,7 @@ r.put("/:id/items", addOrReplaceItems);
  * Get all items for a given time_report (by id).
  */
 r.get("/:id/items", getItemsForReport);
+
+
 
 export default r;
