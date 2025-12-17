@@ -8,13 +8,13 @@
  */
 
 import { useCallback, useEffect, useState } from "react";
-import type { icustomer } from "../models/customer";
+import type { Customer } from "../models/customer";
 import { TimeReportService } from "../services/timeReportService";
 
 export const useCustomer = () => {
-  const [customer, setCustomer] = useState<icustomer[]>([]);
-  const [ownerCompanies, setOwnerCompanies] = useState<icustomer[]>([]);
-  const [recentCustomers, setRecentCustomers] = useState<icustomer[]>([]);
+  const [customer, setCustomer] = useState<Customer[]>([]);
+  const [ownerCompanies, setOwnerCompanies] = useState<Customer[]>([]);
+  const [recentCustomers, setRecentCustomers] = useState<Customer[]>([]);
 
   useEffect(() => {
     let cancelled = false;
