@@ -12,10 +12,11 @@ export interface Article {
 }
 
 export interface ReportItemInput {
-  articleId?: number | null;   
-  description: string;         
-  amount: number;             
+  articleId?: number | null;
+  description: string;
+  amount: number;
   purchasePrice?: number | null;
+  _id?: number;
 }
 
 export interface TimeReportItem {

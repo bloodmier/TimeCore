@@ -1,23 +1,20 @@
 import type { ApiMessageResponse, ApiUser } from "./common";
 
-
-
 export interface ApiLoginRequest {
   email: string;
   password: string;
 }
 
 export interface ApiLoginResponse {
-  message: string; 
+  message: string;
   user: ApiUser;
 }
-
 
 export interface ApiMeUser {
   id: number;
   tenantId: number;
-  tenantName:string;
-  name:string;
+  tenantName: string;
+  name: string;
   role: string;
   email: string;
   avatarUrl?: string | null;
@@ -29,14 +26,11 @@ export interface ApiMeResponse {
   user: ApiMeUser;
 }
 
-
 export interface ApiForgotPasswordRequest {
   email: string;
 }
 
-
 export type ApiForgotPasswordResponse = ApiMessageResponse;
-
 
 export interface ApiResetPasswordRequest {
   token: string;
@@ -49,7 +43,6 @@ export interface ApiResetPasswordResponse {
 }
 
 export type ApiLogoutResponse = ApiMessageResponse;
-
 
 export interface ApiChangePasswordRequest {
   currentPassword: string;

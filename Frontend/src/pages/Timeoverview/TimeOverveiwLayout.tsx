@@ -23,16 +23,6 @@ const idle =
             summary
           </NavLink>
         </li>
-       {/*  <li>
-          <NavLink
-            to="/account/timeregister/templates"
-            className={({ isActive }) =>
-              `${base} ${isActive ? active : idle}`
-            }
-          >
-            Templates
-          </NavLink>
-        </li> */}
       </ul>
 
       <div className="w-full min-w-full border border-[var(--color-border)] rounded-[var(--radius-lg)] p-4 " >

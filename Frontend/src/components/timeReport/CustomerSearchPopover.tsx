@@ -16,7 +16,7 @@ import {
   CommandList,
   CommandSeparator,
 } from "../../components/ui/command";
-import type { icustomer } from "../../models/icustomer";
+import type { icustomer } from "../../models/customer";
 import { Input } from "../../components/ui/input";
 import {
   Select,

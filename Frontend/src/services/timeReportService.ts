@@ -3,19 +3,17 @@ import type { AxiosRequestConfig } from "axios";
 import { deleteData, getData, postData, putData } from "./basicservice";
 
 import type { Project } from "../models/project";
-import type { icustomer } from "../models/icustomer";
+import type { Customer } from "../models/customer";
 import type { LaborTemplate } from "../models/labortemplate";
 
 import type {
   Article,
   ReportItemInput,
   TimeReportItem,
-  Category
+  Category,
 } from "../models/Article";
 
-import {
-  DEFAULT_FILTERS,
-} from "../reducers/draftFilterreducer";
+import { DEFAULT_FILTERS } from "../reducers/draftFilterreducer";
 
 import type {
   DraftFilters,
@@ -38,36 +36,34 @@ export const TimeReportService = {
     postData<Project[]>(`${BASE}/getregisterdtime`, { customerId }),
 
   // ---------- CUSTOMERS ----------
-  getAllCustomers: () =>
-    getData<icustomer[]>(`${BASE}/getallcustomers`),
+  getAllCustomers: () => getData<Customer[]>(`${BASE}/getallcustomers`),
 
   searchCustomer: (query: string) =>
-    getData<icustomer[]>(`${BASE}/searchcustomers`, {
+    getData<Customer[]>(`${BASE}/searchcustomers`, {
       params: { q: query },
     }),
 
-  getCategories: () =>
-    getData<Category[]>(`${BASE}/getcategories`),
+  getCategories: () => getData<Category[]>(`${BASE}/getcategories`),
 
-  getLaborTemplates: () =>
-    getData<LaborTemplate[]>(`${BASE}/labor-templates`),
+  getLaborTemplates: () => getData<LaborTemplate[]>(`${BASE}/labor-templates`),
 
-  postLaborTemplates: (payload:{name: string;
-    extendedDescription: string; })=> postData<LaborTemplate>(`${BASE}/labor-templates`,payload),
+  postLaborTemplates: (payload: {
+    name: string;
+    extendedDescription: string;
+  }) => postData<LaborTemplate>(`${BASE}/labor-templates`, payload),
 
-  deleteLaborTemplates: (id:number)=> deleteData<void>(`${BASE}/labor-templates/${id}`),
+  deleteLaborTemplates: (id: number) =>
+    deleteData<void>(`${BASE}/labor-templates/${id}`),
 
-  getOwnerCompanies: () =>
-    getData<icustomer[]>(`${BASE}/customer/owners`),
+  getOwnerCompanies: () => getData<Customer[]>(`${BASE}/customer/owners`),
 
   quickAddCustomer: (company: string, ownerId: number) =>
-    postData<icustomer>(`${BASE}/customer/quick-add`, {
+    postData<Customer>(`${BASE}/customer/quick-add`, {
       company,
       owner_id: ownerId,
     }),
 
-  getRecentCustomers: () =>
-    getData<icustomer[]>(`${BASE}/customer/recent`),
+  getRecentCustomers: () => getData<Customer[]>(`${BASE}/customer/recent`),
 
   touchCustomerUsage: (customerId: number) =>
     postData<void>(`${BASE}/customer/touch`, { customerId }),
@@ -89,9 +85,7 @@ export const TimeReportService = {
             ? Number(it.purchasePrice)
             : null,
       }))
-      .filter(
-        (x) => x.article_id != null || (x.description?.length ?? 0) > 0
-      );
+      .filter((x) => x.article_id != null || (x.description?.length ?? 0) > 0);
 
     const payload = {
       customer_id: draft.customerId,
@@ -108,9 +102,7 @@ export const TimeReportService = {
     return postData(`${BASE}/draft/save`, payload);
   },
 
-  getDrafts: async (
-    filters: Partial<DraftFilters> = {}
-  ): Promise<Entry[]> => {
+  getDrafts: async (filters: Partial<DraftFilters> = {}): Promise<Entry[]> => {
     const f: DraftFilters = { ...DEFAULT_FILTERS, ...filters };
 
     const qs = new URLSearchParams();
@@ -120,13 +112,10 @@ export const TimeReportService = {
       }
     });
 
-    const url = `${BASE}/drafts${
-      qs.toString() ? `?${qs.toString()}` : ""
-    }`;
+    const url = `${BASE}/drafts${qs.toString() ? `?${qs.toString()}` : ""}`;
 
     const rows = await getData<any[]>(url);
-    const num = (v: any) =>
-      Number.isFinite(Number(v)) ? Number(v) : 0;
+    const num = (v: any) => (Number.isFinite(Number(v)) ? Number(v) : 0);
 
     return rows.map((r) => ({
       id: String(r.id),
@@ -140,8 +129,7 @@ export const TimeReportService = {
       date: (r.date ?? "").slice(0, 10),
       hours: num(r.hours),
       billable: r.billable,
-      projectId:
-        r.project_id != null ? Number(r.project_id) : null,
+      projectId: r.project_id != null ? Number(r.project_id) : null,
       items: Array.isArray(r.items) ? r.items : [],
     }));
   },
@@ -152,19 +140,13 @@ export const TimeReportService = {
   deleteDraft: (draftId: number) =>
     postData<void>(`${BASE}/draft/delete`, { draftId }),
 
-  clearDrafts: () =>
-    postData<void>(`${BASE}/drafts/clear`, {}),
+  clearDrafts: () => postData<void>(`${BASE}/drafts/clear`, {}),
 
   duplicateDraftToApi: async (draftId: number) => {
-    const dubdraft = await getData<Entry>(
-      `${BASE}/drafts/${draftId}`
-    );
+    const dubdraft = await getData<Entry>(`${BASE}/drafts/${draftId}`);
 
     const toMySQLDateLocal = (input: string | Date) => {
-      if (
-        typeof input === "string" &&
-        /^\d{4}-\d{2}-\d{2}$/.test(input)
-      ) {
+      if (typeof input === "string" && /^\d{4}-\d{2}-\d{2}$/.test(input)) {
         return input;
       }
 
@@ -184,10 +166,7 @@ export const TimeReportService = {
   },
 
   // ---------- TEMPLATES ----------
-  saveTimeRegisterTemplate: (
-    templates: FormState,
-    name: string
-  ) =>
+  saveTimeRegisterTemplate: (templates: FormState, name: string) =>
     postData<FormState>(`${BASE}/template/save`, {
       templates,
       name,
@@ -229,10 +208,7 @@ export const TimeReportService = {
       config
     ),
 
-  fetchReportItems: (
-    reportId: number,
-    config?: AxiosRequestConfig
-  ) =>
+  fetchReportItems: (reportId: number, config?: AxiosRequestConfig) =>
     getData<TimeReportItem[]>(`${BASE}/${reportId}/items`, config),
 
   // ---------- TEST ----------

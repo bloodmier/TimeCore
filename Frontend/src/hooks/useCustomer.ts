@@ -7,9 +7,8 @@
  * - Supports quick-adding new end customers under an owner
  */
 
-
 import { useCallback, useEffect, useState } from "react";
-import type { icustomer } from "../models/icustomer";
+import type { icustomer } from "../models/customer";
 import { TimeReportService } from "../services/timeReportService";
 
 export const useCustomer = () => {
@@ -53,30 +52,24 @@ export const useCustomer = () => {
     }
   }, []);
 
-  const searchCustomerfromapi = useCallback(
-    async (query: string) => {
-      return TimeReportService.searchCustomer(query);
-    },
-    []
-  );
+  const searchCustomerfromapi = useCallback(async (query: string) => {
+    return TimeReportService.searchCustomer(query);
+  }, []);
 
-  const quickAdd = useCallback(
-    async (company: string, ownerId: number) => {
-      try {
-        const newCustomer = await TimeReportService.quickAddCustomer(
-          company,
-          ownerId
-        );
-        setCustomer((prev) => [...prev, newCustomer]);
-        setRecentCustomers((prev) => [newCustomer, ...prev].slice(0, 5));
-        return newCustomer;
-      } catch (error) {
-        console.error("Error adding customer:", error);
-        throw error;
-      }
-    },
-    []
-  );
+  const quickAdd = useCallback(async (company: string, ownerId: number) => {
+    try {
+      const newCustomer = await TimeReportService.quickAddCustomer(
+        company,
+        ownerId
+      );
+      setCustomer((prev) => [...prev, newCustomer]);
+      setRecentCustomers((prev) => [newCustomer, ...prev].slice(0, 5));
+      return newCustomer;
+    } catch (error) {
+      console.error("Error adding customer:", error);
+      throw error;
+    }
+  }, []);
 
   return {
     customer,

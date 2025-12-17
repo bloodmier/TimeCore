@@ -11,3 +11,8 @@ export interface ApiUserRegisterResponse {
   message: string; 
   user: ApiUser;
 }
+
+export type UserOption = {
+  id: number;
+  name: string;
+};

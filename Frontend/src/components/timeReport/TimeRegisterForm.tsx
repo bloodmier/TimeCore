@@ -26,7 +26,7 @@ import { sv } from "date-fns/locale";
 import type { FormEvent } from "react";
 import type { Category } from "../../models/Article";
 import type { LaborTemplate } from "../../models/labortemplate";
-import type { icustomer } from "../../models/icustomer";
+import type { icustomer } from "../../models/customer";
 import type { FormState } from "../../models/Draft";
 import type { Project } from "../../models/project";
 import type { ReportItemInput, Article } from "../../models/Article";

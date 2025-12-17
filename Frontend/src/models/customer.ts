@@ -1,4 +1,4 @@
-export interface icustomer {
+export interface Customer {
   id: number;
   company: string;
   billing_owner: number;
