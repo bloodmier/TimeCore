@@ -26,7 +26,7 @@ import { sv } from "date-fns/locale";
 import type { FormEvent } from "react";
 import type { Category } from "../../models/Article";
 import type { LaborTemplate } from "../../models/labortemplate";
-import type { icustomer } from "../../models/customer";
+import type { Customer } from "../../models/customer";
 import type { FormState } from "../../models/Draft";
 import type { Project } from "../../models/project";
 import type { ReportItemInput, Article } from "../../models/Article";
@@ -53,11 +53,11 @@ type Props = {
   pickTemplate: (id: string) => Promise<void>;
   selectedTemplateId: number | string | null;
 
-  customer: icustomer[];
-  searchCustomerfromapi: (q: string) => Promise<icustomer[] | undefined>;
-  recentCustomers: icustomer[];
-  ownerCompanies: icustomer[];
-  quickAdd: (company: string, ownerId: number) => Promise<icustomer>;
+  customer: Customer[];
+  searchCustomerfromapi: (q: string) => Promise<Customer[] | undefined>;
+  recentCustomers: Customer[];
+  ownerCompanies: Customer[];
+  quickAdd: (company: string, ownerId: number) => Promise<Customer>;
   category: Category[];
   laborTemplates: LaborTemplate[];
   onCreateLaborTemplate: (name: string, description: string) => Promise<void>;

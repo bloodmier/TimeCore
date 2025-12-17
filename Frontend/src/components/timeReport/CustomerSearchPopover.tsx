@@ -16,7 +16,7 @@ import {
   CommandList,
   CommandSeparator,
 } from "../../components/ui/command";
-import type { icustomer } from "../../models/customer";
+import type { Customer } from "../../models/customer";
 import { Input } from "../../components/ui/input";
 import {
   Select,
@@ -29,14 +29,14 @@ import {
 export interface CustomerSearchPopoverProps {
   value: number | null;
   onPick: (id: number) => void;
-  onSearch: (query: string) => Promise<icustomer[] | undefined>;
-  customers: icustomer[];
-  recentCustomers: icustomer[];
-  ownerCompanies: icustomer[];
-  quickAdd: (company: string, ownerId: number) => Promise<icustomer>;
+  onSearch: (query: string) => Promise<Customer[] | undefined>;
+  customers: Customer[];
+  recentCustomers: Customer[];
+  ownerCompanies: Customer[];
+  quickAdd: (company: string, ownerId: number) => Promise<Customer>;
   buttonLabel?: string;
   disabled?: boolean;
-  onQuickAdd?: (newCustomer: icustomer) => void;
+  onQuickAdd?: (newCustomer: Customer) => void;
   resetKey?: any;
 }
 
@@ -56,7 +56,7 @@ export const CustomerSearchPopover = ({
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState<icustomer[]>([]);
+  const [results, setResults] = useState<Customer[]>([]);
   const debounceRef = useRef<number | null>(null);
 
   const [newCompany, setNewCompany] = useState("");
