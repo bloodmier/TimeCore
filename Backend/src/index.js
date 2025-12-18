@@ -7,6 +7,7 @@ import { runWarmup } from "./lib/warmup.js";
 import { fileURLToPath } from "url";
 import path from "path";
 import { requireAuth } from "./middleware/authMiddleware.js";
+import { requireRole } from "./middleware/requireRole.js";
 
 //routes
 import userRoutes from "./routes/userRoutes.js";
@@ -14,6 +15,7 @@ import authRoutes from "./routes/authRoutes.js";
 import tenantsRoutes from "./routes/tenantRoutes.js";
 import timereportRoutes from "./routes/timereportRoutes.js";
 import timereportsRouter from "./routes/time-reportsRoutes.js";
+import adminRoute from "./routes/adminRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -46,6 +48,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/tenants", tenantsRoutes);
 app.use('/api/timereport', requireAuth , timereportRoutes);
 app.use('/api/time-reports', requireAuth , timereportsRouter);
+app.use("/api/admin", requireAuth, requireRole("admin"), adminRoute);
+
 
 app.get('/db-check', async (req, res) => {
     try {
@@ -61,6 +65,7 @@ app.get('/db-check', async (req, res) => {
 });
 
 const port = process.env.PORT || 5000;
+
 app.listen(port, ()=>console.log("server is running on http://localhost:5000"));
 
 await runWarmup();

@@ -399,7 +399,7 @@
     "tags": ["Tenants"],
     "security": [
       {
-        "bearerAuth": []
+         "cookieAuth": [] 
       }
     ],
     "responses": {
@@ -436,8 +436,8 @@
       }
     }
   }
-}
-    ,    "/timereport/addtime": {
+    },
+    "/timereport/addtime": {
       "post": {
         "tags": ["Time Reports"],
         "summary": "Create one or more time reports",
@@ -681,7 +681,7 @@
       }
     }
   }
-},
+    },
    "/timereport/labor-templates/{id}": {
   "delete": {
     "summary": "Delete labor template",
@@ -713,7 +713,7 @@
       }
     }
   }
-},
+    },
     "/timereport/customer/owners": {
       "get": {
         "tags": ["Customers"],
@@ -1439,7 +1439,7 @@
         }
       }
     },
-      "/time-reports": {
+    "/time-reports": {
   "get": {
     "tags": ["Time Reports – Overview"],
     "summary": "List time reports for current user",
@@ -1474,9 +1474,8 @@
       "401": { "description": "Unauthorized" }
     }
   }
-}
-,
-"/time-reports/summary": {
+    },
+    "/time-reports/summary": {
   "get": {
     "tags": ["Time Reports – Overview"],
     "summary": "Get time report summary for current user",
@@ -1499,9 +1498,8 @@
       }
     }
   }
-}
-,
-"/time-reports/{id}": {
+    },
+    "/time-reports/{id}": {
   "put": {
     "tags": ["Time Reports – Overview"],
     "summary": "Update time report",
@@ -1548,16 +1546,219 @@
       }
     }
   }
-}
+    },
+    "/admin/time-reports": {
+  "get": {
+    "tags": ["Admin"],
+    "summary": "List time reports for tenant (admin)",
+    "description": "Returns paginated time reports within the authenticated admin's tenant. Supports date filtering, free-text search and cursor pagination.",
+    "security": [{ "cookieAuth": [] }],
+    "parameters": [
+      { "name": "start", "in": "query", "schema": { "type": "string", "format": "date" }, "description": "Start date (YYYY-MM-DD). Defaults to current month start." },
+      { "name": "end", "in": "query", "schema": { "type": "string", "format": "date" }, "description": "End date (YYYY-MM-DD). Defaults to current month end." },
+      { "name": "q", "in": "query", "schema": { "type": "string" }, "description": "Search query. Supports #id, id:123, text matches, or date tokens like 'today'/'idag'." },
+      { "name": "billed", "in": "query", "schema": { "type": "boolean" }, "description": "Filter by billed status." },
+      { "name": "userId", "in": "query", "schema": { "type": "integer" }, "description": "Filter by a single user id." },
+      { "name": "userIds", "in": "query", "schema": { "type": "string" }, "description": "Comma-separated list of user ids." },
+      { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 50, "maximum": 200 }, "description": "Max items per page." },
+      { "name": "cursor", "in": "query", "schema": { "type": "string" }, "description": "Cursor returned from previous call." }
+    ],
+    "responses": {
+      "200": {
+        "description": "Paginated list",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "items": { "type": "array", "items": { "$ref": "#/components/schemas/AdminTimeReportItem" } },
+                "nextCursor": { "type": "string", "nullable": true }
+              }
+            }
+          }
+        }
+      },
+      "401": { "description": "Unauthorized (missing/invalid cookie)" },
+      "403": { "description": "Forbidden (not admin / no tenant bound)" },
+      "500": { "description": "Internal server error" }
+    }
+  }
+    },
+    "/admin/time-reports/summary": {
+      "get": {
+        "tags": ["Admin"],
+        "summary": "Get aggregated time reporting summary (admin)",
+        "description": "Returns totals (hours, billable, non-billable) and day counts for the tenant within the selected date range.",
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          { "name": "start", "in": "query", "schema": { "type": "string", "format": "date" } },
+          { "name": "end", "in": "query", "schema": { "type": "string", "format": "date" } },
+          { "name": "q", "in": "query", "schema": { "type": "string" } },
+          { "name": "billed", "in": "query", "schema": { "type": "boolean" } },
+          { "name": "userId", "in": "query", "schema": { "type": "integer" } },
+          { "name": "userIds", "in": "query", "schema": { "type": "string" }, "description": "Comma-separated list of user ids." }
+        ],
+        "responses": {
+          "200": {
+            "description": "Summary",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AdminTimeReportsSummary" }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden" },
+          "500": { "description": "Internal server error" }
+        }
+      }
+    },
+    "/admin/time-reports/{id}": {
+      "put": {
+        "tags": ["Admin"],
+        "summary": "Update a time report (admin)",
+        "description": "Partially updates a time_report row. Enforces tenant isolation (or superadmin bypass in backend). Supports item delete/upsert in same request.",
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AdminTimeReportUpdateRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated report",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AdminTimeReportItem" }
+              }
+            }
+          },
+          "400": { "description": "Invalid id or payload" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Not found in tenant" },
+          "500": { "description": "Couldn't update time report" }
+        }
+      },
+
+      "delete": {
+        "tags": ["Admin"],
+        "summary": "Delete a time report (admin)",
+        "description": "Deletes a time_report and its related time_report_item rows for the current tenant.",
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "deletedId": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Bad request" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Not found (wrong tenant or id)" }
+        }
+      }
+    },
+    "/admin/users": {
+      "get": {
+        "tags": ["Admin"],
+        "summary": "List users in tenant (admin)",
+        "description": "Returns all users for the authenticated admin's tenant.",
+        "security": [{ "cookieAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Users",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/User" } }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden (no tenant bound / not admin)" },
+          "500": { "description": "Internal server error" }
+        }
+      }
+    },
+    "/admin/time-reports/stats": {
+      "get": {
+        "tags": ["Admin"],
+        "summary": "Get advanced time report statistics (admin)",
+        "description": "Returns summary totals and grouped stats (weeks, customers, users, categories, articles) within the tenant. Supports many filters and optional facet/missing-day outputs.",
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          { "name": "from", "in": "query", "schema": { "type": "string", "format": "date" } },
+          { "name": "to", "in": "query", "schema": { "type": "string", "format": "date" } },
+          { "name": "billed", "in": "query", "schema": { "type": "boolean" } },
+          { "name": "billable", "in": "query", "schema": { "type": "boolean" } },
+          { "name": "q", "in": "query", "schema": { "type": "string" } },
+
+          { "name": "customerId", "in": "query", "schema": { "type": "integer" } },
+          { "name": "projectId", "in": "query", "schema": { "type": "integer" } },
+          { "name": "categoryId", "in": "query", "schema": { "type": "integer" } },
+          { "name": "userId", "in": "query", "schema": { "type": "integer" } },
+
+          { "name": "customerIds", "in": "query", "schema": { "type": "string" }, "description": "Comma-separated ids." },
+          { "name": "projectIds", "in": "query", "schema": { "type": "string" }, "description": "Comma-separated ids." },
+          { "name": "categoryIds", "in": "query", "schema": { "type": "string" }, "description": "Comma-separated ids." },
+          { "name": "userIds", "in": "query", "schema": { "type": "string" }, "description": "Comma-separated ids." },
+
+          { "name": "minH", "in": "query", "schema": { "type": "number" } },
+          { "name": "maxH", "in": "query", "schema": { "type": "number" } },
+
+          { "name": "hasNote", "in": "query", "schema": { "type": "boolean" } },
+          { "name": "hasItems", "in": "query", "schema": { "type": "boolean" } },
+          { "name": "hasInvoiceNumber", "in": "query", "schema": { "type": "boolean" } },
+          { "name": "unbilledOnly", "in": "query", "schema": { "type": "boolean" } },
+
+          { "name": "includeFacets", "in": "query", "schema": { "type": "boolean" } },
+          { "name": "includeMissing", "in": "query", "schema": { "type": "boolean" } },
+          { "name": "includeArticleTimecards", "in": "query", "schema": { "type": "boolean" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Stats payload",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AdminTimeReportsStatsResponse" }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden" },
+          "500": { "description": "Internal server error" }
+        }
+      }
+    }
+
 
 
   },
   "components": {
   "securitySchemes": {
-    "bearerAuth": {
-      "type": "http",
-      "scheme": "bearer",
-      "bearerFormat": "JWT"
+    "cookieAuth": {
+      "type": "apiKey",
+      "in": "cookie",
+      "name": "tc_access",
+      "description": "HttpOnly cookie containing the JWT access token."
     }
   },
     "schemas": {
@@ -2379,9 +2580,8 @@
       "example": "General consulting work."
     }
   }
-},
-
-"LaborTemplateCreate": {
+      },
+      "LaborTemplateCreate": {
   "type": "object",
   "required": ["name", "extended_description"],
   "properties": {
@@ -2390,6 +2590,89 @@
       "type": "string",
       "example": "Installed fiber switches and structured cabling."
           }
+        }
+      },
+      "AdminTimeReportItem": {
+  "type": "object",
+  "properties": {
+    "id": { "type": "integer" },
+    "userId": { "type": "integer" },
+    "date": { "type": "string", "format": "date" },
+    "customerId": { "type": "integer", "nullable": true },
+    "projectId": { "type": "integer", "nullable": true },
+    "categoryId": { "type": "integer", "nullable": true },
+    "customerName": { "type": "string", "nullable": true },
+    "projectName": { "type": "string", "nullable": true },
+    "category": { "type": "string", "nullable": true },
+    "hours": { "type": "number" },
+    "billable": { "type": "boolean" },
+    "billed": { "type": "boolean" },
+    "workDescription": { "type": "string", "nullable": true },
+    "note": { "type": "string", "nullable": true },
+    "items": {
+      "type": "array",
+      "items": { "$ref": "#/components/schemas/TimeReportItem" }
+    }
+  }
+      },
+      "AdminTimeReportsSummary": {
+        "type": "object",
+        "properties": {
+          "totalHours": { "type": "number" },
+          "billableHours": { "type": "number" },
+          "nonBillableHours": { "type": "number" },
+          "amount": { "type": "number" },
+          "daysReported": { "type": "integer" },
+          "vacationHours": { "type": "number" },
+          "sickHours": { "type": "number" }
+        }
+      },
+      "AdminTimeReportUpdateRequest": {
+        "type": "object",
+        "description": "Partial update for a time report. All fields are optional.",
+        "properties": {
+          "customerId": { "type": "integer", "nullable": true },
+          "categoryId": { "type": "integer", "nullable": true },
+          "projectId": { "type": "integer", "nullable": true },
+          "date": { "type": "string", "format": "date" },
+          "hours": { "type": "number" },
+          "note": { "type": "string", "nullable": true },
+          "workDescription": { "type": "string", "nullable": true },
+          "billable": { "type": "boolean" },
+          "billed": { "type": "boolean" },
+          "items": {
+            "type": "object",
+            "properties": {
+              "delete": { "type": "array", "items": { "type": "integer" } },
+              "upsert": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "integer", "nullable": true },
+                    "articleId": { "type": "integer", "nullable": true },
+                    "amount": { "type": "number", "nullable": true },
+                    "description": { "type": "string", "nullable": true }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "AdminTimeReportsStatsResponse": {
+        "type": "object",
+        "properties": {
+          "summary": { "type": "object" },
+          "weekHours": { "type": "array", "items": { "type": "object" } },
+          "byCustomer": { "type": "array", "items": { "type": "object" } },
+          "byUser": { "type": "array", "items": { "type": "object" } },
+          "byCategory": { "type": "array", "items": { "type": "object" } },
+          "articles": { "type": "object" },
+          "articlesByCustomer": { "type": "array", "items": { "type": "object" } },
+          "missingDays": { "type": "array", "items": { "type": "object" }, "nullable": true },
+          "articlesByCustomerTimecards": { "type": "array", "items": { "type": "object" }, "nullable": true },
+          "facets": { "type": "object", "nullable": true }
         }
       }
     }
