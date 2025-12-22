@@ -93,3 +93,39 @@ export type StatsResponse = {
     }>;
   }>;
 };
+
+
+export type adminParams = Partial<AdminFilter> & {
+  start?: string;   
+  end?: string;     
+  userIds?: number[];
+  billed?: boolean;
+  q?: string;       
+  limit?: number;
+  cursor?: string;
+  includeSummary?: boolean; 
+  scope?: string;    
+  includeFacets?: number    
+  articleMode?: "all" | "registered" | "custom";
+  articleIds?: number[];
+  customArticleQuery?: string;
+};
+
+export type FacetItem = { id: number; name: string };
+
+export type StatsResponseWithFacets = StatsResponse & { facets?: AdminFacets };
+
+export type AdminFacets = {
+  customers: FacetItem[];
+  projects: FacetItem[];
+  users: FacetItem[];
+  categories: FacetItem[];
+  articles: {
+    registered: RegisteredArticleOpt[];
+    customTop: CustomTopItem[];
+  };
+};
+
+export type RegisteredArticleOpt = { id: number; name: string; count: number };
+
+export type CustomTopItem = {id:number, label: string; count: number };
