@@ -33,7 +33,7 @@ function createTransporter() {
   });
 }
 
-function getTransporter() {
+export function getTransporter() {
   if (transporter !== null) return transporter;
   transporter = createTransporter();
   return transporter;

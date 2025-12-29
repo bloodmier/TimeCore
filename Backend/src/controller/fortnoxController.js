@@ -267,6 +267,22 @@ function sanitizeInvoiceRows(rows) {
   }
 }
 
+export async function createCustomerInFortnox({ name }) {
+  const resp = await sendToFortnox("customers", {
+    Customer: { Name: name },
+  });
+
+  const customerNumber = resp?.Customer?.CustomerNumber;
+  if (!customerNumber) {
+    const e = new Error("Fortnox response missing CustomerNumber");
+    e._data = resp;
+    throw e;
+  }
+
+  return String(customerNumber);
+}
+
+
 /* ========================== Enrichment ========================== */
 
 /**

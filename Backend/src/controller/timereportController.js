@@ -1,6 +1,6 @@
 import { db } from "../config/db.js";
 import { toBoolOrUndefined } from "../utils/dateRange.js";
-
+import { createCustomerInFortnox } from "../controller/fortnoxController.js"
 /**
  * Create one or more time reports (and optional line items).
  *
@@ -373,29 +373,41 @@ export const getOwnerCompanies = async (req, res) => {
  * - Sets bill_direct = 1 if owner_id matches DB_ID_IN_BACKEND, else 0.
  */
 export const quickAddCustomer = async (req, res) => {
-  console.log(req.user);
-  
   try {
-    // 1. Kolla auth
     if (!req.user || !req.user.id || !req.user.tenantId) {
       return res.status(401).json({ error: "Unauthorized" });
     }
 
+    
     const tenantId = req.user.tenantId;
     const { company, owner_id } = req.body;
-
-    // 2. Validera input
+    
     const trimmedCompany =
-      typeof company === "string" ? company.trim() : "";
-
+    typeof company === "string" ? company.trim() : "";
+    
     const ownerIdNum = Number(owner_id);
+    
+        const [existing] = await db.query(
+      `
+      SELECT id, customer_id, company, billing_owner, customer_owner, bill_direct
+      FROM customer
+      WHERE company = ? AND customer_owner = ?
+      LIMIT 1
+      `,
+      [trimmedCompany, ownerIdNum]
+    );
+
+    if (existing.length > 0) {
+      return res.status(200).json({
+        ...existing[0],
+        existed: true,
+      });
+    }
 
     if (!trimmedCompany || !Number.isInteger(ownerIdNum) || ownerIdNum <= 0) {
       return res.status(400).json({ error: "Invalid payload" });
-    }
-    console.log(tenantId);
-    
-    // 3. Hämta "företaget du jobbar på" från tenants.customer_id
+    } 
+
     const [tenantRows] = await db.query(
       "SELECT customer_id FROM tenants WHERE id = ?",
       [tenantId]
@@ -411,7 +423,6 @@ export const quickAddCustomer = async (req, res) => {
 
     const backendCustomerId = Number(tenantRows[0].customer_id);
 
-    // 4. Säkerställ att owner är en giltig billing_owner-kund
     const [owners] = await db.query(
       "SELECT id FROM customer WHERE id = ? AND billing_owner = 1",
       [ownerIdNum]
@@ -423,23 +434,27 @@ export const quickAddCustomer = async (req, res) => {
         .json({ error: "Selected owner is not eligible" });
     }
 
-    // 5. Sätt bill_direct:
-    //    1 = fakturera direkt från företag du jobbar på
-    //    0 = fakturera via annan billing_owner
     const billDirect = ownerIdNum === backendCustomerId ? 1 : 0;
 
+    const fortnoxCustomerNumber = await createCustomerInFortnox({
+      name: trimmedCompany,
+    });
+
+    console.log(fortnoxCustomerNumber);
+    
     // 6. Skapa kund
     const [result] = await db.execute(
       `
       INSERT INTO customer (
+        customer_id,
         company,
         billing_owner,
         customer_owner,
         bill_direct
       )
-      VALUES (?, 0, ?, ?)
+      VALUES (?, ?, 0, ?, ?)
       `,
-      [trimmedCompany, ownerIdNum, billDirect]
+      [fortnoxCustomerNumber,trimmedCompany, ownerIdNum, billDirect]
     );
 
     return res.status(201).json({
@@ -448,12 +463,10 @@ export const quickAddCustomer = async (req, res) => {
       billing_owner: 0,
       customer_owner: ownerIdNum,
       bill_direct: billDirect,
-      // DB sätter send_report_by_email = 0 som default
     });
   } catch (err) {
     console.error("quickAddCustomer error:", err);
 
-    // Fånga FK-fel på ett snyggt sätt
     if (err.code === "ER_NO_REFERENCED_ROW_2") {
       return res.status(400).json({
         error: "Invalid reference",
