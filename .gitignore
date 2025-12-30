@@ -12,6 +12,8 @@ dist
 dist-ssr
 *.local
 .env
+.fortnox.env
+fortnox_token.json
 
 # Editor directories and files
 .vscode/*

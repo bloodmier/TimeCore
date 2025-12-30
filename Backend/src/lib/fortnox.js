@@ -13,10 +13,6 @@ import crypto from "node:crypto";
  * - Provides a tiny in-memory session store used during OAuth flows (short-lived)
  */
 
-// Fortnox variables live in a dedicated file placed next to where the server is started.
-const envFile = path.resolve(process.cwd(), "fortnox_env");
-dotenv.config({ path: envFile });
-
 // Token persistence file (bind-mount friendly).
 const tokenFile = path.resolve(process.cwd(), "fortnox_token.json");
 const tmpTokenFile = tokenFile + ".tmp";

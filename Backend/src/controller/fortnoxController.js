@@ -28,10 +28,10 @@ async function getPurchasePriceFromTimeReportItemId(triId) {
     `SELECT purchase_price FROM time_report_item WHERE id = ? LIMIT 1`,
     [triId]
   );
-
+  const ARTICLE_MULTIPLIER = Number(process.env.ARTICLE_MULTIPLIER);
   const price = rows?.[0]?.purchase_price ?? null;
   if (price == null) return null;
-    return Number(price) * 1.07;
+    return Number(price) * ARTICLE_MULTIPLIER;
 }
 
 /**
@@ -286,15 +286,15 @@ export async function createCustomerInFortnox({ name }) {
 /* ========================== Enrichment ========================== */
 
 /**
- * Enriches an invoice payload with:
- * - Currency (from local customerId, if provided)
- * - Labor row pricing (customer hourly rate OR owner hourly rate OR per-user level rates)
- * - Material row pricing (purchase_price lookup via TimeReportItemId, plus markup)
- * - Row sanitation (removes internal fields)
+ * ArticleNumber handling:
+ * - Labor and material ArticleNumber are taken from incoming payload if present
+ * - Backend may merge/split rows but preserves the original ArticleNumber
+ * - Fallbacks:
+ *   - Labor: "100"
+ *   - Materials: "87"
  *
- * It supports both payload shapes:
- * - { Invoice: {...} }   (Fortnox wrapper shape)
- * - {...}               (raw invoice object)
+ * This allows article numbers to be configured in the frontend or caller,
+ * while keeping pricing logic backend-driven.
  */
 async function enrichInvoicePrices(invoiceLike, customerId) {
   const wrapped = invoiceLike?.Invoice ? invoiceLike : { Invoice: invoiceLike };
@@ -307,22 +307,20 @@ async function enrichInvoicePrices(invoiceLike, customerId) {
     return invoiceLike;
   }
 
-  let customerHourlyRate = null;
-  let ownerHourlyRate = null;
-
-  // Try customer hourly rate first, then owner fallback
-  customerHourlyRate = await getHourlyRateByCustomerNumber(customerNumber);
-  if (customerHourlyRate == null) {
-    ownerHourlyRate = await getOwnerHourlyRateByCustomerNumber(customerNumber);
-  }
-
-  const hourlyRateOverride = customerHourlyRate ?? ownerHourlyRate;
-
   // Set currency on invoice if we know local customer id
   if (customerId != null) {
     const currency = await getCurrencyByCustomerId(customerId);
     if (currency) inv.Currency = currency;
   }
+
+  let customerHourlyRate = await getHourlyRateByCustomerNumber(customerNumber);
+  let ownerHourlyRate = null;
+
+  if (customerHourlyRate == null) {
+    ownerHourlyRate = await getOwnerHourlyRateByCustomerNumber(customerNumber);
+  }
+
+  const hourlyRateOverride = customerHourlyRate ?? ownerHourlyRate;
 
   const originalRows = inv.InvoiceRows ?? [];
   const laborRows = [];
@@ -334,8 +332,20 @@ async function enrichInvoicePrices(invoiceLike, customerId) {
     else otherRows.push({ ...row });
   }
 
+  // Preserve incoming article numbers (fallbacks if missing)
+  const laborArticleNo =
+    laborRows.find((r) => r.ArticleNumber != null)?.ArticleNumber ?? "100";
+
+  const materialArticleNo =
+    otherRows.find((r) => r.ArticleNumber != null)?.ArticleNumber ?? "87";
+
   // Enrich non-labor rows (e.g. materials)
   for (const row of otherRows) {
+    // Ensure ArticleNumber exists for materials
+    if (!row.ArticleNumber) {
+      row.ArticleNumber = String(materialArticleNo);
+    }
+
     // If TimeReportItemId exists, try to set Price from purchase_price (+ markup)
     const triId = extractTimeReportItemId(row);
     if (triId != null) {
@@ -354,34 +364,24 @@ async function enrichInvoicePrices(invoiceLike, customerId) {
 
   if (laborRows.length > 0) {
     if (hourlyRateOverride != null) {
-      /**
-       * Rule 1:
-       * If we have a customer-specific (or owner fallback) hourly rate,
-       * merge ALL labor into ONE invoice row.
-       */
+      // Rule 1: customer-specific (or owner fallback) hourly rate -> merge ALL labor into ONE row
       const baseDesc = buildBaseDescriptionWithPeriod(laborRows);
       const totalHours = laborRows.reduce(
         (s, r) => s + toNumber(r.DeliveredQuantity, 0),
         0
       );
 
-      finalLaborRows = [{
-        ArticleNumber: "100",
-        DeliveredQuantity: Number(totalHours),
-        Unit: "h",
-        Description: baseDesc,
-        Price: Number(hourlyRateOverride),
-      }];
+      finalLaborRows = [
+        {
+          ArticleNumber: String(laborArticleNo),
+          DeliveredQuantity: Number(totalHours),
+          Unit: "h",
+          Description: baseDesc,
+          Price: Number(hourlyRateOverride),
+        },
+      ];
     } else {
-      /**
-       * Rule 2:
-       * No customer-specific hourly rate -> price labor per user pricing level.
-       *
-       * We:
-       * - load pricing levels for involved user IDs
-       * - aggregate hours per level_id
-       * - emit one row per level with its price (if available)
-       */
+      // Rule 2: no customer-specific hourly rate -> price labor per user pricing level
       const userIds = [];
       for (const r of laborRows) {
         const uid = r.UserId ?? r.userId ?? r.userid ?? r.user_id ?? null;
@@ -412,7 +412,7 @@ async function enrichInvoicePrices(invoiceLike, customerId) {
         const levelLabel = levelId == null ? "level ?" : `level ${levelId}`;
 
         finalLaborRows.push({
-          ArticleNumber: "100",
+          ArticleNumber: String(laborArticleNo),
           DeliveredQuantity: Number(hours),
           Unit: "h",
           Description: `${baseDesc} ${levelLabel}`,
@@ -428,6 +428,7 @@ async function enrichInvoicePrices(invoiceLike, customerId) {
   // Return in the same shape the caller used
   return invoiceLike?.Invoice ? { Invoice: inv } : inv;
 }
+
 
 /**
  * Enriches an "envelope" payload shape:
@@ -552,7 +553,8 @@ export async function handleFortnoxPost(req, res) {
   try {
     const { scope } = req.params;
     const body = req.body;
-
+   console.log("REQ BODY:\n", JSON.stringify(req.body, null, 2));
+    
     if (!body || typeof body !== "object") {
       return res.status(400).json({ error: "Invalid payload" });
     }
@@ -565,7 +567,9 @@ export async function handleFortnoxPost(req, res) {
       for (let i = 0; i < body.length; i++) {
         // Enrich per envelope (labor/materials) + sanitize rows
         const row = await enrichEnvelope(body[i]);
-
+        console.log("AFTER enrichEnvelope labor:",
+  row?.labor?.Invoice?.InvoiceRows?.map(r => r.ArticleNumber)
+);
         // Send labor invoice if present
         if (row?.labor?.Invoice) {
           try {
