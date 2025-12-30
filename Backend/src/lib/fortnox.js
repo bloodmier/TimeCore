@@ -1,19 +1,27 @@
-// src/lib/fortnox.js
 import fs from "fs";
 import path from "path";
-import dotenv from "dotenv";
 import crypto from "node:crypto";
 
 /**
- * This module is the Fortnox integration core:
- * - Loads Fortnox OAuth client credentials from a dedicated env file ("fortnox_env")
- * - Stores and loads OAuth tokens from a JSON file ("fortnox_token.json")
- * - Automatically refreshes access tokens when needed (single-flight refresh)
- * - Calls Fortnox endpoints with proper headers and error normalization
- * - Provides a tiny in-memory session store used during OAuth flows (short-lived)
+ * Fortnox integration core module.
+ *
+ * Responsibilities:
+ * - Loads Fortnox OAuth client credentials from environment variables
+ * - Persists OAuth tokens to disk (JSON file)
+ * - Automatically refreshes access tokens when expired
+ *   (using a single-flight mechanism to avoid concurrent refreshes)
+ * - Executes HTTP requests against Fortnox APIs with required headers
+ * - Normalizes Fortnox API errors into a consistent error format
+ * - Provides a minimal in-memory session store for short-lived OAuth flows
+ *
+ * Design notes:
+ * - Token storage is file-based to support Docker and single-instance deployments
+ * - In-memory sessions are intentionally non-persistent and short-lived
  */
 
-// Token persistence file (bind-mount friendly).
+// Token persistence file.
+// Stored on disk to survive server restarts.
+// Path is compatible with Docker bind-mounted volumes.
 const tokenFile = path.resolve(process.cwd(), "fortnox_token.json");
 const tmpTokenFile = tokenFile + ".tmp";
 

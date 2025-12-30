@@ -8,7 +8,7 @@
   "servers": [
     {
       "url": "http://localhost:5000/api",
-      "description": "Local development"
+      "description": "TimeCore"
     }
   ],
   "paths": {
@@ -38,18 +38,13 @@
               }
             }
           },
-          "400": {
-            "description": "Missing or invalid fields"
-          },
-          "409": {
-            "description": "Email already exists"
-          },
-          "500": {
-            "description": "Unexpected server or database error"
-          }
+          "400": { "description": "Missing or invalid fields" },
+          "409": { "description": "Email already exists" },
+          "500": { "description": "Unexpected server or database error" }
         }
       }
     },
+
     "/users/me/avatar": {
       "put": {
         "tags": ["Users"],
@@ -84,18 +79,13 @@
               }
             }
           },
-          "400": {
-            "description": "No file uploaded or invalid file type/size"
-          },
-          "401": {
-            "description": "Missing or invalid authentication cookie"
-          },
-          "500": {
-            "description": "Internal server error while processing or saving the avatar"
-          }
+          "400": { "description": "No file uploaded or invalid file type/size" },
+          "401": { "description": "Missing or invalid authentication cookie" },
+          "500": { "description": "Internal server error while processing or saving the avatar" }
         }
       }
     },
+
     "/auth/login": {
       "post": {
         "tags": ["Authentication"],
@@ -105,9 +95,7 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LoginRequest"
-              }
+              "schema": { "$ref": "#/components/schemas/LoginRequest" }
             }
           }
         },
@@ -117,34 +105,23 @@
             "headers": {
               "Set-Cookie": {
                 "description": "HttpOnly cookie `tc_access` containing the JWT access token.",
-                "schema": {
-                  "type": "string"
-                }
+                "schema": { "type": "string" }
               }
             },
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LoginResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/LoginResponse" }
               }
             }
           },
-          "400": {
-            "description": "Missing or invalid fields"
-          },
-          "401": {
-            "description": "Invalid email or password"
-          },
-          "403": {
-            "description": "User account is disabled or deleted"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
+          "400": { "description": "Missing or invalid fields" },
+          "401": { "description": "Invalid email or password" },
+          "403": { "description": "User account is disabled or deleted" },
+          "500": { "description": "Internal server error" }
         }
       }
     },
+
     "/auth/me": {
       "get": {
         "tags": ["Authentication"],
@@ -155,60 +132,44 @@
             "description": "Current user information",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MeResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/MeResponse" }
               }
             }
           },
-          "401": {
-            "description": "Missing or invalid authentication cookie"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
+          "401": { "description": "Missing or invalid authentication cookie" },
+          "500": { "description": "Internal server error" }
         }
       }
     },
+
     "/auth/refresh": {
       "post": {
         "tags": ["Authentication"],
         "summary": "Refresh access token",
         "description": "Refreshes the short-lived access token using the long-lived `tc_refresh` HttpOnly cookie. Issues a new `tc_access` cookie and returns the authenticated user.",
-        "requestBody": {
-          "required": false
-        },
+        "requestBody": { "required": false },
         "responses": {
           "200": {
             "description": "Access token refreshed successfully",
             "headers": {
               "Set-Cookie": {
                 "description": "HttpOnly cookie `tc_access` containing the new JWT access token.",
-                "schema": {
-                  "type": "string"
-                }
+                "schema": { "type": "string" }
               }
             },
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LoginResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/LoginResponse" }
               }
             }
           },
-          "401": {
-            "description": "Missing, invalid, or expired refresh token cookie"
-          },
-          "403": {
-            "description": "User account is disabled or deleted"
-          },
-          "500": {
-            "description": "Internal server error while refreshing the token"
-          }
+          "401": { "description": "Missing, invalid, or expired refresh token cookie" },
+          "403": { "description": "User account is disabled or deleted" },
+          "500": { "description": "Internal server error while refreshing the token" }
         }
       }
     },
+
     "/auth/logout": {
       "post": {
         "tags": ["Authentication"],
@@ -219,18 +180,15 @@
             "description": "Logged out successfully",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MessageResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/MessageResponse" }
               }
             }
           },
-          "500": {
-            "description": "Internal server error"
-          }
+          "500": { "description": "Internal server error" }
         }
       }
     },
+
     "/auth/forgot-password": {
       "post": {
         "tags": ["Authentication"],
@@ -239,33 +197,22 @@
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ForgotPasswordRequest"
-              }
-            }
+            "application/json": { "schema": { "$ref": "#/components/schemas/ForgotPasswordRequest" } }
           }
         },
         "responses": {
           "200": {
             "description": "Generic success message (email existence is not revealed)",
             "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MessageResponse"
-                }
-              }
+              "application/json": { "schema": { "$ref": "#/components/schemas/MessageResponse" } }
             }
           },
-          "400": {
-            "description": "Missing or invalid email"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
+          "400": { "description": "Missing or invalid email" },
+          "500": { "description": "Internal server error" }
         }
       }
     },
+
     "/auth/reset-password": {
       "post": {
         "tags": ["Authentication"],
@@ -274,44 +221,29 @@
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ResetPasswordRequest"
-              }
-            }
+            "application/json": { "schema": { "$ref": "#/components/schemas/ResetPasswordRequest" } }
           }
         },
         "responses": {
           "200": {
             "description": "Password has been reset successfully",
-          "headers": {
+            "headers": {
               "Set-Cookie": {
                 "description": "HttpOnly cookie `tc_access` containing the new JWT access token.",
-                "schema": {
-                  "type": "string"
-                }
+                "schema": { "type": "string" }
               }
             },
             "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LoginResponse"
-                }
-              }
+              "application/json": { "schema": { "$ref": "#/components/schemas/LoginResponse" } }
             }
           },
-          "400": {
-            "description": "Invalid or expired token, or weak password"
-          },
-          "403": {
-            "description": "User account is disabled or deleted"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
+          "400": { "description": "Invalid or expired token, or weak password" },
+          "403": { "description": "User account is disabled or deleted" },
+          "500": { "description": "Internal server error" }
         }
       }
     },
+
     "/auth/change-password": {
       "post": {
         "tags": ["Authentication"],
@@ -325,16 +257,8 @@
                 "type": "object",
                 "required": ["currentPassword", "newPassword"],
                 "properties": {
-                  "currentPassword": {
-                    "type": "string",
-                    "format": "password",
-                    "example": "OldPassword123!"
-                  },
-                  "newPassword": {
-                    "type": "string",
-                    "format": "password",
-                    "example": "NewPassword123!"
-                  }
+                  "currentPassword": { "type": "string", "format": "password", "example": "OldPassword123!" },
+                  "newPassword": { "type": "string", "format": "password", "example": "NewPassword123!" }
                 }
               }
             }
@@ -344,28 +268,17 @@
           "200": {
             "description": "Password changed successfully",
             "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MessageResponse"
-                }
-              }
+              "application/json": { "schema": { "$ref": "#/components/schemas/MessageResponse" } }
             }
           },
-          "400": {
-            "description": "Missing fields or weak password"
-          },
-          "401": {
-            "description": "Not authenticated or wrong current password"
-          },
-          "403": {
-            "description": "User account is disabled or deleted"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
+          "400": { "description": "Missing fields or weak password" },
+          "401": { "description": "Not authenticated or wrong current password" },
+          "403": { "description": "User account is disabled or deleted" },
+          "500": { "description": "Internal server error" }
         }
       }
     },
+
     "/tenants": {
       "get": {
         "tags": ["Tenants"],
@@ -376,67 +289,51 @@
             "description": "List of tenants",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Tenant"
-                  }
-                }
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Tenant" } }
+              }
+            }
+          },
+          "500": { "description": "Internal server error while fetching tenants" }
+        }
+      }
+    },
+
+    "/tenants/company": {
+      "get": {
+        "summary": "Get company customer ID for current tenant",
+        "description": "Returns the customer ID associated with the tenant of the authenticated user. This ID represents the company operating the system and is used for billing and ownership logic.",
+        "tags": ["Tenants"],
+        "security": [{ "cookieAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Company customer ID retrieved successfully",
+            "content": {
+              "application/json": {
+                "example": { "customerId": 1 }
               }
             }
           },
           "500": {
-            "description": "Internal server error while fetching tenants"
-          }
-        }
-      }
-    }
-    ,
-    "/tenants/company": {
-  "get": {
-    "summary": "Get company customer ID for current tenant",
-    "description": "Returns the customer ID associated with the tenant of the authenticated user. This ID represents the company operating the system and is used for billing and ownership logic.",
-    "tags": ["Tenants"],
-    "security": [
-      {
-         "cookieAuth": [] 
-      }
-    ],
-    "responses": {
-      "200": {
-        "description": "Company customer ID retrieved successfully",
-        "content": {
-          "application/json": {
-            "example": {
-              "customerId": 1
-            }
-          }
-        }
-      },
-      "500": {
-        "description": "No company customer configured or internal server error",
-        "content": {
-          "application/json": {
-            "examples": {
-              "noCompany": {
-                "summary": "No company customer configured",
-                "value": {
-                  "error": "No company customer configured"
-                }
-              },
-              "internalError": {
-                "summary": "Unexpected error",
-                "value": {
-                  "message": "Internal server error while fetching companyid"
+            "description": "No company customer configured or internal server error",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "noCompany": {
+                    "summary": "No company customer configured",
+                    "value": { "error": "No company customer configured" }
+                  },
+                  "internalError": {
+                    "summary": "Unexpected error",
+                    "value": { "message": "Internal server error while fetching companyid" }
+                  }
                 }
               }
             }
           }
         }
       }
-    }
-  }
     },
+
     "/timereport/addtime": {
       "post": {
         "tags": ["Time Reports"],
@@ -448,15 +345,8 @@
             "application/json": {
               "schema": {
                 "oneOf": [
-                  {
-                    "$ref": "#/components/schemas/TimeReportCreateRequest"
-                  },
-                  {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/TimeReportCreateRequest"
-                    }
-                  }
+                  { "$ref": "#/components/schemas/TimeReportCreateRequest" },
+                  { "type": "array", "items": { "$ref": "#/components/schemas/TimeReportCreateRequest" } }
                 ]
               }
             }
@@ -467,21 +357,16 @@
             "description": "Time reports created successfully",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TimeReportCreateResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/TimeReportCreateResponse" }
               }
             }
           },
-          "400": {
-            "description": "Validation error or empty payload"
-          },
-          "500": {
-            "description": "Failed to insert time reports"
-          }
+          "400": { "description": "Validation error or empty payload" },
+          "500": { "description": "Failed to insert time reports" }
         }
       }
     },
+
     "/timereport/getregisterdtime": {
       "post": {
         "tags": ["Projects"],
@@ -495,10 +380,7 @@
                 "type": "object",
                 "required": ["customerId"],
                 "properties": {
-                  "customerId": {
-                    "type": "integer",
-                    "example": 42
-                  }
+                  "customerId": { "type": "integer", "example": 42 }
                 }
               }
             }
@@ -509,21 +391,15 @@
             "description": "List of projects for the given customer",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Project"
-                  }
-                }
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Project" } }
               }
             }
           },
-          "500": {
-            "description": "Internal server error"
-          }
+          "500": { "description": "Internal server error" }
         }
       }
     },
+
     "/timereport/getallcustomers": {
       "get": {
         "tags": ["Customers"],
@@ -534,21 +410,15 @@
             "description": "List of customers",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Customer"
-                  }
-                }
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Customer" } }
               }
             }
           },
-          "500": {
-            "description": "Internal server error"
-          }
+          "500": { "description": "Internal server error" }
         }
       }
     },
+
     "/timereport/searchcustomers": {
       "get": {
         "tags": ["Customers"],
@@ -559,9 +429,7 @@
             "name": "q",
             "in": "query",
             "required": false,
-            "schema": {
-              "type": "string"
-            },
+            "schema": { "type": "string" },
             "description": "Search term for company name."
           }
         ],
@@ -570,21 +438,15 @@
             "description": "List of matching customers",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Customer"
-                  }
-                }
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Customer" } }
               }
             }
           },
-          "500": {
-            "description": "Internal server error"
-          }
+          "500": { "description": "Internal server error" }
         }
       }
     },
+
     "/timereport/getCategories": {
       "get": {
         "tags": ["Time Reports"],
@@ -600,120 +462,83 @@
                   "items": {
                     "type": "object",
                     "properties": {
-                      "id": {
-                        "type": "integer",
-                        "example": 1
-                      },
-                      "name": {
-                        "type": "string",
-                        "example": "Consulting"
-                      }
+                      "id": { "type": "integer", "example": 1 },
+                      "name": { "type": "string", "example": "Consulting" }
                     }
                   }
                 }
               }
             }
           },
-          "500": {
-            "description": "Failed to fetch categories"
-          }
+          "500": { "description": "Failed to fetch categories" }
         }
       }
     },
+
     "/timereport/labor-templates": {
-  "get": {
-    "tags": ["Time Reports"],
-    "summary": "Get labor text templates",
-    "description": "Returns predefined labor (work_labor) text templates.",
-    "responses": {
-      "200": {
-        "description": "List of labor templates",
-        "content": {
-          "application/json": {
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/LaborTemplate"
+      "get": {
+        "tags": ["Time Reports"],
+        "summary": "Get labor text templates",
+        "description": "Returns predefined labor (work_labor) text templates.",
+        "responses": {
+          "200": {
+            "description": "List of labor templates",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/LaborTemplate" } }
               }
             }
-          }
+          },
+          "500": { "description": "Failed to fetch labor templates" }
         }
       },
-      "500": {
-        "description": "Failed to fetch labor templates"
-      }
-    }
-  },
-
-  "post": {
-    "tags": ["Time Reports"],
-    "summary": "Create a new labor text template",
-    "description": "Creates a user-specific labor template to use as a quick-fill option in time reports.",
-    "security": [
-      { "cookieAuth": [] }
-    ],
-    "requestBody": {
-      "required": true,
-      "content": {
-        "application/json": {
-          "schema": {
-            "$ref": "#/components/schemas/LaborTemplateCreate"
+      "post": {
+        "tags": ["Time Reports"],
+        "summary": "Create a new labor text template",
+        "description": "Creates a user-specific labor template to use as a quick-fill option in time reports.",
+        "security": [{ "cookieAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/LaborTemplateCreate" } }
           }
-        }
-      }
-    },
-    "responses": {
-      "201": {
-        "description": "Labor template created",
-        "content": {
-          "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/LaborTemplate"
-            }
-          }
-        }
-      },
-      "400": {
-        "description": "Invalid input (missing name or description)"
-      },
-      "401": {
-        "description": "Unauthorized"
-      }
-    }
-  }
-    },
-   "/timereport/labor-templates/{id}": {
-  "delete": {
-    "summary": "Delete labor template",
-    "description": "Deletes a user-owned labor template. Global templates cannot be deleted.",
-    "tags": ["Time Reports"],
-    "security": [
-      { "cookieAuth": [] }
-    ],
-    "parameters": [
-      {
-        "name": "id",
-        "in": "path",
-        "required": true,
-        "schema": {
-          "type": "integer"
         },
-        "description": "ID of the labor template to delete"
+        "responses": {
+          "201": {
+            "description": "Labor template created",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/LaborTemplate" } }
+            }
+          },
+          "400": { "description": "Invalid input (missing name or description)" },
+          "401": { "description": "Unauthorized" }
+        }
       }
-    ],
-    "responses": {
-      "204": {
-        "description": "Template deleted"
-      },
-      "404": {
-        "description": "Template not found or does not belong to user"
-      },
-      "401": {
-        "description": "Unauthorized"
-      }
-    }
-  }
     },
+
+    "/timereport/labor-templates/{id}": {
+      "delete": {
+        "summary": "Delete labor template",
+        "description": "Deletes a user-owned labor template. Global templates cannot be deleted.",
+        "tags": ["Time Reports"],
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" },
+            "description": "ID of the labor template to delete"
+          }
+        ],
+        "responses": {
+          "204": { "description": "Template deleted" },
+          "404": { "description": "Template not found or does not belong to user" },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+
     "/timereport/customer/owners": {
       "get": {
         "tags": ["Customers"],
@@ -723,22 +548,14 @@
           "200": {
             "description": "List of owner companies",
             "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Customer"
-                  }
-                }
-              }
+              "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Customer" } } }
             }
           },
-          "500": {
-            "description": "Internal server error"
-          }
+          "500": { "description": "Internal server error" }
         }
       }
     },
+
     "/timereport/customer/quick-add": {
       "post": {
         "tags": ["Customers"],
@@ -747,33 +564,22 @@
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CustomerQuickAddRequest"
-              }
-            }
+            "application/json": { "schema": { "$ref": "#/components/schemas/CustomerQuickAddRequest" } }
           }
         },
         "responses": {
           "201": {
             "description": "Customer created successfully",
             "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CustomerQuickAddResponse"
-                }
-              }
+              "application/json": { "schema": { "$ref": "#/components/schemas/CustomerQuickAddResponse" } }
             }
           },
-          "400": {
-            "description": "Invalid payload or owner not eligible"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
+          "400": { "description": "Invalid payload or owner not eligible" },
+          "500": { "description": "Internal server error" }
         }
       }
     },
+
     "/timereport/customer/recent": {
       "get": {
         "tags": ["Customers"],
@@ -783,22 +589,14 @@
           "200": {
             "description": "List of recent customers",
             "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Customer"
-                  }
-                }
-              }
+              "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Customer" } } }
             }
           },
-          "500": {
-            "description": "Internal server error"
-          }
+          "500": { "description": "Internal server error" }
         }
       }
     },
+
     "/timereport/customer/touch": {
       "post": {
         "tags": ["Customers"],
@@ -811,12 +609,7 @@
               "schema": {
                 "type": "object",
                 "required": ["customerId"],
-                "properties": {
-                  "customerId": {
-                    "type": "integer",
-                    "example": 42
-                  }
-                }
+                "properties": { "customerId": { "type": "integer", "example": 42 } }
               }
             }
           }
@@ -825,22 +618,15 @@
           "200": {
             "description": "Customer usage updated",
             "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SimpleOkResponse"
-                }
-              }
+              "application/json": { "schema": { "$ref": "#/components/schemas/SimpleOkResponse" } }
             }
           },
-          "400": {
-            "description": "Invalid customerId"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
+          "400": { "description": "Invalid customerId" },
+          "500": { "description": "Internal server error" }
         }
       }
     },
+
     "/timereport/draft/save": {
       "post": {
         "tags": ["Time Reports"],
@@ -849,11 +635,7 @@
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TimeReportDraftSaveRequest"
-              }
-            }
+            "application/json": { "schema": { "$ref": "#/components/schemas/TimeReportDraftSaveRequest" } }
           }
         },
         "responses": {
@@ -864,243 +646,101 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "draftId": {
-                      "type": "integer",
-                      "example": 15
-                    },
-                    "itemsSaved": {
-                      "type": "integer",
-                      "example": 3
-                    }
+                    "draftId": { "type": "integer", "example": 15 },
+                    "itemsSaved": { "type": "integer", "example": 3 }
                   }
                 }
               }
             }
           },
-          "500": {
-            "description": "Failed to save draft"
-          }
+          "500": { "description": "Failed to save draft" }
         }
       }
     },
+
     "/timereport/draft/update/{id}": {
       "put": {
         "tags": ["Time Reports"],
         "summary": "Update existing time report draft",
         "description": "Updates header and items for an existing draft belonging to the current user.",
         "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            },
-            "description": "Id of the draft to update."
-          }
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "Id of the draft to update." }
         ],
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TimeReportDraftSaveRequest"
-              }
-            }
+            "application/json": { "schema": { "$ref": "#/components/schemas/TimeReportDraftSaveRequest" } }
           }
         },
         "responses": {
           "200": {
             "description": "Draft updated successfully",
             "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SimpleOkResponse"
-                }
-              }
+              "application/json": { "schema": { "$ref": "#/components/schemas/SimpleOkResponse" } }
             }
           },
-          "500": {
-            "description": "Failed to update draft"
-          }
+          "500": { "description": "Failed to update draft" }
         }
       }
     },
+
     "/timereport/drafts": {
       "get": {
         "tags": ["Time Reports"],
         "summary": "List drafts for current user",
         "description": "Returns drafts for the authenticated user with optional search, date filtering, sorting and pagination. Items are included in the response.",
         "parameters": [
-          {
-            "name": "q",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Optional search term for customer company."
-          },
-          {
-            "name": "from",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date"
-            },
-            "description": "Filter drafts with date >= this value."
-          },
-          {
-            "name": "to",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date"
-            },
-            "description": "Filter drafts with date <= this value."
-          },
-          {
-            "name": "sort",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "enum": ["modified", "date", "created_date", "company_name", "category_name"],
-              "default": "modified"
-            }
-          },
-          {
-            "name": "order",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "enum": ["asc", "desc"],
-              "default": "desc"
-            }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "default": 50
-            }
-          },
-          {
-            "name": "offset",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "default": 0
-            }
-          }
+          { "name": "q", "in": "query", "required": false, "schema": { "type": "string" }, "description": "Optional search term for customer company." },
+          { "name": "from", "in": "query", "required": false, "schema": { "type": "string", "format": "date" }, "description": "Filter drafts with date >= this value." },
+          { "name": "to", "in": "query", "required": false, "schema": { "type": "string", "format": "date" }, "description": "Filter drafts with date <= this value." },
+          { "name": "sort", "in": "query", "required": false, "schema": { "type": "string", "enum": ["modified", "date", "created_date", "company_name", "category_name"], "default": "modified" } },
+          { "name": "order", "in": "query", "required": false, "schema": { "type": "string", "enum": ["asc", "desc"], "default": "desc" } },
+          { "name": "limit", "in": "query", "required": false, "schema": { "type": "integer", "default": 50 } },
+          { "name": "offset", "in": "query", "required": false, "schema": { "type": "integer", "default": 0 } }
         ],
         "responses": {
           "200": {
             "description": "List of drafts with items",
             "headers": {
-              "Cache-Control": {
-                "description": "Set to no-store to disable caching.",
-                "schema": {
-                  "type": "string"
-                }
-              }
+              "Cache-Control": { "description": "Set to no-store to disable caching.", "schema": { "type": "string" } }
             },
             "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/TimeReportDraft"
-                  }
-                }
-              }
+              "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/TimeReportDraft" } } }
             }
           },
-          "500": {
-            "description": "Failed to fetch drafts"
-          }
+          "500": { "description": "Failed to fetch drafts" }
         }
       }
     },
+
     "/timereport/drafts/{id}": {
       "get": {
         "tags": ["Time Reports"],
         "summary": "Get single draft by id",
         "description": "Returns a single draft with its items.",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
         "responses": {
-          "200": {
-            "description": "Draft found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TimeReportDraft"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Draft not found"
-          },
-          "500": {
-            "description": "Server error"
-          }
+          "200": { "description": "Draft found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/TimeReportDraft" } } } },
+          "404": { "description": "Draft not found" },
+          "500": { "description": "Server error" }
         }
       }
     },
+
     "/timereport/drafts/{id}/items": {
       "get": {
         "tags": ["Time Reports"],
         "summary": "Get draft items by draft id",
         "description": "Returns only the items for a specific draft id.",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
         "responses": {
-          "200": {
-            "description": "List of draft items",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/TimeReportDraftItem"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad draft id"
-          },
-          "500": {
-            "description": "Failed to fetch draft items"
-          }
+          "200": { "description": "List of draft items", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/TimeReportDraftItem" } } } } },
+          "400": { "description": "Bad draft id" },
+          "500": { "description": "Failed to fetch draft items" }
         }
       }
     },
+
     "/timereport/draft/delete": {
       "post": {
         "tags": ["Time Reports"],
@@ -1113,55 +753,30 @@
               "schema": {
                 "type": "object",
                 "required": ["draftId"],
-                "properties": {
-                  "draftId": {
-                    "type": "integer",
-                    "example": 15
-                  }
-                }
+                "properties": { "draftId": { "type": "integer", "example": 15 } }
               }
             }
           }
         },
         "responses": {
-          "200": {
-            "description": "Draft deleted",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SimpleOkResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Failed to delete draft"
-          }
+          "200": { "description": "Draft deleted", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SimpleOkResponse" } } } },
+          "500": { "description": "Failed to delete draft" }
         }
       }
     },
+
     "/timereport/drafts/clear": {
       "post": {
         "tags": ["Time Reports"],
         "summary": "Clear all drafts for current user",
         "description": "Deletes all drafts and their items for the authenticated user.",
         "responses": {
-          "200": {
-            "description": "Drafts cleared",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SimpleOkResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Failed to clear drafts"
-          }
+          "200": { "description": "Drafts cleared", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SimpleOkResponse" } } } },
+          "500": { "description": "Failed to clear drafts" }
         }
       }
     },
+
     "/timereport/template/save": {
       "post": {
         "tags": ["Time Reports"],
@@ -1170,200 +785,75 @@
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TimeReportTemplateSaveRequest"
-              }
-            }
+            "application/json": { "schema": { "$ref": "#/components/schemas/TimeReportTemplateSaveRequest" } }
           }
         },
         "responses": {
-          "201": {
-            "description": "Template created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TimeReportTemplateSaveResponse"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "Existing template replaced because user already had 10 templates",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TimeReportTemplateSaveResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Failed to save template"
-          }
+          "201": { "description": "Template created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/TimeReportTemplateSaveResponse" } } } },
+          "200": { "description": "Existing template replaced because user already had 10 templates", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/TimeReportTemplateSaveResponse" } } } },
+          "500": { "description": "Failed to save template" }
         }
       }
     },
+
     "/timereport/template/all": {
       "get": {
         "tags": ["Time Reports"],
         "summary": "Get all templates for current user",
         "description": "Returns all time report templates for the authenticated user.",
         "responses": {
-          "200": {
-            "description": "List of templates",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/TimeReportTemplate"
-                  }
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Failed to get templates"
-          }
+          "200": { "description": "List of templates", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/TimeReportTemplate" } } } } },
+          "500": { "description": "Failed to get templates" }
         }
       }
     },
+
     "/timereport/template/{id}": {
       "get": {
         "tags": ["Time Reports"],
         "summary": "Get template by id",
         "description": "Returns a specific template belonging to the current user.",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
         "responses": {
-          "200": {
-            "description": "Template found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/TimeReportTemplate"
-                  }
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Failed to get template"
-          }
+          "200": { "description": "Template found", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/TimeReportTemplate" } } } } },
+          "500": { "description": "Failed to get template" }
         }
       },
       "delete": {
         "tags": ["Time Reports"],
         "summary": "Delete template by id",
         "description": "Deletes a template belonging to the current user.",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
         "responses": {
-          "200": {
-            "description": "Template deleted",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SimpleOkResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Failed to delete template"
-          }
+          "200": { "description": "Template deleted", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SimpleOkResponse" } } } },
+          "500": { "description": "Failed to delete template" }
         }
       }
     },
+
     "/timereport/articles": {
       "get": {
         "tags": ["Articles"],
         "summary": "Search or list articles",
         "description": "Returns articles for use as line items. If q is empty, the latest articles are returned.",
         "parameters": [
-          {
-            "name": "q",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Search term for article name, art_nr or description."
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "default": 10
-            }
-          },
-          {
-            "name": "offset",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "default": 0
-            }
-          }
+          { "name": "q", "in": "query", "required": false, "schema": { "type": "string" }, "description": "Search term for article name, art_nr or description." },
+          { "name": "limit", "in": "query", "required": false, "schema": { "type": "integer", "default": 10 } },
+          { "name": "offset", "in": "query", "required": false, "schema": { "type": "integer", "default": 0 } }
         ],
         "responses": {
-          "200": {
-            "description": "List of articles",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Article"
-                  }
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Failed to fetch articles"
-          }
+          "200": { "description": "List of articles", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Article" } } } } },
+          "500": { "description": "Failed to fetch articles" }
         }
       }
     },
+
     "/timereport/{id}/items": {
       "put": {
         "tags": ["Time Reports"],
         "summary": "Replace all line items for a time report",
         "description": "Deletes existing items and inserts the provided items for the given time_report id.",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            },
-            "description": "Id of the time_report."
-          }
-        ],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "Id of the time_report." }],
         "requestBody": {
           "required": true,
           "content": {
@@ -1372,218 +862,167 @@
                 "type": "object",
                 "required": ["items"],
                 "properties": {
-                  "items": {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/TimeReportLineItemInput"
-                    }
-                  }
+                  "items": { "type": "array", "items": { "$ref": "#/components/schemas/TimeReportLineItemInput" } }
                 }
               }
             }
           }
         },
         "responses": {
-          "200": {
-            "description": "Items replaced successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SimpleOkResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad report id or no items"
-          },
-          "500": {
-            "description": "Failed to update items"
-          }
+          "200": { "description": "Items replaced successfully", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SimpleOkResponse" } } } },
+          "400": { "description": "Bad report id or no items" },
+          "500": { "description": "Failed to update items" }
         }
       },
       "get": {
         "tags": ["Time Reports"],
         "summary": "Get items for a time report",
         "description": "Returns all items for the given time_report id.",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "200": { "description": "List of items for the time report", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/TimeReportItem" } } } } },
+          "400": { "description": "Bad report id" },
+          "500": { "description": "Failed to fetch items" }
+        }
+      }
+    },
+
+    "/time-reports": {
+      "get": {
+        "tags": ["Time Reports – Overview"],
+        "summary": "List time reports for current user",
+        "description": "Returns paginated time reports owned by the authenticated user.",
+        "security": [{ "cookieAuth": [] }],
         "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          }
+          { "name": "start", "in": "query", "schema": { "type": "string", "format": "date" } },
+          { "name": "end", "in": "query", "schema": { "type": "string", "format": "date" } },
+          { "name": "q", "in": "query", "schema": { "type": "string" } },
+          { "name": "billed", "in": "query", "schema": { "type": "boolean" } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 50 } },
+          { "name": "cursor", "in": "query", "schema": { "type": "string" } }
         ],
         "responses": {
           "200": {
-            "description": "List of items for the time report",
+            "description": "Time reports list",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/TimeReportItem"
+                  "type": "object",
+                  "properties": {
+                    "items": { "type": "array", "items": { "$ref": "#/components/schemas/TimeReportOverviewItem" } },
+                    "nextCursor": { "type": "string", "nullable": true }
                   }
                 }
               }
             }
           },
-          "400": {
-            "description": "Bad report id"
-          },
-          "500": {
-            "description": "Failed to fetch items"
-          }
+          "401": { "description": "Unauthorized" }
         }
       }
     },
-    "/time-reports": {
-  "get": {
-    "tags": ["Time Reports – Overview"],
-    "summary": "List time reports for current user",
-    "description": "Returns paginated time reports owned by the authenticated user.",
-    "security": [{ "cookieAuth": [] }],
-    "parameters": [
-      { "name": "start", "in": "query", "schema": { "type": "string", "format": "date" } },
-      { "name": "end", "in": "query", "schema": { "type": "string", "format": "date" } },
-      { "name": "q", "in": "query", "schema": { "type": "string" } },
-      { "name": "billed", "in": "query", "schema": { "type": "boolean" } },
-      { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 50 } },
-      { "name": "cursor", "in": "query", "schema": { "type": "string" } }
-    ],
-    "responses": {
-      "200": {
-        "description": "Time reports list",
-        "content": {
-          "application/json": {
-            "schema": {
-              "type": "object",
-              "properties": {
-                "items": {
-                  "type": "array",
-                  "items": { "$ref": "#/components/schemas/TimeReportOverviewItem" }
-                },
-                "nextCursor": { "type": "string", "nullable": true }
-              }
-            }
-          }
-        }
-      },
-      "401": { "description": "Unauthorized" }
-    }
-  }
-    },
+
     "/time-reports/summary": {
-  "get": {
-    "tags": ["Time Reports – Overview"],
-    "summary": "Get time report summary for current user",
-    "description": "Returns aggregated time reporting statistics for the authenticated user.",
-    "security": [{ "cookieAuth": [] }],
-    "parameters": [
-      { "name": "start", "in": "query", "schema": { "type": "string", "format": "date" } },
-      { "name": "end", "in": "query", "schema": { "type": "string", "format": "date" } },
-      { "name": "q", "in": "query", "schema": { "type": "string" } },
-      { "name": "billed", "in": "query", "schema": { "type": "boolean" } }
-    ],
-    "responses": {
-      "200": {
-        "description": "Summary data",
-        "content": {
-          "application/json": {
-            "schema": { "$ref": "#/components/schemas/TimeReportSummary" }
+      "get": {
+        "tags": ["Time Reports – Overview"],
+        "summary": "Get time report summary for current user",
+        "description": "Returns aggregated time reporting statistics for the authenticated user.",
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          { "name": "start", "in": "query", "schema": { "type": "string", "format": "date" } },
+          { "name": "end", "in": "query", "schema": { "type": "string", "format": "date" } },
+          { "name": "q", "in": "query", "schema": { "type": "string" } },
+          { "name": "billed", "in": "query", "schema": { "type": "boolean" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Summary data",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/TimeReportSummary" } } }
           }
         }
       }
-    }
-  }
     },
+
     "/time-reports/{id}": {
-  "put": {
-    "tags": ["Time Reports – Overview"],
-    "summary": "Update time report",
-    "description": "Updates a time report owned by the authenticated user.",
-    "security": [{ "cookieAuth": [] }],
-    "parameters": [
-      { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
-    ],
-    "requestBody": {
-      "required": true,
-      "content": {
-        "application/json": {
-          "schema": { "$ref": "#/components/schemas/TimeReportUpdateRequest" }
-        }
-      }
-    },
-    "responses": {
-      "200": { "description": "Updated" },
-      "404": { "description": "Not found" }
-    }
-  },
-  "delete": {
-    "tags": ["Time Reports"],
-    "summary": "Delete time report",
-    "description": "Deletes a time report owned by the authenticated user.",
-    "security": [{ "cookieAuth": [] }],
-    "parameters": [
-      { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
-    ],
-    "responses": {
-      "200": {
-        "description": "Deleted",
-        "content": {
-          "application/json": {
-            "schema": {
-              "type": "object",
-              "properties": {
-                "success": { "type": "boolean" },
-                "deletedId": { "type": "integer" }
-              }
-            }
+      "put": {
+        "tags": ["Time Reports – Overview"],
+        "summary": "Update time report",
+        "description": "Updates a time report owned by the authenticated user.",
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/TimeReportUpdateRequest" } }
           }
-        }
-      }
-    }
-  }
-    },
-    "/admin/time-reports": {
-  "get": {
-    "tags": ["Admin"],
-    "summary": "List time reports for tenant (admin)",
-    "description": "Returns paginated time reports within the authenticated admin's tenant. Supports date filtering, free-text search and cursor pagination.",
-    "security": [{ "cookieAuth": [] }],
-    "parameters": [
-      { "name": "start", "in": "query", "schema": { "type": "string", "format": "date" }, "description": "Start date (YYYY-MM-DD). Defaults to current month start." },
-      { "name": "end", "in": "query", "schema": { "type": "string", "format": "date" }, "description": "End date (YYYY-MM-DD). Defaults to current month end." },
-      { "name": "q", "in": "query", "schema": { "type": "string" }, "description": "Search query. Supports #id, id:123, text matches, or date tokens like 'today'/'idag'." },
-      { "name": "billed", "in": "query", "schema": { "type": "boolean" }, "description": "Filter by billed status." },
-      { "name": "userId", "in": "query", "schema": { "type": "integer" }, "description": "Filter by a single user id." },
-      { "name": "userIds", "in": "query", "schema": { "type": "string" }, "description": "Comma-separated list of user ids." },
-      { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 50, "maximum": 200 }, "description": "Max items per page." },
-      { "name": "cursor", "in": "query", "schema": { "type": "string" }, "description": "Cursor returned from previous call." }
-    ],
-    "responses": {
-      "200": {
-        "description": "Paginated list",
-        "content": {
-          "application/json": {
-            "schema": {
-              "type": "object",
-              "properties": {
-                "items": { "type": "array", "items": { "$ref": "#/components/schemas/AdminTimeReportItem" } },
-                "nextCursor": { "type": "string", "nullable": true }
-              }
-            }
-          }
+        },
+        "responses": {
+          "200": { "description": "Updated" },
+          "404": { "description": "Not found" }
         }
       },
-      "401": { "description": "Unauthorized (missing/invalid cookie)" },
-      "403": { "description": "Forbidden (not admin / no tenant bound)" },
-      "500": { "description": "Internal server error" }
-    }
-  }
+      "delete": {
+        "tags": ["Time Reports"],
+        "summary": "Delete time report",
+        "description": "Deletes a time report owned by the authenticated user.",
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "200": {
+            "description": "Deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "deletedId": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     },
+
+    "/admin/time-reports": {
+      "get": {
+        "tags": ["Admin"],
+        "summary": "List time reports for tenant (admin)",
+        "description": "Returns paginated time reports within the authenticated admin's tenant. Supports date filtering, free-text search and cursor pagination.",
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          { "name": "start", "in": "query", "schema": { "type": "string", "format": "date" }, "description": "Start date (YYYY-MM-DD). Defaults to current month start." },
+          { "name": "end", "in": "query", "schema": { "type": "string", "format": "date" }, "description": "End date (YYYY-MM-DD). Defaults to current month end." },
+          { "name": "q", "in": "query", "schema": { "type": "string" }, "description": "Search query. Supports #id, id:123, text matches, or date tokens like 'today'/'idag'." },
+          { "name": "billed", "in": "query", "schema": { "type": "boolean" }, "description": "Filter by billed status." },
+          { "name": "userId", "in": "query", "schema": { "type": "integer" }, "description": "Filter by a single user id." },
+          { "name": "userIds", "in": "query", "schema": { "type": "string" }, "description": "Comma-separated list of user ids." },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 50, "maximum": 200 }, "description": "Max items per page." },
+          { "name": "cursor", "in": "query", "schema": { "type": "string" }, "description": "Cursor returned from previous call." }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": { "type": "array", "items": { "$ref": "#/components/schemas/AdminTimeReportItem" } },
+                    "nextCursor": { "type": "string", "nullable": true }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized (missing/invalid cookie)" },
+          "403": { "description": "Forbidden (not admin / no tenant bound)" },
+          "500": { "description": "Internal server error" }
+        }
+      }
+    },
+
     "/admin/time-reports/summary": {
       "get": {
         "tags": ["Admin"],
@@ -1601,11 +1040,7 @@
         "responses": {
           "200": {
             "description": "Summary",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/AdminTimeReportsSummary" }
-              }
-            }
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AdminTimeReportsSummary" } } }
           },
           "401": { "description": "Unauthorized" },
           "403": { "description": "Forbidden" },
@@ -1613,32 +1048,22 @@
         }
       }
     },
+
     "/admin/time-reports/{id}": {
       "put": {
         "tags": ["Admin"],
         "summary": "Update a time report (admin)",
         "description": "Partially updates a time_report row. Enforces tenant isolation (or superadmin bypass in backend). Supports item delete/upsert in same request.",
         "security": [{ "cookieAuth": [] }],
-        "parameters": [
-          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
-        ],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
-              "schema": { "$ref": "#/components/schemas/AdminTimeReportUpdateRequest" }
-            }
+            "application/json": { "schema": { "$ref": "#/components/schemas/AdminTimeReportUpdateRequest" } }
           }
         },
         "responses": {
-          "200": {
-            "description": "Updated report",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/AdminTimeReportItem" }
-              }
-            }
-          },
+          "200": { "description": "Updated report", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AdminTimeReportItem" } } } },
           "400": { "description": "Invalid id or payload" },
           "401": { "description": "Unauthorized" },
           "403": { "description": "Forbidden" },
@@ -1646,15 +1071,12 @@
           "500": { "description": "Couldn't update time report" }
         }
       },
-
       "delete": {
         "tags": ["Admin"],
         "summary": "Delete a time report (admin)",
         "description": "Deletes a time_report and its related time_report_item rows for the current tenant.",
         "security": [{ "cookieAuth": [] }],
-        "parameters": [
-          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
-        ],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
         "responses": {
           "200": {
             "description": "Deleted",
@@ -1662,10 +1084,7 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "properties": {
-                    "success": { "type": "boolean" },
-                    "deletedId": { "type": "integer" }
-                  }
+                  "properties": { "success": { "type": "boolean" }, "deletedId": { "type": "integer" } }
                 }
               }
             }
@@ -1677,6 +1096,7 @@
         }
       }
     },
+
     "/admin/users": {
       "get": {
         "tags": ["Admin"],
@@ -1684,20 +1104,14 @@
         "description": "Returns all users for the authenticated admin's tenant.",
         "security": [{ "cookieAuth": [] }],
         "responses": {
-          "200": {
-            "description": "Users",
-            "content": {
-              "application/json": {
-                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/User" } }
-              }
-            }
-          },
+          "200": { "description": "Users", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/User" } } } } },
           "401": { "description": "Unauthorized" },
           "403": { "description": "Forbidden (no tenant bound / not admin)" },
           "500": { "description": "Internal server error" }
         }
       }
     },
+
     "/admin/time-reports/stats": {
       "get": {
         "tags": ["Admin"],
@@ -1710,174 +1124,509 @@
           { "name": "billed", "in": "query", "schema": { "type": "boolean" } },
           { "name": "billable", "in": "query", "schema": { "type": "boolean" } },
           { "name": "q", "in": "query", "schema": { "type": "string" } },
-
           { "name": "customerId", "in": "query", "schema": { "type": "integer" } },
           { "name": "projectId", "in": "query", "schema": { "type": "integer" } },
           { "name": "categoryId", "in": "query", "schema": { "type": "integer" } },
           { "name": "userId", "in": "query", "schema": { "type": "integer" } },
-
           { "name": "customerIds", "in": "query", "schema": { "type": "string" }, "description": "Comma-separated ids." },
           { "name": "projectIds", "in": "query", "schema": { "type": "string" }, "description": "Comma-separated ids." },
           { "name": "categoryIds", "in": "query", "schema": { "type": "string" }, "description": "Comma-separated ids." },
           { "name": "userIds", "in": "query", "schema": { "type": "string" }, "description": "Comma-separated ids." },
-
           { "name": "minH", "in": "query", "schema": { "type": "number" } },
           { "name": "maxH", "in": "query", "schema": { "type": "number" } },
-
           { "name": "hasNote", "in": "query", "schema": { "type": "boolean" } },
           { "name": "hasItems", "in": "query", "schema": { "type": "boolean" } },
           { "name": "hasInvoiceNumber", "in": "query", "schema": { "type": "boolean" } },
           { "name": "unbilledOnly", "in": "query", "schema": { "type": "boolean" } },
-
           { "name": "includeFacets", "in": "query", "schema": { "type": "boolean" } },
           { "name": "includeMissing", "in": "query", "schema": { "type": "boolean" } },
           { "name": "includeArticleTimecards", "in": "query", "schema": { "type": "boolean" } }
         ],
         "responses": {
-          "200": {
-            "description": "Stats payload",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/AdminTimeReportsStatsResponse" }
-              }
-            }
-          },
+          "200": { "description": "Stats payload", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AdminTimeReportsStatsResponse" } } } },
           "401": { "description": "Unauthorized" },
           "403": { "description": "Forbidden" },
           "500": { "description": "Internal server error" }
         }
       }
+    },
+
+    "/fortnox/oauth/start": {
+      "get": {
+        "tags": ["Fortnox"],
+        "summary": "Start Fortnox OAuth redirect",
+        "description": "Consumes a one-time sid (created by POST /fortnox/oauth/session) and redirects the browser to Fortnox authorization page.",
+        "parameters": [
+          { "name": "sid", "in": "query", "required": true, "schema": { "type": "string" }, "description": "One-time session id created by POST /fortnox/oauth/session" }
+        ],
+        "responses": {
+          "302": { "description": "Redirect to Fortnox authorization URL" },
+          "401": { "description": "Invalid or expired sid" }
+        }
+      }
+    },
+
+    "/fortnox/oauth/callback": {
+      "get": {
+        "tags": ["Fortnox"],
+        "summary": "Fortnox OAuth callback",
+        "description": "Callback endpoint Fortnox redirects to after authorization. Exchanges code for tokens and stores them server-side, then returns HTML that closes the popup and notifies the opener window.",
+        "parameters": [
+          { "name": "code", "in": "query", "required": false, "schema": { "type": "string" } },
+          { "name": "state", "in": "query", "required": false, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "HTML response that closes popup and posts message to opener", "content": { "text/html": { "schema": { "type": "string" } } } },
+          "400": { "description": "Missing code or invalid state" },
+          "500": { "description": "Token exchange failed or OAuth callback failed" }
+        }
+      }
+    },
+
+    "/fortnox/status": {
+      "get": {
+        "tags": ["Fortnox"],
+        "summary": "Check Fortnox connection status",
+        "description": "Admin-only. Performs a lightweight Fortnox API call to verify that stored token is valid. Returns needsReauth=true if Fortnox requires re-authorization.",
+        "security": [{ "cookieAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "needsReauth": { "type": "boolean", "example": false },
+                    "authorize_url": { "type": "string", "nullable": true, "example": "/fortnox/oauth/start" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized (missing/invalid tc_access cookie)" },
+          "403": { "description": "Forbidden (not admin)" },
+          "500": { "description": "Internal server error" }
+        }
+      }
+    },
+
+    "/fortnox/{scope}": {
+      "get": {
+        "tags": ["Fortnox"],
+        "summary": "Proxy GET to Fortnox",
+        "description": "Admin-only. Proxies a GET request to Fortnox. The path parameter `scope` decides which Fortnox resource is called (e.g. customers, invoices, companyinformation). Query params are forwarded to Fortnox."
+,
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          { "name": "scope", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Fortnox resource scope (e.g. invoices, customers, companyinformation)" }
+        ],
+        "responses": {
+          "200": { "description": "Fortnox response payload (proxied)", "content": { "application/json": { "schema": { "type": "object" } } } },
+          "401": {
+            "description": "Unauthorized or needs re-authorization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": { "type": "string", "example": "Fortnox needs re-authorization" },
+                    "authorize_url": { "type": "string", "example": "/fortnox/oauth/start" }
+                  }
+                }
+              }
+            }
+          },
+          "403": { "description": "Forbidden (not admin)" },
+          "500": { "description": "Internal server error" }
+        }
+      },
+
+      "post": {
+        "tags": ["Fortnox"],
+        "summary": "Proxy POST to Fortnox (send invoices, etc.)",
+        "description": "Admin-only. Sends payload to Fortnox (typically invoices). Server enriches/sanitizes invoice rows and applies pricing rules before sending. Supports single invoice payload or batch array of envelopes.",
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          { "name": "scope", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Fortnox resource scope (e.g. invoices)" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  { "$ref": "#/components/schemas/FortnoxInvoiceWrapper" },
+                  { "$ref": "#/components/schemas/FortnoxEnvelope" },
+                  { "type": "array", "items": { "$ref": "#/components/schemas/FortnoxEnvelope" } }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Created / Fortnox response payload", "content": { "application/json": { "schema": { "type": "object" } } } },
+          "401": {
+            "description": "Unauthorized or needs re-authorization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": { "type": "string", "example": "Fortnox needs re-authorization" },
+                    "authorize_url": { "type": "string", "example": "/fortnox/oauth/start" }
+                  }
+                }
+              }
+            }
+          },
+          "403": { "description": "Forbidden (not admin)" },
+          "500": { "description": "Internal server error" }
+        }
+      }
+    },
+    "/fortnox/sync/customers": {
+  "post": {
+    "tags": ["Fortnox"],
+    "summary": "Sync customers from Fortnox into local DB",
+    "description": "Admin-only. Fetches customers from Fortnox (paged) and upserts them into the local customer table. This endpoint can be triggered manually; background polling will call the same sync logic internally.",
+    "security": [{ "cookieAuth": [] }],
+    "requestBody": {
+      "required": false,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "properties": {
+              "limit": {
+                "type": "integer",
+                "default": 500,
+                "minimum": 1,
+                "maximum": 500,
+                "description": "Customers per page when fetching from Fortnox."
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "Sync completed",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "ok": { "type": "boolean", "example": true },
+                "totalFetched": { "type": "integer", "example": 123 },
+                "upserted": { "type": "integer", "example": 123 }
+              }
+            }
+          }
+        }
+      },
+      "401": {
+        "description": "Unauthorized or needs re-authorization",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "ok": { "type": "boolean", "example": false },
+                "error": { "type": "string", "example": "Fortnox needs re-authorization" },
+                "authorize_url": { "type": "string", "example": "/fortnox/oauth/start" }
+              }
+            }
+          }
+        }
+      },
+      "403": { "description": "Forbidden (not admin)" },
+      "500": { "description": "Internal server error" }
     }
+  }
+    },
 
 
+    "/fortnox/oauth/session": {
+      "post": {
+        "tags": ["Fortnox"],
+        "summary": "Create short-lived Fortnox OAuth session (sid)",
+        "description": "Admin-only. Creates a short-lived in-memory session id (sid) used once to start the Fortnox OAuth redirect flow in a browser window.",
+        "security": [{ "cookieAuth": [] }],
+        "responses": {
+          "201": {
+            "description": "Session created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "sid": { "type": "string", "example": "d0f4a6a7-5aa4-4df8-8b0b-2dfc5b6f0b11" },
+                    "ttlSeconds": { "type": "integer", "example": 300 }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized (missing/invalid tc_access cookie)" },
+          "403": { "description": "Forbidden (not admin)" },
+          "500": { "description": "Internal server error" }
+        }
+      }
+    },
 
+    "/worklogpdf/generate": {
+      "post": {
+        "tags": ["Worklog PDF"],
+        "summary": "Generate and store a worklog PDF",
+        "description": "Creates a PDF from time report rows (by company + period or selected ids), stores it in DB (worklog_pdf), and returns metadata including invoiceId used to fetch the PDF.",
+        "security": [{ "cookieAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/WorklogPdfGenerateRequest" } }
+          }
+        },
+        "responses": {
+          "200": { "description": "Generated and stored", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WorklogPdfGenerateResponse" } } } },
+          "400": { "description": "Missing companyId or invalid payload" },
+          "404": { "description": "No worklog rows found for criteria" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden (not admin)" },
+          "500": { "description": "Internal server error" }
+        }
+      }
+    },
+
+    "/worklogpdf/{invoiceId}/pdf": {
+      "get": {
+        "tags": ["Worklog PDF"],
+        "summary": "Get worklog PDF by invoice id",
+        "description": "Returns the stored PDF buffer from DB. If query download=1, it forces download, otherwise inline view.",
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          { "name": "invoiceId", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Invoice id (or internal id) used to locate worklog_pdf row" },
+          { "name": "download", "in": "query", "required": false, "schema": { "type": "string", "enum": ["1"] }, "description": "If set to 1, returns Content-Disposition attachment" }
+        ],
+        "responses": {
+          "200": { "description": "PDF content", "content": { "application/pdf": { "schema": { "type": "string", "format": "binary" } } } },
+          "304": { "description": "Not modified (ETag matched)" },
+          "404": { "description": "Not found" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden (not admin)" },
+          "500": { "description": "Internal server error" }
+        }
+      }
+    },
+
+    "/worklogpdf/queue": {
+      "post": {
+        "tags": ["Worklog PDF"],
+        "summary": "Queue PDF generation jobs",
+        "description": "Enqueues one or many jobs into worklog_pdf_job and triggers background drain. Jobs will be processed by the worker and stored in worklog_pdf; optionally attached to Fortnox if invoice_number exists.",
+        "security": [{ "cookieAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  { "$ref": "#/components/schemas/WorklogPdfQueueItem" },
+                  { "type": "array", "items": { "$ref": "#/components/schemas/WorklogPdfQueueItem" } },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "items": { "type": "array", "items": { "$ref": "#/components/schemas/WorklogPdfQueueItem" } }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Queued",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "queued": { "type": "integer", "example": 3 },
+                    "rejected": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "invoiceId": { "type": "string", "nullable": true },
+                          "reason": { "type": "string" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "No items / invalid items" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden (not admin)" },
+          "500": { "description": "Internal server error" }
+        }
+      }
+    },
+
+    "/worklogpdf/queue/status": {
+      "get": {
+        "tags": ["Worklog PDF"],
+        "summary": "Get queue status counts",
+        "description": "Returns counts of jobs grouped by status from worklog_pdf_job.",
+        "security": [{ "cookieAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Counts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "counts": {
+                      "type": "object",
+                      "additionalProperties": { "type": "integer" },
+                      "example": { "queued": 2, "processing": 1, "done": 12, "failed": 0 }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden (not admin)" },
+          "500": { "description": "Internal server error" }
+        }
+      }
+    },
+
+    "/worklogpdf/sendPDFToCustomer": {
+      "post": {
+        "tags": ["Worklog PDF"],
+        "summary": "Send a stored PDF to customer emails",
+        "description": "Sends a stored worklog PDF (from worklog_pdf by PdfId) to recipients via email. Optionally saves new recipients to customer_email.",
+        "security": [{ "cookieAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/WorklogPdfSendRequest" } }
+          }
+        },
+        "responses": {
+          "200": { "description": "Sent", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/MessageResponse" } } } },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden (not admin)" },
+          "500": { "description": "Internal server error" }
+        }
+      }
+    },
+
+    "/worklogpdf/getEmails/{id}": {
+      "get": {
+        "tags": ["Worklog PDF"],
+        "summary": "Get customer email prefs for sending PDF",
+        "description": "Returns all stored email recipients for a customer from customer_email and the customer's language.",
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "Local customer id" }],
+        "responses": {
+          "200": { "description": "Emails + language", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WorklogCustomerEmailPrefs" } } } },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden (not admin)" },
+          "500": { "description": "Internal server error" }
+        }
+      }
+    },
+
+    "/worklogpdf/getpdfsInrange": {
+      "post": {
+        "tags": ["Worklog PDF"],
+        "summary": "Search/list PDFs in a date range",
+        "description": "Returns stored PDF metadata from worklog_pdf joined with customer. Supports optional query string and optional start/end date range.",
+        "security": [{ "cookieAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/WorklogPdfSearchRequest" } }
+          }
+        },
+        "responses": {
+          "200": { "description": "Results", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/WorklogPdfSearchResult" } } } } },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden (not admin)" },
+          "500": { "description": "Failed to fetch PDFs in range" }
+        }
+      }
+    }
   },
+
   "components": {
-  "securitySchemes": {
-    "cookieAuth": {
-      "type": "apiKey",
-      "in": "cookie",
-      "name": "tc_access",
-      "description": "HttpOnly cookie containing the JWT access token."
-    }
-  },
+    "securitySchemes": {
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "tc_access",
+        "description": "HttpOnly cookie containing the JWT access token."
+      }
+    },
     "schemas": {
       "UserRegisterRequest": {
         "type": "object",
         "required": ["name", "email", "password", "tenantId"],
         "properties": {
-          "name": {
-            "type": "string",
-            "example": "User Name"
-          },
-          "email": {
-            "type": "string",
-            "format": "email",
-            "example": "user@example.com"
-          },
-          "password": {
-            "type": "string",
-            "format": "password",
-            "example": "Password123!"
-          },
-          "tenantId": {
-            "type": "integer",
-            "example": 1
-          }
+          "name": { "type": "string", "example": "User Name" },
+          "email": { "type": "string", "format": "email", "example": "user@example.com" },
+          "password": { "type": "string", "format": "password", "example": "Password123!" },
+          "tenantId": { "type": "integer", "example": 1 }
         }
       },
       "UserRegisterResponse": {
         "type": "object",
         "properties": {
-          "message": {
-            "type": "string",
-            "example": "User created successfully"
-          },
-          "user": {
-            "$ref": "#/components/schemas/User"
-          }
+          "message": { "type": "string", "example": "User created successfully" },
+          "user": { "$ref": "#/components/schemas/User" }
         }
       },
       "UserAvatarUpdateResponse": {
         "type": "object",
         "properties": {
-          "message": {
-            "type": "string",
-            "example": "Avatar updated"
-          },
-          "user": {
-            "$ref": "#/components/schemas/User"
-          }
+          "message": { "type": "string", "example": "Avatar updated" },
+          "user": { "$ref": "#/components/schemas/User" }
         }
       },
       "User": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "integer",
-            "example": 4
-          },
-          "name": {
-            "type": "string",
-            "example": "User Name"
-          },
-          "email": {
-            "type": "string",
-            "format": "email",
-            "example": "user@example.com"
-          },
-          "tenant_id": {
-            "type": "integer",
-            "example": 1
-          },
-          "tenantName": {
-            "type": "string",
-            "nullable": true,
-            "example": "TimeCore AB",
-            "description": "Name of the tenant/company the user belongs to."
-          },
-          "role": {
-            "type": "string",
-            "example": "user"
-          },
-          "is_active": {
-            "type": "integer",
-            "example": 1
-          },
-          "avatarUrl": {
-            "type": "string",
-            "nullable": true,
-            "example": "/uploads/avatars/user-4-1733393023.webp",
-            "description": "Public URL to the user's profile image. Can be null if no avatar is set."
-          }
+          "id": { "type": "integer", "example": 4 },
+          "name": { "type": "string", "example": "User Name" },
+          "email": { "type": "string", "format": "email", "example": "user@example.com" },
+          "tenant_id": { "type": "integer", "example": 1 },
+          "tenantName": { "type": "string", "nullable": true, "example": "TimeCore AB", "description": "Name of the tenant/company the user belongs to." },
+          "role": { "type": "string", "example": "user" },
+          "is_active": { "type": "integer", "example": 1 },
+          "avatarUrl": { "type": "string", "nullable": true, "example": "/uploads/avatars/user-4-1733393023.webp", "description": "Public URL to the user's profile image. Can be null if no avatar is set." }
         }
       },
       "LoginRequest": {
         "type": "object",
         "required": ["email", "password"],
         "properties": {
-          "email": {
-            "type": "string",
-            "format": "email",
-            "example": "user@example.com"
-          },
-          "password": {
-            "type": "string",
-            "format": "password",
-            "example": "Password123!"
-          }
+          "email": { "type": "string", "format": "email", "example": "user@example.com" },
+          "password": { "type": "string", "format": "password", "example": "Password123!" }
         }
       },
       "LoginResponse": {
         "type": "object",
         "properties": {
-          "message": {
-            "type": "string",
-            "example": "Login successful"
-          },
-          "user": {
-            "$ref": "#/components/schemas/User"
-          }
+          "message": { "type": "string", "example": "Login successful" },
+          "user": { "$ref": "#/components/schemas/User" }
         }
       },
       "MeResponse": {
@@ -1886,39 +1635,13 @@
           "user": {
             "type": "object",
             "properties": {
-              "id": {
-                "type": "integer",
-                "example": 4
-              },
-              "tenantId": {
-                "type": "integer",
-                "example": 1
-              },
-              "tenantName": {
-                "type": "string",
-                "nullable": true,
-                "example": "TimeCore AB",
-                "description": "Name of the tenant/company the user belongs to (from JWT payload)."
-              },
-              "name": {
-                "type": "string",
-                "example": "Arne"
-              },
-              "role": {
-                "type": "string",
-                "example": "user"
-              },
-              "email": {
-                "type": "string",
-                "format": "email",
-                "example": "user@example.com"
-              },
-              "avatarUrl": {
-                "type": "string",
-                "nullable": true,
-                "example": "/uploads/avatars/user-4-1733393023.webp",
-                "description": "Public URL to the user's profile image from the JWT payload."
-              }
+              "id": { "type": "integer", "example": 4 },
+              "tenantId": { "type": "integer", "example": 1 },
+              "tenantName": { "type": "string", "nullable": true, "example": "TimeCore AB", "description": "Name of the tenant/company the user belongs to (from JWT payload)." },
+              "name": { "type": "string", "example": "Arne" },
+              "role": { "type": "string", "example": "user" },
+              "email": { "type": "string", "format": "email", "example": "user@example.com" },
+              "avatarUrl": { "type": "string", "nullable": true, "example": "/uploads/avatars/user-4-1733393023.webp", "description": "Public URL to the user's profile image from the JWT payload." }
             }
           }
         }
@@ -1926,695 +1649,288 @@
       "ForgotPasswordRequest": {
         "type": "object",
         "required": ["email"],
-        "properties": {
-          "email": {
-            "type": "string",
-            "format": "email",
-            "example": "user@example.com"
-          }
-        }
+        "properties": { "email": { "type": "string", "format": "email", "example": "user@example.com" } }
       },
       "ResetPasswordRequest": {
         "type": "object",
         "required": ["token", "password"],
         "properties": {
-          "token": {
-            "type": "string",
-            "example": "rawResetTokenFromEmailOrLog"
-          },
-          "password": {
-            "type": "string",
-            "format": "password",
-            "example": "NewPassword123!"
-          }
+          "token": { "type": "string", "example": "rawResetTokenFromEmailOrLog" },
+          "password": { "type": "string", "format": "password", "example": "NewPassword123!" }
         }
       },
       "Tenant": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "integer",
-            "example": 1
-          },
-          "name": {
-            "type": "string",
-            "example": "TimeCore AB"
-          },
-          "org_number": {
-            "type": "string",
-            "example": "559123-4567"
-          }
+          "id": { "type": "integer", "example": 1 },
+          "name": { "type": "string", "example": "TimeCore AB" },
+          "org_number": { "type": "string", "example": "559123-4567" }
         }
       },
       "MessageResponse": {
         "type": "object",
-        "properties": {
-          "message": {
-            "type": "string",
-            "example": "Some informational message"
-          }
-        }
+        "properties": { "message": { "type": "string", "example": "Some informational message" } }
       },
-            "Customer": {
+
+      "Customer": {
         "type": "object",
         "description": "Customer record used when selecting where to book time.",
         "properties": {
-          "id": {
-            "type": "integer",
-            "example": 42
-          },
-          "customer_id": {
-            "type": "string",
-            "nullable": true,
-            "example": "CUST-1001",
-            "description": "External/customer number if used."
-          },
-          "company": {
-            "type": "string",
-            "example": "Acme AB"
-          },
-          "last_used": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true,
-            "example": "2025-12-08T10:15:00Z"
-          },
-          "billing_owner": {
-            "type": "integer",
-            "example": 1,
-            "description": "1 if this is an owner/billing company."
-          },
-          "customer_owner": {
-            "type": "integer",
-            "nullable": true,
-            "example": 1,
-            "description": "Owner customer id if this is an end-customer."
-          },
-          "bill_direct": {
-            "type": "integer",
-            "example": 0,
-            "description": "1 if invoices should be billed directly to this customer."
-          },
-          "include_attachments_on_send": {
-            "type": "integer",
-            "example": 0
-          },
-          "email": {
-            "type": "string",
-            "nullable": true,
-            "example": "info@acme.se"
-          },
-          "hourly_rate": {
-            "type": "number",
-            "format": "float",
-            "nullable": true,
-            "example": 950.0
-          },
-          "currency": {
-            "type": "string",
-            "example": "SEK"
-          },
-          "language": {
-            "type": "string",
-            "example": "sv"
-          }
+          "id": { "type": "integer", "example": 42 },
+          "customer_id": { "type": "string", "nullable": true, "example": "CUST-1001", "description": "External/customer number if used." },
+          "company": { "type": "string", "example": "Acme AB" },
+          "last_used": { "type": "string", "format": "date-time", "nullable": true, "example": "2025-12-08T10:15:00Z" },
+          "billing_owner": { "type": "integer", "example": 1, "description": "1 if this is an owner/billing company." },
+          "customer_owner": { "type": "integer", "nullable": true, "example": 1, "description": "Owner customer id if this is an end-customer." },
+          "bill_direct": { "type": "integer", "example": 0, "description": "1 if invoices should be billed directly to this customer." },
+          "include_attachments_on_send": { "type": "integer", "example": 0 },
+          "email": { "type": "string", "nullable": true, "example": "info@acme.se" },
+          "hourly_rate": { "type": "number", "format": "float", "nullable": true, "example": 950.0 },
+          "currency": { "type": "string", "example": "SEK" },
+          "language": { "type": "string", "example": "sv" }
         }
       },
+
       "Project": {
         "type": "object",
         "description": "Project for a given customer.",
         "properties": {
-          "id": {
-            "type": "integer",
-            "example": 3
-          },
-          "customer_id": {
-            "type": "integer",
-            "example": 42
-          },
-          "projectname": {
-            "type": "string",
-            "example": "Website redesign"
-          },
-          "last_active": {
-            "type": "string",
-            "format": "date",
-            "example": "2025-12-01"
-          },
-          "status": {
-            "type": "string",
-            "example": "active"
-          },
-          "archived_at": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "deleted_at": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          }
+          "id": { "type": "integer", "example": 3 },
+          "customer_id": { "type": "integer", "example": 42 },
+          "projectname": { "type": "string", "example": "Website redesign" },
+          "last_active": { "type": "string", "format": "date", "example": "2025-12-01" },
+          "status": { "type": "string", "example": "active" },
+          "archived_at": { "type": "string", "format": "date-time", "nullable": true },
+          "deleted_at": { "type": "string", "format": "date-time", "nullable": true }
         }
       },
+
       "Article": {
         "type": "object",
         "description": "Article (material/product) used as a line item.",
         "properties": {
-          "id": {
-            "type": "integer",
-            "example": 10
-          },
-          "art_nr": {
-            "type": "string",
-            "nullable": true,
-            "example": "ART-100"
-          },
-          "name": {
-            "type": "string",
-            "example": "Consulting hour"
-          },
-          "description": {
-            "type": "string",
-            "nullable": true,
-            "example": "Senior consulting hour"
-          },
-          "purchase_price": {
-            "type": "number",
-            "format": "float",
-            "nullable": true,
-            "example": 450.0
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          }
+          "id": { "type": "integer", "example": 10 },
+          "art_nr": { "type": "string", "nullable": true, "example": "ART-100" },
+          "name": { "type": "string", "example": "Consulting hour" },
+          "description": { "type": "string", "nullable": true, "example": "Senior consulting hour" },
+          "purchase_price": { "type": "number", "format": "float", "nullable": true, "example": 450.0 },
+          "created_at": { "type": "string", "format": "date-time", "nullable": true }
         }
       },
+
       "TimeReportLineItemInput": {
         "type": "object",
         "description": "Line item attached to a time report or draft.",
         "properties": {
-          "article_id": {
-            "type": "integer",
-            "nullable": true,
-            "example": 10
-          },
-          "amount": {
-            "type": "integer",
-            "example": 2
-          },
-          "description": {
-            "type": "string",
-            "example": "Consulting hours"
-          },
-          "purchasePrice": {
-            "type": "number",
-            "format": "float",
-            "nullable": true,
-            "example": 450.0,
-            "description": "Purchase price per unit (optional)."
-          }
+          "article_id": { "type": "integer", "nullable": true, "example": 10 },
+          "amount": { "type": "integer", "example": 2 },
+          "description": { "type": "string", "example": "Consulting hours" },
+          "purchasePrice": { "type": "number", "format": "float", "nullable": true, "example": 450.0, "description": "Purchase price per unit (optional)." }
         }
       },
+
       "TimeReportCreateRequest": {
         "type": "object",
         "description": "Payload for creating a single time report. The API also accepts an array of these objects.",
         "required": ["customer_id", "work_labor", "category", "date", "hours"],
         "properties": {
-          "customer_id": {
-            "type": "integer",
-            "example": 42,
-            "description": "Customer id from the customer table."
-          },
-          "note": {
-            "type": "string",
-            "maxLength": 150,
-            "example": "Worked on initial design"
-          },
-          "work_labor": {
-            "type": "string",
-            "maxLength": 500,
-            "example": "UI/UX design and planning"
-          },
-          "category": {
-            "type": "integer",
-            "example": 1,
-            "description": "Foreign key to time_report_categories.id"
-          },
-          "date": {
-            "type": "string",
-            "format": "date",
-            "example": "2025-12-08"
-          },
-          "hours": {
-            "type": "number",
-            "format": "float",
-            "example": 2.5
-          },
-          "billable": {
-            "type": "boolean",
-            "nullable": true,
-            "description": "If omitted, DB default is used."
-          },
-          "project_id": {
-            "type": "integer",
-            "nullable": true,
-            "example": 3
-          },
-          "draft_id": {
-            "type": "integer",
-            "nullable": true,
-            "example": 15,
-            "description": "Optional draft id to copy items from and then delete the draft."
-          },
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/TimeReportLineItemInput"
-            },
-            "description": "Optional line items for this time report. If omitted and draft_id is set, items are copied from the draft."
-          }
+          "customer_id": { "type": "integer", "example": 42, "description": "Customer id from the customer table." },
+          "note": { "type": "string", "maxLength": 150, "example": "Worked on initial design" },
+          "work_labor": { "type": "string", "maxLength": 500, "example": "UI/UX design and planning" },
+          "category": { "type": "integer", "example": 1, "description": "Foreign key to time_report_categories.id" },
+          "date": { "type": "string", "format": "date", "example": "2025-12-08" },
+          "hours": { "type": "number", "format": "float", "example": 2.5 },
+          "billable": { "type": "boolean", "nullable": true, "description": "If omitted, DB default is used." },
+          "project_id": { "type": "integer", "nullable": true, "example": 3 },
+          "draft_id": { "type": "integer", "nullable": true, "example": 15, "description": "Optional draft id to copy items from and then delete the draft." },
+          "items": { "type": "array", "items": { "$ref": "#/components/schemas/TimeReportLineItemInput" }, "description": "Optional line items for this time report. If omitted and draft_id is set, items are copied from the draft." }
         }
       },
+
       "TimeReportCreateResponse": {
         "type": "object",
         "properties": {
-          "ok": {
-            "type": "boolean",
-            "example": true
-          },
-          "message": {
-            "type": "string",
-            "example": "Time reports created successfully"
-          }
+          "ok": { "type": "boolean", "example": true },
+          "message": { "type": "string", "example": "Time reports created successfully" }
         }
       },
+
       "TimeReportDraftItem": {
         "type": "object",
         "properties": {
-          "article_id": {
-            "type": "integer",
-            "nullable": true,
-            "example": 10
-          },
-          "amount": {
-            "type": "integer",
-            "example": 1
-          },
-          "description": {
-            "type": "string",
-            "example": "Consulting hour"
-          },
-          "purchasePrice": {
-            "type": "number",
-            "format": "float",
-            "nullable": true,
-            "example": 450.0
-          }
+          "article_id": { "type": "integer", "nullable": true, "example": 10 },
+          "amount": { "type": "integer", "example": 1 },
+          "description": { "type": "string", "example": "Consulting hour" },
+          "purchasePrice": { "type": "number", "format": "float", "nullable": true, "example": 450.0 }
         }
       },
+
       "TimeReportDraft": {
         "type": "object",
         "description": "Draft version of a time report, including optional items.",
         "properties": {
-          "id": {
-            "type": "integer",
-            "example": 15
-          },
-          "user": {
-            "type": "integer",
-            "example": 4
-          },
-          "customer_id": {
-            "type": "string",
-            "example": "42"
-          },
-          "note": {
-            "type": "string",
-            "example": "Draft note"
-          },
-          "work_labor": {
-            "type": "string",
-            "example": "Planned work"
-          },
-          "category": {
-            "type": "integer",
-            "example": 1
-          },
-          "date": {
-            "type": "string",
-            "format": "date",
-            "example": "2025-12-08"
-          },
-          "hours": {
-            "type": "number",
-            "format": "float",
-            "example": 3.0
-          },
-          "billable": {
-            "type": "integer",
-            "nullable": true,
-            "example": 1
-          },
-          "project_id": {
-            "type": "integer",
-            "nullable": true,
-            "example": 3
-          },
-          "created_date": {
-            "type": "string",
-            "format": "date-time",
-            "example": "2025-12-08T09:15:00Z"
-          },
-          "modified": {
-            "type": "string",
-            "format": "date-time",
-            "example": "2025-12-08T09:30:00Z"
-          },
-          "company_name": {
-            "type": "string",
-            "nullable": true,
-            "example": "Acme AB"
-          },
-          "category_name": {
-            "type": "string",
-            "nullable": true,
-            "example": "Consulting"
-          },
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/TimeReportDraftItem"
-            }
-          }
+          "id": { "type": "integer", "example": 15 },
+          "user": { "type": "integer", "example": 4 },
+          "customer_id": { "type": "string", "example": "42" },
+          "note": { "type": "string", "example": "Draft note" },
+          "work_labor": { "type": "string", "example": "Planned work" },
+          "category": { "type": "integer", "example": 1 },
+          "date": { "type": "string", "format": "date", "example": "2025-12-08" },
+          "hours": { "type": "number", "format": "float", "example": 3.0 },
+          "billable": { "type": "integer", "nullable": true, "example": 1 },
+          "project_id": { "type": "integer", "nullable": true, "example": 3 },
+          "created_date": { "type": "string", "format": "date-time", "example": "2025-12-08T09:15:00Z" },
+          "modified": { "type": "string", "format": "date-time", "example": "2025-12-08T09:30:00Z" },
+          "company_name": { "type": "string", "nullable": true, "example": "Acme AB" },
+          "category_name": { "type": "string", "nullable": true, "example": "Consulting" },
+          "items": { "type": "array", "items": { "$ref": "#/components/schemas/TimeReportDraftItem" } }
         }
       },
+
       "TimeReportDraftSaveRequest": {
         "type": "object",
         "description": "Payload for creating or updating a time report draft.",
         "required": ["customer_id", "work_labor", "category", "date", "hours"],
         "properties": {
-          "customer_id": {
-            "type": "integer",
-            "example": 42
-          },
-          "note": {
-            "type": "string",
-            "maxLength": 150
-          },
-          "work_labor": {
-            "type": "string",
-            "maxLength": 500
-          },
-          "category": {
-            "type": "integer",
-            "example": 1
-          },
-          "date": {
-            "type": "string",
-            "format": "date",
-            "example": "2025-12-08"
-          },
-          "hours": {
-            "type": "number",
-            "format": "float",
-            "example": 2.5
-          },
-          "billable": {
-            "type": "boolean",
-            "nullable": true
-          },
-          "project_id": {
-            "type": "integer",
-            "nullable": true
-          },
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/TimeReportLineItemInput"
-            }
-          }
+          "customer_id": { "type": "integer", "example": 42 },
+          "note": { "type": "string", "maxLength": 150 },
+          "work_labor": { "type": "string", "maxLength": 500 },
+          "category": { "type": "integer", "example": 1 },
+          "date": { "type": "string", "format": "date", "example": "2025-12-08" },
+          "hours": { "type": "number", "format": "float", "example": 2.5 },
+          "billable": { "type": "boolean", "nullable": true },
+          "project_id": { "type": "integer", "nullable": true },
+          "items": { "type": "array", "items": { "$ref": "#/components/schemas/TimeReportLineItemInput" } }
         }
       },
+
       "TimeReportTemplate": {
         "type": "object",
         "description": "Saved time report template (max 10 per user).",
         "properties": {
-          "id": {
-            "type": "integer",
-            "example": 7
-          },
-          "user": {
-            "type": "integer",
-            "example": 4
-          },
-          "name": {
-            "type": "string",
-            "example": "Standard consulting day"
-          },
-          "customer_id": {
-            "type": "string",
-            "example": "42"
-          },
-          "note": {
-            "type": "string",
-            "example": "Standard note"
-          },
-          "work_labor": {
-            "type": "string",
-            "example": "Consulting work"
-          },
-          "category": {
-            "type": "integer",
-            "example": 1
-          },
-          "date": {
-            "type": "string",
-            "format": "date",
-            "example": "2025-12-08"
-          },
-          "hours": {
-            "type": "number",
-            "format": "float",
-            "example": 8.0
-          },
-          "billable": {
-            "type": "integer",
-            "example": 1
-          },
-          "project_id": {
-            "type": "integer",
-            "nullable": true
-          },
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/TimeReportLineItemInput"
-            }
-          },
-          "created_date": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "modified": {
-            "type": "string",
-            "format": "date-time"
-          }
+          "id": { "type": "integer", "example": 7 },
+          "user": { "type": "integer", "example": 4 },
+          "name": { "type": "string", "example": "Standard consulting day" },
+          "customer_id": { "type": "string", "example": "42" },
+          "note": { "type": "string", "example": "Standard note" },
+          "work_labor": { "type": "string", "example": "Consulting work" },
+          "category": { "type": "integer", "example": 1 },
+          "date": { "type": "string", "format": "date", "example": "2025-12-08" },
+          "hours": { "type": "number", "format": "float", "example": 8.0 },
+          "billable": { "type": "integer", "example": 1 },
+          "project_id": { "type": "integer", "nullable": true },
+          "items": { "type": "array", "items": { "$ref": "#/components/schemas/TimeReportLineItemInput" } },
+          "created_date": { "type": "string", "format": "date-time" },
+          "modified": { "type": "string", "format": "date-time" }
         }
       },
+
       "TimeReportTemplateSaveRequest": {
         "type": "object",
         "description": "Payload for saving or replacing a time report template.",
         "required": ["name", "customerId", "workDescription", "category", "date", "hours"],
         "properties": {
-          "name": {
-            "type": "string",
-            "example": "Standard consulting day"
-          },
-          "customerId": {
-            "type": "string",
-            "example": "42"
-          },
-          "note": {
-            "type": "string",
-            "example": "Template note"
-          },
-          "workDescription": {
-            "type": "string",
-            "example": "Consulting and project management"
-          },
-          "category": {
-            "type": "integer",
-            "example": 1
-          },
-          "date": {
-            "type": "string",
-            "format": "date",
-            "example": "2025-12-08"
-          },
-          "hours": {
-            "type": "number",
-            "format": "float",
-            "example": 8.0
-          },
-          "billable": {
-            "type": "boolean",
-            "example": true
-          },
-          "projectId": {
-            "type": "integer",
-            "nullable": true
-          },
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/TimeReportLineItemInput"
-            }
-          }
+          "name": { "type": "string", "example": "Standard consulting day" },
+          "customerId": { "type": "string", "example": "42" },
+          "note": { "type": "string", "example": "Template note" },
+          "workDescription": { "type": "string", "example": "Consulting and project management" },
+          "category": { "type": "integer", "example": 1 },
+          "date": { "type": "string", "format": "date", "example": "2025-12-08" },
+          "hours": { "type": "number", "format": "float", "example": 8.0 },
+          "billable": { "type": "boolean", "example": true },
+          "projectId": { "type": "integer", "nullable": true },
+          "items": { "type": "array", "items": { "$ref": "#/components/schemas/TimeReportLineItemInput" } }
         }
       },
+
       "TimeReportTemplateSaveResponse": {
         "type": "object",
         "properties": {
-          "templateId": {
-            "type": "integer",
-            "example": 7
-          },
-          "replaced": {
-            "type": "boolean",
-            "example": false,
-            "description": "True if an old template was overwritten because the user already had 10 templates."
-          }
+          "templateId": { "type": "integer", "example": 7 },
+          "replaced": { "type": "boolean", "example": false, "description": "True if an old template was overwritten because the user already had 10 templates." }
         }
       },
+
       "TimeReportItem": {
         "type": "object",
         "description": "Line item stored for a finalized time report.",
         "properties": {
-          "id": {
-            "type": "integer",
-            "example": 100
-          },
-          "time_report_id": {
-            "type": "integer",
-            "example": 55
-          },
-          "article_id": {
-            "type": "integer",
-            "nullable": true
-          },
-          "amount": {
-            "type": "integer",
-            "example": 2
-          },
-          "description": {
-            "type": "string",
-            "example": "Consulting hours"
-          }
+          "id": { "type": "integer", "example": 100 },
+          "time_report_id": { "type": "integer", "example": 55 },
+          "article_id": { "type": "integer", "nullable": true },
+          "amount": { "type": "integer", "example": 2 },
+          "description": { "type": "string", "example": "Consulting hours" }
         }
       },
+
       "SimpleOkResponse": {
         "type": "object",
         "properties": {
-          "ok": {
-            "type": "boolean",
-            "example": true
-          },
-          "message": {
-            "type": "string",
-            "nullable": true,
-            "example": "Customer usage touched"
-          }
+          "ok": { "type": "boolean", "example": true },
+          "message": { "type": "string", "nullable": true, "example": "Customer usage touched" }
         }
       },
+
       "CustomerQuickAddRequest": {
         "type": "object",
         "required": ["company", "owner_id"],
         "properties": {
-          "company": {
-            "type": "string",
-            "example": "New end customer AB"
-          },
-          "owner_id": {
-            "type": "integer",
-            "example": 1,
-            "description": "Customer id of the billing owner."
-          }
+          "company": { "type": "string", "example": "New end customer AB" },
+          "owner_id": { "type": "integer", "example": 1, "description": "Customer id of the billing owner." }
         }
       },
+
       "CustomerQuickAddResponse": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "integer",
-            "example": 123
-          },
-          "company": {
-            "type": "string",
-            "example": "New end customer AB"
-          },
-          "billing_owner": {
-            "type": "integer",
-            "example": 0
-          },
-          "customer_owner": {
-            "type": "integer",
-            "example": 1
-          },
-          "bill_direct": {
-            "type": "integer",
-            "example": 1
-          }
+          "id": { "type": "integer", "example": 123 },
+          "company": { "type": "string", "example": "New end customer AB" },
+          "billing_owner": { "type": "integer", "example": 0 },
+          "customer_owner": { "type": "integer", "example": 1 },
+          "bill_direct": { "type": "integer", "example": 1 }
         }
       },
+
       "LaborTemplate": {
         "type": "object",
-      "properties": {
-    "id": { "type": "integer", "example": 1 },
-    "user": { "type": "integer", "nullable": true },
-    "name": { "type": "string", "example": "Consulting" },
-    "extended_description": {
-      "type": "string",
-      "example": "General consulting work."
-    }
-  }
-      },
-      "LaborTemplateCreate": {
-  "type": "object",
-  "required": ["name", "extended_description"],
-  "properties": {
-    "name": { "type": "string", "example": "Installation" },
-    "extended_description": {
-      "type": "string",
-      "example": "Installed fiber switches and structured cabling."
-          }
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "user": { "type": "integer", "nullable": true },
+          "name": { "type": "string", "example": "Consulting" },
+          "extended_description": { "type": "string", "example": "General consulting work." }
         }
       },
-      "AdminTimeReportItem": {
-  "type": "object",
-  "properties": {
-    "id": { "type": "integer" },
-    "userId": { "type": "integer" },
-    "date": { "type": "string", "format": "date" },
-    "customerId": { "type": "integer", "nullable": true },
-    "projectId": { "type": "integer", "nullable": true },
-    "categoryId": { "type": "integer", "nullable": true },
-    "customerName": { "type": "string", "nullable": true },
-    "projectName": { "type": "string", "nullable": true },
-    "category": { "type": "string", "nullable": true },
-    "hours": { "type": "number" },
-    "billable": { "type": "boolean" },
-    "billed": { "type": "boolean" },
-    "workDescription": { "type": "string", "nullable": true },
-    "note": { "type": "string", "nullable": true },
-    "items": {
-      "type": "array",
-      "items": { "$ref": "#/components/schemas/TimeReportItem" }
-    }
-  }
+
+      "LaborTemplateCreate": {
+        "type": "object",
+        "required": ["name", "extended_description"],
+        "properties": {
+          "name": { "type": "string", "example": "Installation" },
+          "extended_description": { "type": "string", "example": "Installed fiber switches and structured cabling." }
+        }
       },
+
+      "AdminTimeReportItem": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "userId": { "type": "integer" },
+          "date": { "type": "string", "format": "date" },
+          "customerId": { "type": "integer", "nullable": true },
+          "projectId": { "type": "integer", "nullable": true },
+          "categoryId": { "type": "integer", "nullable": true },
+          "customerName": { "type": "string", "nullable": true },
+          "projectName": { "type": "string", "nullable": true },
+          "category": { "type": "string", "nullable": true },
+          "hours": { "type": "number" },
+          "billable": { "type": "boolean" },
+          "billed": { "type": "boolean" },
+          "workDescription": { "type": "string", "nullable": true },
+          "note": { "type": "string", "nullable": true },
+          "items": { "type": "array", "items": { "$ref": "#/components/schemas/TimeReportItem" } }
+        }
+      },
+
       "AdminTimeReportsSummary": {
         "type": "object",
         "properties": {
@@ -2627,6 +1943,7 @@
           "sickHours": { "type": "number" }
         }
       },
+
       "AdminTimeReportUpdateRequest": {
         "type": "object",
         "description": "Partial update for a time report. All fields are optional.",
@@ -2660,6 +1977,7 @@
           }
         }
       },
+
       "AdminTimeReportsStatsResponse": {
         "type": "object",
         "properties": {
@@ -2674,43 +1992,182 @@
           "articlesByCustomerTimecards": { "type": "array", "items": { "type": "object" }, "nullable": true },
           "facets": { "type": "object", "nullable": true }
         }
+      },
+
+      "FortnoxInvoiceRow": {
+        "type": "object",
+        "properties": {
+          "ArticleNumber": { "type": "string", "example": "100" },
+          "DeliveredQuantity": { "type": "number", "example": 8 },
+          "Price": { "type": "number", "nullable": true, "example": 950 },
+          "Description": { "type": "string", "nullable": true, "example": "Support / Arbete November 2025" },
+          "Unit": { "type": "string", "nullable": true, "example": "h" },
+          "TimeReportItemId": { "type": "integer", "nullable": true, "description": "Internal helper field used only for server-side price lookup; stripped before sending to Fortnox." },
+          "UserId": { "type": "integer", "nullable": true, "description": "Internal helper field for labor aggregation by user level; stripped before sending to Fortnox." },
+          "Meta": { "type": "object", "nullable": true, "description": "Internal helper object (periodStart/periodEnd); stripped before sending to Fortnox." }
+        }
+      },
+
+      "FortnoxInvoice": {
+        "type": "object",
+        "properties": {
+          "CustomerNumber": { "type": "string", "example": "123" },
+          "Currency": { "type": "string", "nullable": true, "example": "SEK" },
+          "InvoiceRows": { "type": "array", "items": { "$ref": "#/components/schemas/FortnoxInvoiceRow" } }
+        }
+      },
+
+      "FortnoxInvoiceWrapper": {
+        "type": "object",
+        "properties": { "Invoice": { "$ref": "#/components/schemas/FortnoxInvoice" } }
+      },
+
+      "FortnoxEnvelope": {
+        "type": "object",
+        "description": "Batch envelope item used by POST /fortnox/{scope}. Each envelope can contain a labor invoice and/or a materials invoice.",
+        "properties": {
+          "labor": { "$ref": "#/components/schemas/FortnoxInvoiceWrapper", "nullable": true },
+          "materials": { "$ref": "#/components/schemas/FortnoxInvoiceWrapper", "nullable": true },
+          "envelopeCompanyId": { "type": "integer", "nullable": true, "description": "Local customer id used to lookup currency." }
+        }
+      },
+
+      "WorklogPdfGenerateRequest": {
+        "type": "object",
+        "required": ["companyId"],
+        "properties": {
+          "companyId": { "type": "integer", "example": 42 },
+          "period": {
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "from": { "type": "string", "format": "date", "nullable": true, "example": "2025-12-01" },
+              "to": { "type": "string", "format": "date", "nullable": true, "example": "2025-12-31" }
+            }
+          },
+          "language": { "type": "string", "nullable": true, "enum": ["sv", "en"], "example": "sv" },
+          "onlyBillable": { "type": "boolean", "nullable": true, "example": true },
+          "selectedTimeReportIds": { "type": "array", "items": { "type": "integer" }, "nullable": true, "example": [101, 102, 103] },
+          "attachMode": { "type": "string", "nullable": true, "enum": ["none", "manual"], "example": "none" },
+          "invoiceNumber": { "type": "string", "nullable": true, "example": "F-2025-1234" }
+        }
+      },
+
+      "WorklogPdfGenerateResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": true },
+          "companyId": { "type": "integer", "example": 42 },
+          "companyName": { "type": "string", "nullable": true, "example": "Acme AB" },
+          "period": { "type": "object", "properties": { "from": { "type": "string", "nullable": true, "example": "2025-12-01" }, "to": { "type": "string", "nullable": true, "example": "2025-12-31" } } },
+          "invoiceId": { "type": "integer", "example": 555 },
+          "fileName": { "type": "string", "example": "Acme AB-2025-12-01_2025-12-31.pdf" },
+          "bytes": { "type": "integer", "example": 48231 },
+          "sha256": { "type": "string", "example": "c7a0b0...deadbeef" },
+          "lang": { "type": "string", "example": "sv" },
+          "attached": {
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "attempted": { "type": "boolean", "example": false },
+              "ok": { "type": "boolean", "nullable": true },
+              "invoiceNumber": { "type": "string", "nullable": true }
+            }
+          }
+        }
+      },
+
+      "WorklogPdfQueueItem": {
+        "type": "object",
+        "required": ["invoiceId", "rows"],
+        "properties": {
+          "invoiceId": { "type": "integer", "example": 555 },
+          "invoiceNumber": { "type": "string", "nullable": true, "example": "12345" },
+          "customerName": { "type": "string", "nullable": true, "example": "Acme AB" },
+          "companyId": { "type": "integer", "nullable": true, "example": 42 },
+          "period": {
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "from": { "type": "string", "format": "date", "nullable": true },
+              "to": { "type": "string", "format": "date", "nullable": true }
+            }
+          },
+          "rows": {
+            "type": "array",
+            "description": "Rows already mapped to the PDF renderer format.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "date": { "type": "string", "nullable": true, "example": "2025-12-08" },
+                "hours": { "type": "number", "example": 2.5 },
+                "by": { "type": "string", "nullable": true, "example": "Arne" },
+                "category": { "type": "string", "nullable": true, "example": "Consulting" },
+                "desc": { "type": "string", "nullable": true, "example": "UI work" }
+              }
+            }
+          }
+        }
+      },
+
+      "WorklogCustomerEmailPrefs": {
+        "type": "object",
+        "properties": {
+          "emails": { "type": "array", "items": { "type": "string", "format": "email" }, "example": ["info@acme.se", "finance@acme.se"] },
+          "language": { "type": "string", "example": "sv" }
+        }
+      },
+
+      "WorklogPdfSendRequest": {
+        "type": "object",
+        "required": ["recipients", "lang", "PdfId", "companyId"],
+        "properties": {
+          "recipients": { "type": "array", "items": { "type": "string", "format": "email" } },
+          "newRecipients": { "type": "array", "items": { "type": "string", "format": "email" }, "nullable": true },
+          "saveNew": { "type": "boolean", "nullable": true, "example": false },
+          "lang": { "type": "string", "enum": ["sv", "en"], "example": "sv" },
+          "PdfId": { "type": "integer", "example": 123 },
+          "companyId": { "type": "integer", "example": 42 }
+        }
+      },
+
+      "WorklogPdfSearchRequest": {
+        "type": "object",
+        "properties": {
+          "start": { "type": "string", "format": "date", "nullable": true, "example": "2025-01-01" },
+          "end": { "type": "string", "format": "date", "nullable": true, "example": "2025-12-31" },
+          "query": { "type": "string", "nullable": true, "example": "Acme" }
+        }
+      },
+
+      "WorklogPdfSearchResult": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": true },
+          "companyId": { "type": "integer", "example": 42 },
+          "companyName": { "type": "string", "example": "Acme AB" },
+          "period": { "type": "object", "properties": { "from": { "type": "string", "nullable": true, "example": "2025-12-01" }, "to": { "type": "string", "nullable": true, "example": "2025-12-31" } } },
+          "invoiceId": { "type": "integer", "example": 555 },
+          "fileName": { "type": "string", "example": "Acme AB-2025-12-01_2025-12-31.pdf" },
+          "bytes": { "type": "integer", "example": 48231 },
+          "sha256": { "type": "string", "example": "c7a0b0...deadbeef" },
+          "lang": { "type": "string", "example": "sv" },
+          "fileId": { "type": "integer", "example": 777 }
+        }
       }
     }
   },
-  
+
   "tags": [
-    {
-      "name": "Users",
-      "description": "User registration and management"
-    },
-    {
-      "name": "Authentication",
-      "description": "Login, logout and password reset"
-    },
-    {
-      "name": "Tenants",
-      "description": "Company / tenant information"
-    }
-    ,
-        {
-      "name": "Time Reports",
-      "description": "Time reporting, drafts, templates and line items"
-    },
-    {
-    "name": "Time Reports – Overview",
-    "description": "List, update, delete and summarize reported time for the authenticated user."
-    },
-    {
-      "name": "Customers",
-      "description": "Customer search, owner companies and quick create for time reporting"
-    },
-    {
-      "name": "Projects",
-      "description": "Projects per customer used in time reporting"
-    },
-    {
-      "name": "Articles",
-      "description": "Article search for materials and products"
-    }
+    { "name": "Users", "description": "User registration and management" },
+    { "name": "Authentication", "description": "Login, logout and password reset" },
+    { "name": "Tenants", "description": "Company / tenant information" },
+    { "name": "Time Reports", "description": "Time reporting, drafts, templates and line items" },
+    { "name": "Time Reports – Overview", "description": "List, update, delete and summarize reported time for the authenticated user." },
+    { "name": "Customers", "description": "Customer search, owner companies and quick create for time reporting" },
+    { "name": "Projects", "description": "Projects per customer used in time reporting" },
+    { "name": "Articles", "description": "Article search for materials and products" },
+    { "name": "Fortnox", "description": "Fortnox OAuth flow and Fortnox API proxy endpoints (admin-only)." },
+    { "name": "Worklog PDF", "description": "Generate, queue, fetch and email worklog PDFs (admin-only)." }
   ]
 }
