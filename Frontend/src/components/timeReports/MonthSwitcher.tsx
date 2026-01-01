@@ -161,7 +161,7 @@ export const MonthSwitcher: React.FC<Props> = ({ start, end, onChange, AllUnbill
   const endLabel = end ?? "—";
 
   return (
-    <div className="flex w-full items-center gap-2 flex-wrap lg:flex-nowrap lg:justify-end">
+    <div className="flex w-full items-center gap-2 flex-wrap lg:flex-nowrap justify-center">
       <div className="flex gap-2">
         {AllUnbilled && (
           <Button variant="outline" className="mr-5" onClick={setNoDate}>

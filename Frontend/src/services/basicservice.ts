@@ -1,11 +1,8 @@
-// src/services/baseService.ts
-import type {AxiosError, AxiosRequestConfig, AxiosResponse} from "axios";
+import type { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import axios from "axios";
 
 const API_BASE_URL =
   import.meta.env.VITE_BACKEND_URL ?? "http://localhost:5000/api";
-
-// ---- REFRESH TOKEN HANDLING ----------------------------------------------
 
 type RetriableConfig = AxiosRequestConfig & { _retry?: boolean };
 
@@ -21,8 +18,6 @@ function notifySubscribers(success: boolean) {
   subscribers = [];
 }
 
-// ---- AXIOS INSTANCE -------------------------------------------------------
-
 const api = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
@@ -30,8 +25,6 @@ const api = axios.create({
     "Content-Type": "application/json",
   },
 });
-
-// ---- RESPONSE INTERCEPTOR -------------------------------------------------
 
 api.interceptors.response.use(
   (response: AxiosResponse) => response,
@@ -66,11 +59,8 @@ api.interceptors.response.use(
 
       return new Promise((resolve, reject) => {
         subscribe((success) => {
-          if (success) {
-            resolve(api(originalRequest));
-          } else {
-            reject(error);
-          }
+          if (success) resolve(api(originalRequest));
+          else reject(error);
         });
       });
     }
@@ -79,50 +69,40 @@ api.interceptors.response.use(
   }
 );
 
+export const apiClient = api;
+
 // ---- BASIC CRUD HELPERS ---------------------------------------------------
 
-// GET
 export const getData = async <T>(
   url: string,
   config?: AxiosRequestConfig
 ): Promise<T> => {
-  const response = await api.get<T>(url, {
-    ...(config ?? {}),
-  });
+  const response = await api.get<T>(url, { ...(config ?? {}) });
   return response.data;
 };
 
-// POST
 export const postData = async <T>(
   url: string,
   payload?: any,
   config?: AxiosRequestConfig
 ): Promise<T> => {
-  const response = await api.post<T>(url, payload, {
-    ...(config ?? {}),
-  });
+  const response = await api.post<T>(url, payload, { ...(config ?? {}) });
   return response.data;
 };
 
-// PUT
 export const putData = async <T>(
   url: string,
   payload?: any,
   config?: AxiosRequestConfig
 ): Promise<T> => {
-  const response = await api.put<T>(url, payload, {
-    ...(config ?? {}),
-  });
+  const response = await api.put<T>(url, payload, { ...(config ?? {}) });
   return response.data;
 };
 
-// DELETE
 export const deleteData = async <T>(
   url: string,
   config?: AxiosRequestConfig
 ): Promise<T> => {
-  const response = await api.delete<T>(url, {
-    ...(config ?? {}),
-  });
+  const response = await api.delete<T>(url, { ...(config ?? {}) });
   return response.data;
 };

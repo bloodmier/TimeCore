@@ -56,20 +56,46 @@ export const useCustomer = () => {
     return TimeReportService.searchCustomer(query);
   }, []);
 
-  const quickAdd = useCallback(async (company: string, ownerId: number) => {
-    try {
-      const newCustomer = await TimeReportService.quickAddCustomer(
-        company,
-        ownerId
+
+const quickAdd = useCallback(async (company: string, ownerId: number) => {
+  const normalizedCompany = company.trim();
+
+  try {
+    const newCustomer = await TimeReportService.quickAddCustomer(
+      normalizedCompany,
+      ownerId
+    );
+
+    setCustomer((prev) => {
+      const existsIdx = prev.findIndex((c: any) =>
+        (c.customer_id && newCustomer.customer_id && c.customer_id === newCustomer.customer_id) ||
+        (c.company?.trim?.() === newCustomer.company?.trim?.() && c.customer_owner === newCustomer.customer_owner)
       );
-      setCustomer((prev) => [...prev, newCustomer]);
-      setRecentCustomers((prev) => [newCustomer, ...prev].slice(0, 5));
-      return newCustomer;
-    } catch (error) {
-      console.error("Error adding customer:", error);
-      throw error;
-    }
-  }, []);
+
+      if (existsIdx !== -1) {
+        const copy = [...prev];
+        copy[existsIdx] = { ...copy[existsIdx], ...newCustomer };
+        return copy;
+      }
+
+      return [...prev, newCustomer];
+    });
+
+    setRecentCustomers((prev) => {
+      const filtered = prev.filter((c: any) =>
+        !(c.customer_id && newCustomer.customer_id && c.customer_id === newCustomer.customer_id) &&
+        !(c.company?.trim?.() === newCustomer.company?.trim?.() && c.customer_owner === newCustomer.customer_owner)
+      );
+
+      return [newCustomer, ...filtered].slice(0, 5);
+    });
+
+    return newCustomer;
+  } catch (error) {
+    console.error("Error adding customer:", error);
+    throw error;
+  }
+}, []);
 
   return {
     customer,

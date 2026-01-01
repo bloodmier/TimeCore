@@ -56,7 +56,7 @@ export function Layout() {
   );
 
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground">
+    <div className="min-h-[100dvh] flex flex-col bg-background text-foreground">
       <header
         className={`fixed w-full top-0 left-0 z-50 border-b border-border px-6 py-4 shadow-sm ${
           theme === "light" ? "bg-background/80" : "bg-background/60"
@@ -122,7 +122,7 @@ export function Layout() {
           </div>
         )}
       </header>
-      <main className="flex-1 w-full max-w-6xl mx-auto mt-24 px-4">
+      <main className="flex-1 w-full max-w-6xl mx-auto pt-24 px-4">
         <Outlet />
       </main>
     </div>

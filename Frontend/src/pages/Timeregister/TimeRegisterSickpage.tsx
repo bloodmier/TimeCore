@@ -50,8 +50,7 @@ export const TimeRegisterSickpage = () => {
     
   },[])
   const CUSTOMER_DB_ID = customerId;
-  console.log(CUSTOMER_DB_ID);
-  
+ 
   const fullDay = () => {
     setHours("8");
     setHalfDay(false);
