@@ -1,4 +1,3 @@
-// src/components/time/CustomerSearchPopover.tsx
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { Check, ChevronsUpDown, Loader2, Plus } from "lucide-react";
 import { Button } from "../../components/ui/button";

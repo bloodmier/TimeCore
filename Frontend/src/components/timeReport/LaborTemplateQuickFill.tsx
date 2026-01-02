@@ -107,160 +107,174 @@ export const LaborTemplateQuickFill: React.FC<Props> = ({
   };
 
   return (
-    <>
-      <div className="mb-1 flex flex-col gap-1">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <Label htmlFor="workTemplate">Quick fill for labor</Label>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7"
-              onClick={openSaveDialog}
-              aria-label="Save current labor description as quick fill"
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
-          </div>
+ <>
+  {/* Header + select */}
+  <div className="mb-1 flex w-full min-w-0 flex-col gap-1 overflow-hidden">
+    <div className="flex w-full min-w-0 items-center justify-between gap-2">
+      <div className="flex min-w-0 flex-1 items-center gap-2">
+        <Label htmlFor="workTemplate" className="min-w-0 flex-1 truncate">
+          Quick fill for labor
+        </Label>
 
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="h-7 text-xs"
-            onClick={() => setManageDialogOpen(true)}
-            disabled={isLoading} // ✅ optional
-          >
-            Manage
-          </Button>
-        </div>
-
-        <Select
-          onValueChange={handleSelect}
-          value={currentTemplateId !== null ? String(currentTemplateId) : ""}
-          disabled={isLoading} // ✅ optional
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="h-7 w-7 shrink-0"
+          onClick={openSaveDialog}
+          aria-label="Save current labor description as quick fill"
         >
-          <SelectTrigger id="workTemplate" aria-label="Labor template">
-            <SelectValue placeholder={isLoading ? "Loading…" : "Choose labor template…"} />
-          </SelectTrigger>
-          <SelectContent>
-            {templates.map((t) => ( // ✅ safe even if null
-              <SelectItem key={t.id} value={String(t.id)}>
-                {t.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          <Plus className="h-4 w-4" />
+        </Button>
       </div>
 
-      {/* Save dialog */}
-      <Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Save quick fill</DialogTitle>
-            <DialogDescription>
-              Save this labor description so you can reuse it later.
-            </DialogDescription>
-          </DialogHeader>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="h-7 shrink-0 text-xs"
+        onClick={() => setManageDialogOpen(true)}
+        disabled={isLoading}
+      >
+        Manage
+      </Button>
+    </div>
 
-          <div className="space-y-3">
-            <div className="space-y-1">
-              <Label htmlFor="quickfill-name">Name</Label>
-              <Input
-                id="quickfill-name"
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
-                placeholder="Short name"
-              />
-            </div>
+    <Select
+      onValueChange={handleSelect}
+      value={currentTemplateId !== null ? String(currentTemplateId) : ""}
+      disabled={isLoading}
+    >
+      <SelectTrigger
+        id="workTemplate"
+        aria-label="Labor template"
+        className="w-full min-w-0"
+      >
+        <SelectValue
+          placeholder={isLoading ? "Loading…" : "Choose labor template…"}
+        />
+      </SelectTrigger>
 
-            <div className="space-y-1">
-              <Label htmlFor="quickfill-description">Description</Label>
-              <Textarea
-                id="quickfill-description"
-                value={newDescription}
-                onChange={(e) => setNewDescription(e.target.value)}
-                rows={4}
-              />
-            </div>
+      <SelectContent className="w-[var(--radix-select-trigger-width)] max-w-[var(--radix-select-trigger-width)]">
+        {templates.map((t) => (
+          <SelectItem key={t.id} value={String(t.id)} className="min-w-0">
+            <span className="block min-w-0 truncate">{t.name}</span>
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  </div>
 
-            {error && <p className="text-sm text-destructive">{error}</p>}
-          </div>
+  {/* Save dialog */}
+  <Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}>
+    <DialogContent className="max-w-md">
+      <DialogHeader>
+        <DialogTitle>Save quick fill</DialogTitle>
+        <DialogDescription>
+          Save this labor description so you can reuse it later.
+        </DialogDescription>
+      </DialogHeader>
 
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setSaveDialogOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button type="button" onClick={handleSave} disabled={saving}>
-              {saving ? "Saving…" : "Save quick fill"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <div className="space-y-3">
+        <div className="space-y-1">
+          <Label htmlFor="quickfill-name">Name</Label>
+          <Input
+            id="quickfill-name"
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            placeholder="Short name"
+          />
+        </div>
 
-      {/* Manage dialog */}
-      <Dialog open={manageDialogOpen} onOpenChange={setManageDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Manage quick fills</DialogTitle>
-            <DialogDescription>
-              Remove quick fills you no longer need.
-            </DialogDescription>
-          </DialogHeader>
+        <div className="space-y-1">
+          <Label htmlFor="quickfill-description">Description</Label>
+          <Textarea
+            id="quickfill-description"
+            value={newDescription}
+            onChange={(e) => setNewDescription(e.target.value)}
+            rows={4}
+          />
+        </div>
 
-          <ScrollArea className="max-h-64 pr-2">
-            <div className="space-y-2">
-              {isLoading ? (
-                <p className="text-sm text-muted-foreground">Loading…</p>
-              ) : templates.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
-                  You have no quick fills yet.
-                </p>
-              ) : (
-                templates.map((t) => (
-                  <div
-                    key={t.id}
-                    className="flex items-start justify-between gap-2 rounded-xl border p-2 text-sm"
-                  >
-                    <div>
-                      <div className="font-medium">{t.name}</div>
-                      <div className="text-xs text-muted-foreground line-clamp-2">
-                        {t.extended_description}
-                      </div>
-                    </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="mt-1 h-7 w-7"
-                      onClick={() => handleDelete(t.id)}
-                      aria-label={`Delete quick fill ${t.name}`}
-                      disabled={deletingId === t.id}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+        {error && <p className="text-sm text-destructive">{error}</p>}
+      </div>
+
+      <DialogFooter>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => setSaveDialogOpen(false)}
+        >
+          Cancel
+        </Button>
+        <Button type="button" onClick={handleSave} disabled={saving}>
+          {saving ? "Saving…" : "Save quick fill"}
+        </Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
+
+  {/* Manage dialog */}
+  <Dialog open={manageDialogOpen} onOpenChange={setManageDialogOpen}>
+    <DialogContent className="max-w-md">
+      <DialogHeader>
+        <DialogTitle>Manage quick fills</DialogTitle>
+        <DialogDescription>
+          Remove quick fills you no longer need.
+        </DialogDescription>
+      </DialogHeader>
+
+      <ScrollArea className="max-h-64 pr-2">
+        <div className="space-y-2">
+          {isLoading ? (
+            <p className="text-sm text-muted-foreground">Loading…</p>
+          ) : templates.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              You have no quick fills yet.
+            </p>
+          ) : (
+            templates.map((t) => (
+              <div
+                key={t.id}
+                className="flex w-full min-w-0 items-start justify-between gap-2 overflow-hidden rounded-xl border p-2 text-sm"
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="font-medium truncate">{t.name}</div>
+                  <div className="text-xs text-muted-foreground line-clamp-2 break-words">
+                    {t.extended_description}
                   </div>
-                ))
-              )}
-            </div>
-          </ScrollArea>
+                </div>
 
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setManageDialogOpen(false)}
-            >
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="mt-1 h-7 w-7 shrink-0"
+                  onClick={() => handleDelete(t.id)}
+                  aria-label={`Delete quick fill ${t.name}`}
+                  disabled={deletingId === t.id}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            ))
+          )}
+        </div>
+      </ScrollArea>
+
+      <DialogFooter>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => setManageDialogOpen(false)}
+        >
+          Close
+        </Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
+</>
+
+
   );
 };

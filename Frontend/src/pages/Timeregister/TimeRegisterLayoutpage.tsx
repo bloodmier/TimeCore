@@ -9,9 +9,11 @@ export const TimeRegisterLayoutpage = () => {
     "border-[var(--color-border)] text-muted-foreground hover:bg-[var(--color-accent)] hover:text-[var(--color-accent-foreground)]";
 
   return (
-    <div className="w-full">
+    <div className="w-full min-w-0">
+      {/* Tabs */}
       <div className="w-full overflow-x-auto">
-        <ul className="flex gap-2 mb-4 border-b pb-2 min-w-max">
+        {/* ✅ remove min-w-max, allow shrink */}
+        <ul className="flex flex-wrap gap-2 mb-4 border-b pb-2 min-w-0">
           <li>
             <NavLink
               to="/account/timeregister/labor"
@@ -47,7 +49,8 @@ export const TimeRegisterLayoutpage = () => {
         </ul>
       </div>
 
-      <div className="border border-[var(--color-border)] rounded-[var(--radius-lg)] p-4">
+      {/* Content */}
+      <div className="border border-[var(--color-border)] rounded-[var(--radius-lg)] p-4 min-w-0 overflow-hidden">
         <Outlet />
       </div>
     </div>

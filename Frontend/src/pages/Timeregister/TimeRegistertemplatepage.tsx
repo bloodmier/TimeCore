@@ -34,7 +34,7 @@ export function TimeRegisterTemplatesPage() {
           <span className="text-lg font-medium mb-2">Loading templates…</span>
         </div>
       ) : templates?.length ? (
-        <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
           {templates.map((t) => (
             <TemplateCard
               key={t.id}
