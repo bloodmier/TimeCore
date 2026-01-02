@@ -380,3 +380,11 @@ export function consumeSession(sid) {
   if (data) store.delete(sid);
   return data;
 }
+
+export function saveFortnoxToken(token) {
+  writeJsonFileAtomically(tokenFile, token);
+}
+
+export function hasFortnoxToken() {
+  return !!loadToken();
+}
