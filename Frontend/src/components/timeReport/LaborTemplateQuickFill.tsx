@@ -23,7 +23,7 @@ import { Plus, Trash2 } from "lucide-react";
 import type { LaborTemplate } from "../../models/labortemplate";
 
 interface Props {
-  laborTemplates: LaborTemplate[];
+  laborTemplates: LaborTemplate[] | null;
   currentTemplateId: number | null;
   workDescription: string;
   onChangeTemplateId: (id: number | null) => void;
@@ -41,6 +41,9 @@ export const LaborTemplateQuickFill: React.FC<Props> = ({
   onCreateTemplate,
   onDeleteTemplate,
 }) => {
+  const templates = laborTemplates ?? []; // ✅ prevents crashes on null
+  const isLoading = laborTemplates === null; // ✅ optional but useful
+
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [manageDialogOpen, setManageDialogOpen] = useState(false);
 
@@ -96,7 +99,7 @@ export const LaborTemplateQuickFill: React.FC<Props> = ({
     onChangeTemplateId(id);
 
     if (id !== null) {
-      const tmpl = laborTemplates.find((t) => t.id === id);
+      const tmpl = templates.find((t) => t.id === id); // ✅ use normalized list
       if (tmpl) {
         onChangeWorkDescription(tmpl.extended_description);
       }
@@ -127,6 +130,7 @@ export const LaborTemplateQuickFill: React.FC<Props> = ({
             size="sm"
             className="h-7 text-xs"
             onClick={() => setManageDialogOpen(true)}
+            disabled={isLoading} // ✅ optional
           >
             Manage
           </Button>
@@ -135,12 +139,13 @@ export const LaborTemplateQuickFill: React.FC<Props> = ({
         <Select
           onValueChange={handleSelect}
           value={currentTemplateId !== null ? String(currentTemplateId) : ""}
+          disabled={isLoading} // ✅ optional
         >
           <SelectTrigger id="workTemplate" aria-label="Labor template">
-            <SelectValue placeholder="Choose labor template…" />
+            <SelectValue placeholder={isLoading ? "Loading…" : "Choose labor template…"} />
           </SelectTrigger>
           <SelectContent>
-            {laborTemplates.map((t) => (
+            {templates.map((t) => ( // ✅ safe even if null
               <SelectItem key={t.id} value={String(t.id)}>
                 {t.name}
               </SelectItem>
@@ -180,11 +185,7 @@ export const LaborTemplateQuickFill: React.FC<Props> = ({
               />
             </div>
 
-            {error && (
-              <p className="text-sm text-destructive">
-                {error}
-              </p>
-            )}
+            {error && <p className="text-sm text-destructive">{error}</p>}
           </div>
 
           <DialogFooter>
@@ -214,36 +215,38 @@ export const LaborTemplateQuickFill: React.FC<Props> = ({
 
           <ScrollArea className="max-h-64 pr-2">
             <div className="space-y-2">
-              {laborTemplates.length === 0 && (
+              {isLoading ? (
+                <p className="text-sm text-muted-foreground">Loading…</p>
+              ) : templates.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
                   You have no quick fills yet.
                 </p>
-              )}
-
-              {laborTemplates.map((t) => (
-                <div
-                  key={t.id}
-                  className="flex items-start justify-between gap-2 rounded-xl border p-2 text-sm"
-                >
-                  <div>
-                    <div className="font-medium">{t.name}</div>
-                    <div className="text-xs text-muted-foreground line-clamp-2">
-                      {t.extended_description}
-                    </div>
-                  </div>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="mt-1 h-7 w-7"
-                    onClick={() => handleDelete(t.id)}
-                    aria-label={`Delete quick fill ${t.name}`}
-                    disabled={deletingId === t.id}
+              ) : (
+                templates.map((t) => (
+                  <div
+                    key={t.id}
+                    className="flex items-start justify-between gap-2 rounded-xl border p-2 text-sm"
                   >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
+                    <div>
+                      <div className="font-medium">{t.name}</div>
+                      <div className="text-xs text-muted-foreground line-clamp-2">
+                        {t.extended_description}
+                      </div>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="mt-1 h-7 w-7"
+                      onClick={() => handleDelete(t.id)}
+                      aria-label={`Delete quick fill ${t.name}`}
+                      disabled={deletingId === t.id}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))
+              )}
             </div>
           </ScrollArea>
 
