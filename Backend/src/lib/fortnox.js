@@ -22,7 +22,8 @@ import crypto from "node:crypto";
 // Token persistence file.
 // Stored on disk to survive server restarts.
 // Path is compatible with Docker bind-mounted volumes.
-const tokenFile = path.resolve(process.cwd(), "fortnox_token.json");
+/* const tokenFile = path.resolve(process.cwd(), "fortnox_token.json"); */
+const tokenFile = "/app/data/fortnox_token.json";
 const tmpTokenFile = tokenFile + ".tmp";
 
 // ---------------- Utils: file IO ----------------
