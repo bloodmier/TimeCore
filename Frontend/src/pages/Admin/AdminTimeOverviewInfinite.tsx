@@ -111,7 +111,6 @@ export const AdminTimeOverviewInfinite: React.FC = () => {
 
   return (
     <div className="flex flex-col w-full min-h-[80svh] md:h-[100dvh] md:max-h-[100dvh] lg:h-[74dvh]">
-      {/* Header */}
       <div className="flex-shrink-0 w-full border-b bg-background">
         <div className="relative w-full min-w-0 mx-auto px-3 py-3">
           <AdminOverviewControls
