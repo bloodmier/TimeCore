@@ -109,6 +109,7 @@ async function loadRowsByIds(ids = [], { onlyBillable = true } = {}) {
 
 export async function generateWorklogPdf(req, res) {
   const body = req?.body || {};
+  
   const safeCompanyId = Number(body.companyId ?? null);
 
   try {
@@ -116,7 +117,7 @@ export async function generateWorklogPdf(req, res) {
       companyId,
       period,
       language,
-      onlyBillable = true,
+      onlyBillable = false,
       selectedTimeReportIds = [],
       attachMode = "none",
       invoiceNumber = null,
