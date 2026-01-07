@@ -74,6 +74,7 @@ export const Homepage = () => {
       </h1>
 
 
+
       <p className="mt-4 text-base opacity-85 md:text-lg">
         TimeCore helps teams register work, validate reports through an admin flow,
         and prepare customer-ready output — with Fortnox integration and PDF generation.
