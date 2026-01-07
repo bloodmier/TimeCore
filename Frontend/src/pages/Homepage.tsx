@@ -61,7 +61,7 @@ export const Homepage = () => {
    
 
  
- 
+
       <section className="mx-auto w-full max-w-6xl px-4 py-12 md:py-16">
   <div className="grid items-center gap-10 md:grid-cols-2">
     <div>
@@ -77,6 +77,7 @@ export const Homepage = () => {
         TimeCore helps teams register work, validate reports through an admin flow,
         and prepare customer-ready output — with Fortnox integration and PDF generation.
       </p>
+
 
 
       <div className="mt-6 flex gap-3">
