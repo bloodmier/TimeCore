@@ -7,6 +7,7 @@ import {
   adminUpdateTimereport,
   getUsers,
   getAdminTimeReportsStats,
+  getAdminTimeReportsChanges
 } from "../controller/admin-Time-reportsController.js";
 
 const r = Router();
@@ -23,5 +24,6 @@ r.delete("/timeoverveiw/entries/:id", AdminDeleteTimereportById);
 r.get("/timeoverveiw/timereportsummary", getAdminTimeReportsSummary);
 r.put("/timeoverveiw/updateentries/:id", adminUpdateTimereport);
 r.get("/timeoverveiw/stats", getAdminTimeReportsStats);
+r.get("/timeoverveiw/changes", getAdminTimeReportsChanges);
 
 export default r;

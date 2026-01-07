@@ -1,27 +1,3 @@
-/**
- * useAdminTimeReportsInfinite
- *
- * Admin-facing hook for browsing, filtering and managing time reports
- * using infinite scrolling.
- *
- * Responsibilities:
- * - Fetches paginated admin time reports with cursor-based pagination
- * - Supports filtering by date range, user, billing status and search query
- * - Handles optimistic updates and deletes with safe rollback
- * - Fetches and exposes tenant users for filtering
- * - Fetches server-side summary statistics
- * - Provides a client-side fallback summary when server summary is unavailable
- *
- * Technical details:
- * - Uses cookie-based authentication via AdminTimeOverviewService
- * - Protects against stale responses using request id guards
- * - Uses refs to avoid closure-related rollback bugs
- * - Designed for admin-only routes
- *
- * @param initial Optional initial filter parameters (date range, scope, limit, etc.)
- * @returns State and handlers for admin time report overview pages
- */
-
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type {
   GetTimeReportsParams,
@@ -51,20 +27,6 @@ type Params = {
   status?: "billed" | "unbilled";
 } & ExtraParams;
 
-/**
- * parseIdQuery
- *
- * Parses a search string and attempts to extract a numeric ID.
- * Supported formats:
- * - "id:123"
- * - "#123"
- * - "123"
- *
- * Used to detect direct ID searches in the admin search field.
- *
- * @param q Raw search string
- * @returns Parsed numeric ID or null if no valid ID was found
- */
 export function parseIdQuery(q: string): number | null {
   const s = (q ?? "").trim().toLowerCase();
   if (!s) return null;
@@ -82,30 +44,10 @@ export function parseIdQuery(q: string): number | null {
   }
   return null;
 }
-/**
- * billedFromStatus
- *
- * Converts a UI-friendly status value into the boolean format
- * expected by the backend API.
- *
- * @param status "billed" | "unbilled" | undefined
- * @returns true | false | undefined
- */
+
 const billedFromStatus = (status?: string): boolean | undefined =>
   status === "billed" ? true : status === "unbilled" ? false : undefined;
-/**
- * normalizeForList
- *
- * Normalizes backend time report rows into a consistent shape
- * expected by the UI.
- *
- * Handles:
- * - category vs categoryName inconsistencies
- * - Ensures items is always an array
- *
- * @param row Raw backend row
- * @returns Normalized TimeReportRow
- */
+
 const normalizeForList = (row: any): TimeReportRow => ({
   ...row,
   category: row?.category ?? row?.categoryName ?? null,
@@ -130,8 +72,6 @@ export function useAdminTimeReportsInfinite(initial?: Partial<Params>) {
   const [rows, setRows] = useState<TimeReportRow[]>([]);
   const [nextCursor, setNextCursor] = useState<string | undefined>(undefined);
 
-// Keeps a reference to the latest rows array.
-// Used to safely rollback optimistic updates without stale closures.
   const rowsRef = useRef<TimeReportRow[]>([]);
   useEffect(() => {
     rowsRef.current = rows;
@@ -141,17 +81,22 @@ export function useAdminTimeReportsInfinite(initial?: Partial<Params>) {
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-
   const [users, setUsers] = useState<IUser[]>([]);
   const [summary, setSummary] = useState<Summary | null>(null);
   const [loadingSummary, setLoadingSummary] = useState(false);
 
   const hasMore = !!nextCursor;
-// Guards used to prevent outdated requests from mutating state
-// when filters change quickly.
+
   const listReqIdRef = useRef(0);
   const summaryReqIdRef = useRef(0);
 
+  const [hasNewUpdates, setHasNewUpdates] = useState(false);
+
+  // ✅ FIX: keep two refs
+  // baselineMsRef = "list is synced up to this server version"
+  // latestServerMsRef = "latest server version we've observed during polling"
+  const baselineMsRef = useRef<number | null>(null);
+  const latestServerMsRef = useRef<number | null>(null);
 
   const listQuery: GetTimeReportsParams = useMemo(
     () => ({
@@ -189,6 +134,19 @@ export function useAdminTimeReportsInfinite(initial?: Partial<Params>) {
     [params.start, params.end, params.status, params.q, params.userId, params.userIds]
   );
 
+  const changesQuery = useMemo(
+    () => ({
+      start: params.start,
+      end: params.end,
+      billed: billedFromStatus(params.status),
+      q: params.q,
+      userId: params.userId,
+      userIds: params.userIds,
+    }),
+    [params.start, params.end, params.status, params.q, params.userId, params.userIds]
+  );
+
+  // Load users once
   useEffect(() => {
     let mounted = true;
     (async () => {
@@ -204,12 +162,53 @@ export function useAdminTimeReportsInfinite(initial?: Partial<Params>) {
       mounted = false;
     };
   }, []);
-/**
- * refetch
- *
- * Fetches the first page of time reports for the current filters.
- * Resets pagination state and replaces existing rows.
- */
+
+  // ✅ FIX: Polling should NOT advance baseline.
+  // It only detects if server latest > baseline -> refresh.
+  useEffect(() => {
+    let alive = true;
+
+    const tick = async () => {
+      try {
+        const res = await AdminTimeOverviewService.getChanges({
+          ...changesQuery,
+          since: baselineMsRef.current ?? undefined,
+        });
+
+        if (!alive) return;
+
+        if (res?.latestMs == null) return;
+
+        // always keep newest server version we've seen
+        latestServerMsRef.current = res.latestMs;
+
+        // first successful tick: establish baseline without showing banner
+        if (baselineMsRef.current == null) {
+          baselineMsRef.current = res.latestMs;
+          return;
+        }
+
+        // server newer than baseline -> banner
+        if (res.latestMs > baselineMsRef.current) {
+          setHasNewUpdates(true);
+        }
+      } catch (e) {
+        console.warn("getChanges polling failed:", e);
+      }
+    };
+
+    void tick();
+    const id = window.setInterval(tick, 15_000);
+
+    return () => {
+      alive = false;
+      window.clearInterval(id);
+    };
+  }, [changesQuery]);
+
+  /**
+   * refetch: fetch first page and then set baseline to server latestMs (NOT Date.now)
+   */
   const refetch = useCallback(async () => {
     const reqId = ++listReqIdRef.current;
     setLoadingFirst(true);
@@ -222,17 +221,35 @@ export function useAdminTimeReportsInfinite(initial?: Partial<Params>) {
       const first = (res?.items ?? []).map(normalizeForList);
       setRows(first);
       setNextCursor(res?.nextCursor);
-    } catch (e: any) {
-      if (reqId !== listReqIdRef.current) return; 
 
+      // hide banner
+      setHasNewUpdates(false);
+
+      // ✅ sync baseline to server latest version
+      try {
+        const ch = await AdminTimeOverviewService.getChanges({
+          ...changesQuery,
+          since: undefined,
+        });
+        if (ch?.latestMs != null) {
+          baselineMsRef.current = ch.latestMs;
+          latestServerMsRef.current = ch.latestMs;
+        } else {
+          baselineMsRef.current = null;
+          latestServerMsRef.current = null;
+        }
+      } catch {
+        // keep previous baseline
+      }
+    } catch (e: any) {
+      if (reqId !== listReqIdRef.current) return;
       setRows([]);
       setNextCursor(undefined);
       setError(e?.message ?? "Failed to fetch admin reports");
     } finally {
       if (reqId === listReqIdRef.current) setLoadingFirst(false);
     }
-  }, [listQuery]);
-
+  }, [listQuery, changesQuery]);
 
   const refetchSummary = useCallback(async () => {
     const reqId = ++summaryReqIdRef.current;
@@ -243,11 +260,11 @@ export function useAdminTimeReportsInfinite(initial?: Partial<Params>) {
       if (reqId !== summaryReqIdRef.current) return;
       setSummary(s);
     } catch {
+      // ignore
     } finally {
       if (reqId === summaryReqIdRef.current) setLoadingSummary(false);
     }
   }, [summaryQuery]);
-
 
   useEffect(() => {
     void refetch();
@@ -256,12 +273,7 @@ export function useAdminTimeReportsInfinite(initial?: Partial<Params>) {
   useEffect(() => {
     void refetchSummary();
   }, [refetchSummary]);
-/**
- * loadMore
- *
- * Fetches the next page of results using the current cursor
- * and appends them to the existing list.
- */
+
   const loadMore = useCallback(async () => {
     if (!nextCursor || loadingMore) return;
 
@@ -284,17 +296,11 @@ export function useAdminTimeReportsInfinite(initial?: Partial<Params>) {
       setLoadingMore(false);
     }
   }, [nextCursor, loadingMore, listQuery]);
-/**
- * handleUpdate
- *
- * Optimistically updates a time report row.
- * Rolls back to the previous state if the API request fails.
- */
+
   const handleUpdate = useCallback(
     async (id: string | number, patch: TimeReportPatch) => {
       const before = rowsRef.current;
 
-    
       setRows((prev) =>
         prev.map((r) => (r.id === id ? ({ ...r, ...patch } as TimeReportRow) : r))
       );
@@ -307,20 +313,22 @@ export function useAdminTimeReportsInfinite(initial?: Partial<Params>) {
             prev.map((r) => (r.id === id ? (normalized as TimeReportRow) : r))
           );
         }
+
         void refetchSummary();
+
+        // ✅ treat our own update as synced: move baseline to latest server seen (if any)
+        if (latestServerMsRef.current != null) {
+          baselineMsRef.current = latestServerMsRef.current;
+        }
+        setHasNewUpdates(false);
       } catch (e: any) {
-        setRows(before); 
+        setRows(before);
         setError(e?.message ?? "Failed to update report");
       }
     },
     [refetchSummary]
   );
-/**
- * handleDelete
- *
- * Optimistically removes a time report row.
- * Restores the previous list if deletion fails.
- */
+
   const handleDelete = useCallback(
     async (id: number) => {
       const before = rowsRef.current;
@@ -330,22 +338,20 @@ export function useAdminTimeReportsInfinite(initial?: Partial<Params>) {
       try {
         await AdminTimeOverviewService.deleteEntry(id);
         void refetchSummary();
+
+        // ✅ treat our own delete as synced
+        if (latestServerMsRef.current != null) {
+          baselineMsRef.current = latestServerMsRef.current;
+        }
+        setHasNewUpdates(false);
       } catch (e: any) {
-        setRows(before); 
+        setRows(before);
         setError(e?.message ?? "Failed to delete report");
       }
     },
     [refetchSummary]
   );
-/**
- * resetAnd
- *
- * Utility helper used by all filter setters.
- * - Resets pagination
- * - Clears current rows
- * - Applies new filter params
- * - Forces refetch if filters did not actually change
- */
+
   const resetAnd = useCallback(
     (updater: (p: Params) => Params) => {
       const next = updater({ ...params, cursor: undefined });
@@ -362,6 +368,12 @@ export function useAdminTimeReportsInfinite(initial?: Partial<Params>) {
 
       setRows([]);
       setNextCursor(undefined);
+
+      // ✅ reset banner + baseline when filters change
+      setHasNewUpdates(false);
+      baselineMsRef.current = null;
+      latestServerMsRef.current = null;
+
       setParams(next);
 
       if (same) queueMicrotask(() => void refetch());
@@ -436,6 +448,59 @@ export function useAdminTimeReportsInfinite(initial?: Partial<Params>) {
 
   const summaryPreferServer: Summary = summary ?? pageSummary;
 
+  /**
+   * refreshVisible: refresh first page WITHOUT clearing UI first
+   * After refresh, baseline moves -> banner clears
+   */
+  const refreshVisible = useCallback(
+    async (opts?: { preserveScrollEl?: HTMLElement | null }) => {
+      const reqId = ++listReqIdRef.current;
+
+      const el = opts?.preserveScrollEl ?? null;
+      const prevScrollTop = el ? el.scrollTop : null;
+
+      setError(null);
+
+      try {
+        const res = await AdminTimeOverviewService.getEntries(listQuery);
+        if (reqId !== listReqIdRef.current) return;
+
+        const first = (res?.items ?? []).map(normalizeForList);
+
+        setRows(first);
+        setNextCursor(res?.nextCursor);
+
+        if (el && typeof prevScrollTop === "number") {
+          requestAnimationFrame(() => {
+            try {
+              el.scrollTop = prevScrollTop;
+            } catch {}
+          });
+        }
+
+        // ✅ synced now -> clear banner, then set baseline to server latest
+        setHasNewUpdates(false);
+
+        try {
+          const ch = await AdminTimeOverviewService.getChanges({
+            ...changesQuery,
+            since: undefined,
+          });
+          if (ch?.latestMs != null) {
+            baselineMsRef.current = ch.latestMs;
+            latestServerMsRef.current = ch.latestMs;
+          }
+        } catch {}
+
+        void refetchSummary();
+      } catch (e: any) {
+        if (reqId !== listReqIdRef.current) return;
+        setError(e?.message ?? "Failed to refresh");
+      }
+    },
+    [listQuery, refetchSummary, changesQuery]
+  );
+
   return {
     rows,
     hasMore,
@@ -460,5 +525,16 @@ export function useAdminTimeReportsInfinite(initial?: Partial<Params>) {
     pageSummary,
     totalSummary: summary,
     loadingSummary,
+
+    hasNewUpdates,
+    refreshVisible,
+
+    clearNewUpdates: () => {
+      // “Dismiss” banner -> move baseline to the latest server version we know
+      setHasNewUpdates(false);
+      if (latestServerMsRef.current != null) {
+        baselineMsRef.current = latestServerMsRef.current;
+      }
+    },
   };
 }

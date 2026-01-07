@@ -993,7 +993,7 @@ export const adminUpdateTimereport = async (req, res) => {
   }
 
   // Always update modified date for auditing
-  mainSets.push("`modified` = CURRENT_DATE");
+  mainSets.push("`modified` = CURRENT_TIMESTAMP");
 
   const conn = await db.getConnection();
   try {
@@ -2436,4 +2436,156 @@ export const getAdminTimeReportsStats = async (req, res) => {
     conn.release();
   }
 };
+
+/**
+ * getAdminTimeReportsChanges
+ *
+ * Purpose:
+ * - Lightweight "change detector" for admin time overview.
+ * - Returns the latest change timestamp/date within the same tenant + filters
+ *   as the list endpoint, so the frontend can poll and show a "New updates" banner.
+ *
+ * Response:
+ * - 200: { latestUpdatedAt: string | null }
+ *
+ * Notes:
+ * - Uses MAX(GREATEST(created_date, modified)) as a coarse "version".
+ * - If your columns are DATE-only, this is day precision (OK for a refresh banner).
+ */
+export const getAdminTimeReportsChanges = async (req, res) => {
+  const conn = await db.getConnection();
+
+  try {
+    const tenantId = req.user?.tenantId ?? null;
+    const adminUserId = req.user?.id ?? null;
+
+    if (tenantId == null) {
+      return res.status(403).json({ error: "Forbidden (no tenant bound)" });
+    }
+    if (adminUserId == null) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+
+    // Default date range = current month (same as list)
+    const { start: defStart, end: defEnd } = getThisMonthRangeYMD();
+    const start = String(req.query.start ?? defStart).slice(0, 10);
+    const end = String(req.query.end ?? defEnd).slice(0, 10);
+    const endExclusive = addDaysYMD(end, 1);
+
+    const billed = toBoolOrUndefined(req.query.billed);
+
+    const qRaw = (req.query.q ?? "").toString().trim();
+    const qUserId = req.query.userId ? Number(req.query.userId) : undefined;
+    const qUserIds =
+      typeof req.query.userIds === "string"
+        ? req.query.userIds.split(",").map(Number).filter(Number.isFinite)
+        : undefined;
+
+    // NOTE: No #id / id:123 in changes endpoint
+    const q = qRaw;
+
+    const where = ["tr.`date` >= ?", "tr.`date` < ?", "u.`tenant_id` = ?"];
+    const params = [start, endExclusive, tenantId];
+
+    // User filters
+    if (typeof qUserId === "number" && Number.isFinite(qUserId)) {
+      where.push("tr.`user` = ?");
+      params.push(qUserId);
+    } else if (qUserIds?.length) {
+      where.push("tr.`user` IN (?)");
+      params.push(qUserIds);
+    }
+
+    // Billed filter
+    if (billed !== undefined) {
+      where.push("tr.`billed` = ?");
+      params.push(billed);
+    }
+
+    // Search filters (match list endpoint basics)
+    const ymdMatch = q && q.match(/^\d{4}-\d{2}-\d{2}$/);
+    const dayOnly = q && q.match(/^\d{1,2}$/);
+
+    if (ymdMatch) {
+      where.push(
+        `DATE_FORMAT(CONVERT_TZ(tr.date,'UTC','Europe/Stockholm'),'%Y-%m-%d') = ?`
+      );
+      params.push(q);
+    } else if (dayOnly) {
+      where.push(`DAY(CONVERT_TZ(tr.date,'UTC','Europe/Stockholm')) = ?`);
+      params.push(Number(q));
+    } else if (q) {
+      const like = `%${q}%`;
+      where.push(`(
+        c.company LIKE ? OR
+        p.projectname LIKE ? OR
+        cat.name LIKE ? OR
+        tr.work_labor LIKE ? OR
+        tr.note LIKE ? OR
+        DATE_FORMAT(CONVERT_TZ(tr.date,'UTC','Europe/Stockholm'),'%Y-%m-%d') LIKE ?
+      )`);
+      params.push(like, like, like, like, like, like);
+    }
+
+    // ✅ Version query uses DATETIME fields (created_at/modified_at)
+    const sql = `
+      SELECT
+        MAX(GREATEST(tr.modified_at, tr.created_at)) AS latestUpdatedAt
+      FROM time_report tr
+      LEFT JOIN customer               c   ON c.id  = tr.customer_id
+      LEFT JOIN project                p   ON p.id  = tr.project_id
+      LEFT JOIN time_report_categories cat ON cat.id = tr.category
+      JOIN users                       u   ON u.id  = tr.\`user\`
+      WHERE ${where.join(" AND ")}
+    `;
+
+    const [rows] = await conn.query(sql, params);
+    const latest = rows?.[0]?.latestUpdatedAt ?? null;
+
+    const toMs = (v) => {
+      if (!v) return null;
+
+      if (v instanceof Date) {
+        const t = v.getTime();
+        return Number.isFinite(t) ? t : null;
+      }
+
+      const s = String(v).trim();
+      if (!s) return null;
+
+      // If someone sends ms as string
+      if (/^\d{10,13}$/.test(s)) {
+        const n = Number(s);
+        return Number.isFinite(n) ? n : null;
+      }
+
+      // MySQL DATETIME "YYYY-MM-DD HH:mm:ss" -> ISO-ish
+      const isoish = s.includes("T") ? s : s.replace(" ", "T");
+      const d = new Date(isoish);
+      const t = d.getTime();
+      return Number.isFinite(t) ? t : null;
+    };
+
+    const latestMs = toMs(latest);
+
+    const sinceRaw = (req.query.since ?? "").toString().trim();
+    const sinceMs = sinceRaw ? toMs(sinceRaw) : null;
+
+    const changed =
+      latestMs != null && sinceMs != null ? latestMs > sinceMs : false;
+
+    return res.json({
+      latestMs,
+      latestIso: latestMs != null ? new Date(latestMs).toISOString() : null,
+      changed,
+    });
+  } catch (err) {
+    console.error("getAdminTimeReportsChanges error:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  } finally {
+    conn.release();
+  }
+};
+
+
 

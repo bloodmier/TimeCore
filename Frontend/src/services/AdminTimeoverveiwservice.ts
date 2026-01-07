@@ -80,4 +80,22 @@ export const AdminTimeOverviewService = {
   // GET /admin/users
   getUsers: () =>
     getData<IUser[]>(`/admin/users`),
+
+ getChanges: async (p: {
+    start: string;
+    end: string;
+    billed?: boolean;
+    userId?: number;
+    userIds?: number[];
+    q?: string;
+    since?: number;
+  }) => {
+    const qs = buildAdminReportsParams(p as any);
+    return getData<{
+      latestMs: number | null;
+      latestIso: string | null;
+      changed: boolean;
+    }>(`/admin/timeoverveiw/changes?${qs.toString()}`);
+  },
+
 };

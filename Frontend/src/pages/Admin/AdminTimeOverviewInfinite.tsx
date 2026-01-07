@@ -9,11 +9,13 @@
  * - Free-text and ID-based search
  * - Inline editing and deletion of time reports
  * - Real-time summary statistics
+ * - Soft refresh banner when new data is available
  *
  * UX & performance considerations:
  * - Uses scroll-based lazy loading with throttling
  * - Preserves layout during initial load to reduce CLS
  * - Displays clear loading, empty and error states
+ * - Does NOT auto-refresh list to avoid scroll jumps
  *
  * Access:
  * - Intended for admin users only
@@ -24,7 +26,6 @@ import React, { useCallback, useEffect, useRef } from "react";
 import { AppLoader } from "../../components/appLoader";
 import { TimeReportsTable } from "../../components/timeReports/TimeReportsTable";
 import { useTimeOverviewData } from "../../hooks/useTimeOverveiw";
-
 import {
   useAdminTimeReportsInfinite,
   parseIdQuery,
@@ -48,6 +49,11 @@ export const AdminTimeOverviewInfinite: React.FC = () => {
     users,
     SelectedUser,
     summary,
+
+    // Changes polling
+    hasNewUpdates,
+    clearNewUpdates,
+    refreshVisible, // <-- soft refresh (no scroll jump)
   } = useAdminTimeReportsInfinite({ limit: 25, scope: "all" });
 
   const { customerData, lookupData, articleSearch } = useTimeOverviewData();
@@ -99,18 +105,31 @@ export const AdminTimeOverviewInfinite: React.FC = () => {
 
   const handleSearchSubmit = useCallback(
     (q: string) => {
-      // Keep your existing behavior: backend receives q (supports #id / id:xxx)
       setSearch(q);
-
-      // Optional: you can use this if you want to do something special client-side
-      // (like auto-expand the row in UI) when query is an ID.
       void parseIdQuery(q);
     },
     [setSearch]
   );
 
+  const onRefreshNewData = useCallback(() => {
+    clearNewUpdates();
+    void refreshVisible({ preserveScrollEl: listRef.current });
+  }, [clearNewUpdates, refreshVisible]);
+
+  // Auto-refresh when new updates are detected (no banner)
+useEffect(() => {
+  if (!hasNewUpdates) return;
+
+  // Refresh list without scroll jump
+  void refreshVisible({ preserveScrollEl: listRef.current });
+
+  // Clear the flag so it doesn't loop
+  clearNewUpdates();
+}, [hasNewUpdates, refreshVisible, clearNewUpdates]);
+
   return (
     <div className="flex flex-col w-full min-h-[80svh] md:h-[100dvh] md:max-h-[100dvh] lg:h-[74dvh]">
+      {/* Controls */}
       <div className="flex-shrink-0 w-full border-b bg-background">
         <div className="relative w-full min-w-0 mx-auto px-3 py-3">
           <AdminOverviewControls
@@ -127,6 +146,23 @@ export const AdminTimeOverviewInfinite: React.FC = () => {
           />
         </div>
       </div>
+
+      {/* New updates banner (does NOT auto-refresh) */}
+    {/*   {hasNewUpdates && !loadingFirst && (
+        <div className="flex-shrink-0 w-full border-b bg-background">
+          <div className="mx-auto w-full min-w-0 px-3 py-2 flex items-center justify-between gap-3">
+            <div className="text-sm min-w-0 truncate">New updates available</div>
+
+            <button
+              type="button"
+              className="text-sm underline shrink-0"
+              onClick={onRefreshNewData}
+            >
+              Refresh
+            </button>
+          </div>
+        </div>
+      )} */}
 
       {/* Content region */}
       <div
