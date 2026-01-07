@@ -1213,3 +1213,88 @@ export async function lockAndMarkItems(req, res) {
     conn.release();
   }
 }
+
+
+
+export async function getInvoiceChanges(req, res) {
+  const conn = await db.getConnection();
+  try {
+    const q = req.query || {};
+
+    const startRaw = typeof q.start === "string" ? q.start.slice(0, 10) : "";
+    const endRaw = typeof q.end === "string" ? q.end.slice(0, 10) : "";
+
+    const start = /^\d{4}-\d{2}-\d{2}$/.test(startRaw) ? startRaw : null;
+    const end = /^\d{4}-\d{2}-\d{2}$/.test(endRaw) ? endRaw : null;
+
+    const statusRaw = typeof q.status === "string" ? q.status : "unbilled";
+    const status = ["unbilled", "billed", "all"].includes(statusRaw)
+      ? statusRaw
+      : "unbilled";
+
+    const onlyBillable =
+      String(q.onlyBillable ?? "true").toLowerCase() !== "false";
+
+    // Date clause
+    const conds = [];
+    const params = [];
+
+    if (start) {
+      conds.push("tr.date >= ?");
+      params.push(start);
+    }
+    if (end) {
+      conds.push("tr.date <= ?");
+      params.push(end);
+    }
+
+    // Status clause (matchar din collect-logik)
+    if (status === "unbilled") {
+      conds.push(
+        "(tr.billed IS NULL OR tr.billed = 0) AND (tr.invoice_number IS NULL OR tr.invoice_number = '')"
+      );
+    } else if (status === "billed") {
+      conds.push(
+        "tr.billed = 1 AND (tr.invoice_number IS NOT NULL AND tr.invoice_number <> '')"
+      );
+    }
+
+    if (onlyBillable) {
+      conds.push("tr.billable = 1");
+    }
+
+    const where = conds.length ? `WHERE ${conds.join(" AND ")}` : "";
+
+    const [rows] = await conn.query(
+      `
+      SELECT MAX(tr.modified_at) AS latest_dt
+      FROM time_report tr
+      ${where}
+      `,
+      params
+    );
+
+    const latestDt = rows?.[0]?.latest_dt ?? null;
+
+    if (!latestDt) {
+      return res.json({ latestMs: null, latestIso: null, changed: false });
+    }
+
+    const d = new Date(latestDt);
+    const latestMs = Number.isFinite(d.getTime()) ? d.getTime() : null;
+
+    return res.json({
+      latestMs,
+      latestIso: latestMs != null ? d.toISOString() : null,
+      changed: true,
+    });
+  } catch (e) {
+    console.error("getInvoiceChanges error:", e);
+    return res.status(500).json({
+      error: "Internal error",
+      detail: String(e?.message || e),
+    });
+  } finally {
+    conn.release();
+  }
+}

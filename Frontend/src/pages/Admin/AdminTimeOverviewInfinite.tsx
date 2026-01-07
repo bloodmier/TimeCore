@@ -1,26 +1,31 @@
 /**
  * AdminTimeOverviewInfinite
  *
- * Admin page for viewing and managing all time reports within a tenant.
+ * Admin interface for viewing and managing all time reports within a tenant.
  *
- * Features:
- * - Infinite scrolling with cursor-based pagination
- * - Date range selection and user filtering
- * - Free-text and ID-based search
- * - Inline editing and deletion of time reports
- * - Real-time summary statistics
- * - Soft refresh banner when new data is available
+ * This page is designed for large datasets and concurrent usage:
+ * - Uses cursor-based infinite scrolling to efficiently browse many records
+ * - Supports date range filtering, user filtering, and free-text search
+ * - Allows inline editing and deletion of time reports
+ * - Displays live summary statistics for the current filter selection
  *
- * UX & performance considerations:
- * - Uses scroll-based lazy loading with throttling
- * - Preserves layout during initial load to reduce CLS
- * - Displays clear loading, empty and error states
- * - Does NOT auto-refresh list to avoid scroll jumps
+ * Real-time update strategy:
+ * - Periodically polls the backend "changes" endpoint to detect server-side updates
+ * - Automatically refreshes visible data when changes are detected
+ * - Preserves the user's current scroll position during refreshes
+ * - Avoids disruptive full reloads, banners, or forced scroll jumps
+ *
+ * UX & performance goals:
+ * - Optimized for admins working while other users report time simultaneously
+ * - Ensures data consistency without interrupting ongoing review work
+ * - Minimizes network traffic by refreshing only when changes are detected
  *
  * Access:
- * - Intended for admin users only
- * - Data is tenant-scoped and protected by backend middleware
+ * - Admin-only route
+ * - All data is tenant-scoped and protected by backend authorization middleware
  */
+
+
 
 import React, { useCallback, useEffect, useRef } from "react";
 import { AppLoader } from "../../components/appLoader";
@@ -49,11 +54,7 @@ export const AdminTimeOverviewInfinite: React.FC = () => {
     users,
     SelectedUser,
     summary,
-
-    // Changes polling
-    hasNewUpdates,
-    clearNewUpdates,
-    refreshVisible, // <-- soft refresh (no scroll jump)
+    setScrollEl,
   } = useAdminTimeReportsInfinite({ limit: 25, scope: "all" });
 
   const { customerData, lookupData, articleSearch } = useTimeOverviewData();
@@ -61,6 +62,11 @@ export const AdminTimeOverviewInfinite: React.FC = () => {
   const listRef = useRef<HTMLDivElement | null>(null);
   const lastLoadAtRef = useRef<number>(0);
   const nudgedRef = useRef(false);
+
+  // ✅ tell the hook which element scrolls
+  useEffect(() => {
+    setScrollEl(listRef.current);
+  }, [setScrollEl]);
 
   // Scroll-based infinite loading with cooldown to avoid request spam.
   useEffect(() => {
@@ -111,22 +117,6 @@ export const AdminTimeOverviewInfinite: React.FC = () => {
     [setSearch]
   );
 
-  const onRefreshNewData = useCallback(() => {
-    clearNewUpdates();
-    void refreshVisible({ preserveScrollEl: listRef.current });
-  }, [clearNewUpdates, refreshVisible]);
-
-  // Auto-refresh when new updates are detected (no banner)
-useEffect(() => {
-  if (!hasNewUpdates) return;
-
-  // Refresh list without scroll jump
-  void refreshVisible({ preserveScrollEl: listRef.current });
-
-  // Clear the flag so it doesn't loop
-  clearNewUpdates();
-}, [hasNewUpdates, refreshVisible, clearNewUpdates]);
-
   return (
     <div className="flex flex-col w-full min-h-[80svh] md:h-[100dvh] md:max-h-[100dvh] lg:h-[74dvh]">
       {/* Controls */}
@@ -146,23 +136,6 @@ useEffect(() => {
           />
         </div>
       </div>
-
-      {/* New updates banner (does NOT auto-refresh) */}
-    {/*   {hasNewUpdates && !loadingFirst && (
-        <div className="flex-shrink-0 w-full border-b bg-background">
-          <div className="mx-auto w-full min-w-0 px-3 py-2 flex items-center justify-between gap-3">
-            <div className="text-sm min-w-0 truncate">New updates available</div>
-
-            <button
-              type="button"
-              className="text-sm underline shrink-0"
-              onClick={onRefreshNewData}
-            >
-              Refresh
-            </button>
-          </div>
-        </div>
-      )} */}
 
       {/* Content region */}
       <div
@@ -188,7 +161,6 @@ useEffect(() => {
           {/* First load overlay */}
           {loadingFirst && !error && (
             <>
-              {/* Invisible table to preserve layout and reduce CLS */}
               <div className="invisible w-full">
                 <TimeReportsTable
                   rows={rows as any}

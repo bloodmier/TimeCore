@@ -886,6 +886,106 @@
         }
       }
     },
+    "/timeoverveiw/changes": {
+      "get": {
+        "tags": ["Admin"],
+        "summary": "Check if admin time report overview has changed",
+        "description": "Returns the latest updated timestamp (MAX(GREATEST(modified_at, created_at))) for time reports in the admin tenant filtered the same way as the admin list endpoint. Used for polling so the UI can refresh when data changes.",
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string", "format": "date" },
+            "description": "Start date (YYYY-MM-DD). Defaults to current month start (same as list endpoint)."
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string", "format": "date" },
+            "description": "End date (YYYY-MM-DD). Defaults to current month end (same as list endpoint)."
+          },
+          {
+            "name": "billed",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "boolean" },
+            "description": "Optional billed filter."
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string" },
+            "description": "Free-text search (same basics as list endpoint). NOTE: changes endpoint does not support #id/id:123 shortcuts."
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer" },
+            "description": "Filter by a single user id."
+          },
+          {
+            "name": "userIds",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string" },
+            "description": "Comma-separated list of user ids."
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                { "type": "integer", "format": "int64", "description": "Milliseconds since epoch" },
+                { "type": "string", "format": "date-time" },
+                { "type": "string", "description": "MySQL DATETIME 'YYYY-MM-DD HH:mm:ss'" }
+              ]
+            },
+            "description": "If provided, the response sets changed=true when latestMs > since."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Latest change info for admin time report overview filters",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ChangesResponseWithSince" },
+                "examples": {
+                  "noMatches": {
+                    "summary": "No matching rows",
+                    "value": { "latestMs": null, "latestIso": null, "changed": false }
+                  },
+                  "changedTrue": {
+                    "summary": "Changed since provided timestamp",
+                    "value": {
+                      "latestMs": 1762527600000,
+                      "latestIso": "2025-11-07T10:00:00.000Z",
+                      "changed": true
+                    }
+                  },
+                  "changedFalse": {
+                    "summary": "Not changed since provided timestamp",
+                    "value": {
+                      "latestMs": 1762527600000,
+                      "latestIso": "2025-11-07T10:00:00.000Z",
+                      "changed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized (missing/invalid cookie)" },
+          "403": { "description": "Forbidden (not admin / no tenant bound)" },
+          "500": { "description": "Internal server error" }
+        }
+      }
+    },
 
     "/time-reports": {
       "get": {
@@ -1564,7 +1664,108 @@
           "500": { "description": "Failed to fetch PDFs in range" }
         }
       }
+    },
+    "/invoice/collect": {
+      "post": {
+        "tags": ["Invoice"],
+        "summary": "Collect invoiceable data",
+        "description": "Collects invoiceable data (time reports + items), grouped per customer/company, used to build invoice drafts/previews in the UI.",
+        "security": [{ "cookieAuth": [] }],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": { "type": "object" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Collected invoice data", "content": { "application/json": { "schema": { "type": "object" } } } },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden (not admin)" },
+          "500": { "description": "Internal server error" }
+        }
+      }
+    },
+
+    "/invoice/lock-and-mark": {
+      "post": {
+        "tags": ["Invoice"],
+        "summary": "Lock and mark time reports as billed",
+        "description": "Locks selected time report rows (FOR UPDATE) and marks them as billed by writing billed=1 and invoice_number=<invoiceNumber> to prevent double invoicing.",
+        "security": [{ "cookieAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "type": "object" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Locked and marked", "content": { "application/json": { "schema": { "type": "object" } } } },
+          "400": { "description": "Invalid payload" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden (not admin)" },
+          "409": { "description": "Conflict (rows already billed/locked)" },
+          "500": { "description": "Internal server error" }
+        }
+      }
+    },
+
+    "/invoice/lock-and-mark-items": {
+      "post": {
+        "tags": ["Invoice"],
+        "summary": "Lock and mark time report items as invoiced",
+        "description": "Locks selected time report item rows (FOR UPDATE) and marks them as invoiced by writing invoice_number=<invoiceNumber>.",
+        "security": [{ "cookieAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "type": "object" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Locked and marked", "content": { "application/json": { "schema": { "type": "object" } } } },
+          "400": { "description": "Invalid payload" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden (not admin)" },
+          "409": { "description": "Conflict" },
+          "500": { "description": "Internal server error" }
+        }
+      }
+    },
+
+    "/invoice/changes": {
+      "get": {
+        "tags": ["Invoice"],
+        "summary": "Check if invoice overview data has changed",
+        "description": "Returns the latest modification timestamp for time reports matching the provided filters. Used by frontend polling to refresh only when needed.",
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          { "name": "start", "in": "query", "required": false, "schema": { "type": "string", "format": "date" } },
+          { "name": "end", "in": "query", "required": false, "schema": { "type": "string", "format": "date" } },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string", "enum": ["unbilled", "billed", "all"], "default": "unbilled" }
+          },
+          { "name": "onlyBillable", "in": "query", "required": false, "schema": { "type": "boolean", "default": true } }
+        ],
+        "responses": {
+          "200": { "description": "Change status", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ChangesResponse" } } } },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden (not admin)" },
+          "500": { "description": "Internal server error" }
+        }
+      }
     }
+
+    
+
   },
 
   "components": {
@@ -2154,7 +2355,30 @@
           "lang": { "type": "string", "example": "sv" },
           "fileId": { "type": "integer", "example": 777 }
         }
-      }
+      },
+      "ChangesResponse": {
+  "type": "object",
+  "properties": {
+    "latestMs": { "type": "integer", "format": "int64", "nullable": true, "example": 1762527600000 },
+    "latestIso": { "type": "string", "format": "date-time", "nullable": true, "example": "2025-11-07T10:00:00.000Z" },
+    "changed": { "type": "boolean", "example": true }
+  }
+},
+
+"ChangesResponseWithSince": {
+  "allOf": [
+    { "$ref": "#/components/schemas/ChangesResponse" }
+  ]
+},
+
+"ErrorResponse": {
+  "type": "object",
+  "properties": {
+    "error": { "type": "string", "example": "Internal error" },
+    "detail": { "type": "string", "nullable": true, "example": "Some DB error message" }
+  }
+}
+
     }
   },
 
@@ -2168,6 +2392,8 @@
     { "name": "Projects", "description": "Projects per customer used in time reporting" },
     { "name": "Articles", "description": "Article search for materials and products" },
     { "name": "Fortnox", "description": "Fortnox OAuth flow and Fortnox API proxy endpoints (admin-only)." },
-    { "name": "Worklog PDF", "description": "Generate, queue, fetch and email worklog PDFs (admin-only)." }
+    { "name": "Worklog PDF", "description": "Generate, queue, fetch and email worklog PDFs (admin-only)." },
+    { "name": "Invoice", "description": "Invoice collection, locking/marking and change detection" }
+
   ]
 }

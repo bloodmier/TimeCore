@@ -87,6 +87,25 @@ export const AdminInvoiceService = {
     return { blob: response.data, fileName };
   },
 
+ getChanges: (p: {
+  start: string;
+  end: string;
+  status: "unbilled" | "billed" | "all";
+  onlyBillable: boolean;
+}) => {
+  const qs = new URLSearchParams();
+
+  qs.set("start", p.start);
+  qs.set("end", p.end);
+  qs.set("status", p.status);
+  qs.set("onlyBillable", String(p.onlyBillable));
+
+  return getData<{ latestMs: number | null }>(
+    `/invoice/changes?${qs.toString()}`
+  );
+},
+
+
   // ----- Customer prefs / send -----
 
   getCustomerSendPrefs: (customerId: number) =>

@@ -2,7 +2,8 @@ import { Router } from "express";
 import {
   collectAllInvoiceData,
   lockAndMarkBilled,
-  lockAndMarkItems
+  lockAndMarkItems,
+  getInvoiceChanges
 } from "../controller/invoiceController.js";
 
 const r = Router();
@@ -30,5 +31,13 @@ r.post("/lock-and-mark", lockAndMarkBilled);
  * This prevents double invoicing of material rows.
  */
 r.post("/lock-and-mark-items", lockAndMarkItems);
+
+/**
+ * GET /admin/invoice/changes
+ *
+ * Returns the latest "version timestamp" (ms) for anything affecting the invoice overview
+ * within the selected filters. Used by frontend polling to auto-refresh only when needed.
+ */
+r.get("/changes", getInvoiceChanges);
 
 export default r;

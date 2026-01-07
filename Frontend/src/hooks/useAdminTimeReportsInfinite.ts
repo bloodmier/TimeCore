@@ -90,13 +90,17 @@ export function useAdminTimeReportsInfinite(initial?: Partial<Params>) {
   const listReqIdRef = useRef(0);
   const summaryReqIdRef = useRef(0);
 
-  const [hasNewUpdates, setHasNewUpdates] = useState(false);
-
-  // ✅ FIX: keep two refs
-  // baselineMsRef = "list is synced up to this server version"
-  // latestServerMsRef = "latest server version we've observed during polling"
+  // ✅ server-version tracking
   const baselineMsRef = useRef<number | null>(null);
-  const latestServerMsRef = useRef<number | null>(null);
+
+  // ✅ keep scroll element here so hook can preserve position on refresh
+  const scrollElRef = useRef<HTMLElement | null>(null);
+  const setScrollEl = useCallback((el: HTMLElement | null) => {
+    scrollElRef.current = el;
+  }, []);
+
+  // ✅ prevent overlapping refresh loops
+  const autoRefreshingRef = useRef(false);
 
   const listQuery: GetTimeReportsParams = useMemo(
     () => ({
@@ -163,51 +167,62 @@ export function useAdminTimeReportsInfinite(initial?: Partial<Params>) {
     };
   }, []);
 
-  // ✅ FIX: Polling should NOT advance baseline.
-  // It only detects if server latest > baseline -> refresh.
-  useEffect(() => {
-    let alive = true;
+  /**
+   * refreshVisible: refresh first page WITHOUT clearing UI first
+   * Preserves scrollTop on provided element.
+   * Also updates baseline to current server latest.
+   */
+  const refreshVisible = useCallback(
+    async (opts?: { preserveScrollEl?: HTMLElement | null }) => {
+      const reqId = ++listReqIdRef.current;
 
-    const tick = async () => {
+      const el = opts?.preserveScrollEl ?? null;
+      const prevScrollTop = el ? el.scrollTop : null;
+
+      setError(null);
+
       try {
-        const res = await AdminTimeOverviewService.getChanges({
-          ...changesQuery,
-          since: baselineMsRef.current ?? undefined,
-        });
+        const res = await AdminTimeOverviewService.getEntries(listQuery);
+        if (reqId !== listReqIdRef.current) return;
 
-        if (!alive) return;
+        const first = (res?.items ?? []).map(normalizeForList);
+        setRows(first);
+        setNextCursor(res?.nextCursor);
 
-        if (res?.latestMs == null) return;
-
-        // always keep newest server version we've seen
-        latestServerMsRef.current = res.latestMs;
-
-        // first successful tick: establish baseline without showing banner
-        if (baselineMsRef.current == null) {
-          baselineMsRef.current = res.latestMs;
-          return;
+        if (el && typeof prevScrollTop === "number") {
+          requestAnimationFrame(() => {
+            try {
+              el.scrollTop = prevScrollTop;
+            } catch {}
+          });
         }
 
-        // server newer than baseline -> banner
-        if (res.latestMs > baselineMsRef.current) {
-          setHasNewUpdates(true);
-        }
-      } catch (e) {
-        console.warn("getChanges polling failed:", e);
+        // ✅ sync baseline to server latest (so polling doesn't instantly re-trigger)
+        try {
+          const ch = await AdminTimeOverviewService.getChanges({
+            ...changesQuery,
+            since: undefined,
+          });
+          baselineMsRef.current = ch?.latestMs ?? null;
+        } catch {}
+
+        // refresh summary too
+        void (async () => {
+          try {
+            const s = await AdminTimeOverviewService.getSummary(summaryQuery);
+            setSummary(s);
+          } catch {}
+        })();
+      } catch (e: any) {
+        if (reqId !== listReqIdRef.current) return;
+        setError(e?.message ?? "Failed to refresh");
       }
-    };
-
-    void tick();
-    const id = window.setInterval(tick, 15_000);
-
-    return () => {
-      alive = false;
-      window.clearInterval(id);
-    };
-  }, [changesQuery]);
+    },
+    [listQuery, changesQuery, summaryQuery]
+  );
 
   /**
-   * refetch: fetch first page and then set baseline to server latestMs (NOT Date.now)
+   * refetch: first load / hard refresh (clears UI then loads)
    */
   const refetch = useCallback(async () => {
     const reqId = ++listReqIdRef.current;
@@ -222,24 +237,15 @@ export function useAdminTimeReportsInfinite(initial?: Partial<Params>) {
       setRows(first);
       setNextCursor(res?.nextCursor);
 
-      // hide banner
-      setHasNewUpdates(false);
-
-      // ✅ sync baseline to server latest version
+      // ✅ establish baseline from server
       try {
         const ch = await AdminTimeOverviewService.getChanges({
           ...changesQuery,
           since: undefined,
         });
-        if (ch?.latestMs != null) {
-          baselineMsRef.current = ch.latestMs;
-          latestServerMsRef.current = ch.latestMs;
-        } else {
-          baselineMsRef.current = null;
-          latestServerMsRef.current = null;
-        }
+        baselineMsRef.current = ch?.latestMs ?? null;
       } catch {
-        // keep previous baseline
+        baselineMsRef.current = null;
       }
     } catch (e: any) {
       if (reqId !== listReqIdRef.current) return;
@@ -273,6 +279,58 @@ export function useAdminTimeReportsInfinite(initial?: Partial<Params>) {
   useEffect(() => {
     void refetchSummary();
   }, [refetchSummary]);
+
+  /**
+   * ✅ Polling: check /changes, and auto-refresh ONLY when needed.
+   * Preserves scroll position via scrollElRef.
+   */
+  useEffect(() => {
+    let alive = true;
+
+    const tick = async () => {
+      // avoid refreshing while we’re already refreshing or paging
+      if (autoRefreshingRef.current) return;
+      if (loadingFirst || loadingMore) return;
+
+      try {
+        const res = await AdminTimeOverviewService.getChanges({
+          ...changesQuery,
+          since: baselineMsRef.current ?? undefined,
+        });
+
+        if (!alive) return;
+        if (res?.latestMs == null) return;
+
+        // First tick: establish baseline (no refresh)
+        if (baselineMsRef.current == null) {
+          baselineMsRef.current = res.latestMs;
+          return;
+        }
+
+        // Server has newer version -> auto refresh (preserve scroll)
+        if (res.latestMs > baselineMsRef.current) {
+          autoRefreshingRef.current = true;
+          try {
+            await refreshVisible({ preserveScrollEl: scrollElRef.current });
+            // baseline will be updated inside refreshVisible (best), but also set it here safely:
+            baselineMsRef.current = res.latestMs;
+          } finally {
+            autoRefreshingRef.current = false;
+          }
+        }
+      } catch (e) {
+        console.warn("getChanges polling failed:", e);
+      }
+    };
+
+    void tick();
+    const id = window.setInterval(tick, 15_000);
+
+    return () => {
+      alive = false;
+      window.clearInterval(id);
+    };
+  }, [changesQuery, refreshVisible, loadingFirst, loadingMore]);
 
   const loadMore = useCallback(async () => {
     if (!nextCursor || loadingMore) return;
@@ -313,20 +371,22 @@ export function useAdminTimeReportsInfinite(initial?: Partial<Params>) {
             prev.map((r) => (r.id === id ? (normalized as TimeReportRow) : r))
           );
         }
-
         void refetchSummary();
 
-        // ✅ treat our own update as synced: move baseline to latest server seen (if any)
-        if (latestServerMsRef.current != null) {
-          baselineMsRef.current = latestServerMsRef.current;
-        }
-        setHasNewUpdates(false);
+        // after our own write, baseline should move forward (best effort)
+        try {
+          const ch = await AdminTimeOverviewService.getChanges({
+            ...changesQuery,
+            since: undefined,
+          });
+          baselineMsRef.current = ch?.latestMs ?? baselineMsRef.current;
+        } catch {}
       } catch (e: any) {
         setRows(before);
         setError(e?.message ?? "Failed to update report");
       }
     },
-    [refetchSummary]
+    [refetchSummary, changesQuery]
   );
 
   const handleDelete = useCallback(
@@ -339,17 +399,19 @@ export function useAdminTimeReportsInfinite(initial?: Partial<Params>) {
         await AdminTimeOverviewService.deleteEntry(id);
         void refetchSummary();
 
-        // ✅ treat our own delete as synced
-        if (latestServerMsRef.current != null) {
-          baselineMsRef.current = latestServerMsRef.current;
-        }
-        setHasNewUpdates(false);
+        try {
+          const ch = await AdminTimeOverviewService.getChanges({
+            ...changesQuery,
+            since: undefined,
+          });
+          baselineMsRef.current = ch?.latestMs ?? baselineMsRef.current;
+        } catch {}
       } catch (e: any) {
         setRows(before);
         setError(e?.message ?? "Failed to delete report");
       }
     },
-    [refetchSummary]
+    [refetchSummary, changesQuery]
   );
 
   const resetAnd = useCallback(
@@ -369,10 +431,8 @@ export function useAdminTimeReportsInfinite(initial?: Partial<Params>) {
       setRows([]);
       setNextCursor(undefined);
 
-      // ✅ reset banner + baseline when filters change
-      setHasNewUpdates(false);
+      // ✅ reset baseline when filters change (new polling baseline)
       baselineMsRef.current = null;
-      latestServerMsRef.current = null;
 
       setParams(next);
 
@@ -448,59 +508,6 @@ export function useAdminTimeReportsInfinite(initial?: Partial<Params>) {
 
   const summaryPreferServer: Summary = summary ?? pageSummary;
 
-  /**
-   * refreshVisible: refresh first page WITHOUT clearing UI first
-   * After refresh, baseline moves -> banner clears
-   */
-  const refreshVisible = useCallback(
-    async (opts?: { preserveScrollEl?: HTMLElement | null }) => {
-      const reqId = ++listReqIdRef.current;
-
-      const el = opts?.preserveScrollEl ?? null;
-      const prevScrollTop = el ? el.scrollTop : null;
-
-      setError(null);
-
-      try {
-        const res = await AdminTimeOverviewService.getEntries(listQuery);
-        if (reqId !== listReqIdRef.current) return;
-
-        const first = (res?.items ?? []).map(normalizeForList);
-
-        setRows(first);
-        setNextCursor(res?.nextCursor);
-
-        if (el && typeof prevScrollTop === "number") {
-          requestAnimationFrame(() => {
-            try {
-              el.scrollTop = prevScrollTop;
-            } catch {}
-          });
-        }
-
-        // ✅ synced now -> clear banner, then set baseline to server latest
-        setHasNewUpdates(false);
-
-        try {
-          const ch = await AdminTimeOverviewService.getChanges({
-            ...changesQuery,
-            since: undefined,
-          });
-          if (ch?.latestMs != null) {
-            baselineMsRef.current = ch.latestMs;
-            latestServerMsRef.current = ch.latestMs;
-          }
-        } catch {}
-
-        void refetchSummary();
-      } catch (e: any) {
-        if (reqId !== listReqIdRef.current) return;
-        setError(e?.message ?? "Failed to refresh");
-      }
-    },
-    [listQuery, refetchSummary, changesQuery]
-  );
-
   return {
     rows,
     hasMore,
@@ -526,15 +533,7 @@ export function useAdminTimeReportsInfinite(initial?: Partial<Params>) {
     totalSummary: summary,
     loadingSummary,
 
-    hasNewUpdates,
-    refreshVisible,
-
-    clearNewUpdates: () => {
-      // “Dismiss” banner -> move baseline to the latest server version we know
-      setHasNewUpdates(false);
-      if (latestServerMsRef.current != null) {
-        baselineMsRef.current = latestServerMsRef.current;
-      }
-    },
+    // ✅ expose this so pages can hand the scroll container to the hook
+    setScrollEl,
   };
 }

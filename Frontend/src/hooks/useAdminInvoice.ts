@@ -73,6 +73,8 @@ import {
   type ProceedResult,
   type ProceedLog,
 } from "../helpers/proceedLogging";
+import { useAutoRefreshChanges } from "../hooks/useAutoRefreshChanges";
+
 
 const thisMonth = getThisMonthRange();
 type Range = { start?: string; end?: string };
@@ -159,6 +161,37 @@ export const useAdminInvoice = () => {
     lastFetchedKeyRef.current = null;
     fetchData({ start: range.start, end: range.end });
   };
+
+  const getLatestMs = useCallback(async () => {
+    const r = { start: range.start ?? "", end: range.end ?? "" };
+
+    // Du kan välja om status/onlyBillable ska påverka "changes"-nyckeln
+    // (rekommenderas: ja, så att den bara refreshar när just denna vy har ändringar)
+    const res = await AdminInvoiceService.getChanges({
+      start: r.start,
+      end: r.end,
+      status,
+      onlyBillable,
+    });
+
+    return res?.latestMs ?? null;
+  }, [range.start, range.end, status, onlyBillable]);
+
+ const onAutoRefresh = useCallback(async () => {
+  refetch();
+}, [refetch]);
+
+
+  const auto = useAutoRefreshChanges({
+    getLatestMs,
+    onRefresh: onAutoRefresh,
+    options: { intervalMs: 15_000 },
+  });
+
+  // När filter ändras: reset baseline så första poll bara "synkar" och inte trigger refresh direkt
+  useEffect(() => {
+    auto.resetBaseline();
+  }, [range.start, range.end, status, onlyBillable]);
 
   const handleInvoiceTarget = async () => {
     // Placeholder for future invoice target selection logic (e.g. select a customer/company as target).
