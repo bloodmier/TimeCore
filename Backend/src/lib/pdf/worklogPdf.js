@@ -208,7 +208,11 @@ export async function renderWorklogPdf({ invoiceNo, customer, rows, lang = "sv",
   </html>
   `;
 
-  const browser = await puppeteer.launch({ args: ["--no-sandbox", "--disable-setuid-sandbox"] });
+  const browser = await puppeteer.launch({
+  executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || "/usr/bin/chromium",
+  args: ["--no-sandbox", "--disable-setuid-sandbox"],
+});
+
   const page = await browser.newPage();
   await page.setContent(html, { waitUntil: "networkidle0" });
   const pdfBuffer = await page.pdf({
