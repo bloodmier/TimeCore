@@ -60,6 +60,7 @@ export const Homepage = () => {
       />
    
    
+
       <section className="mx-auto w-full max-w-6xl px-4 py-12 md:py-16">
   <div className="grid items-center gap-10 md:grid-cols-2">
     <div>
