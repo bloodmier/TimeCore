@@ -526,7 +526,7 @@ export const useAdminInvoice = () => {
   ) => {
     const chosen = (perRow || []).filter((r) => r.include);
     if (!chosen.length) return;
-
+    
     setResults([]);
 
     const isValidInvoice = (s?: string | null) => !!(s && /^[A-Za-z0-9-_]+$/.test(s));
