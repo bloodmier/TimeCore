@@ -1,5 +1,6 @@
 
 export const Homepage = () => {
+const KEY_POINTS = [
 
 
   return (
