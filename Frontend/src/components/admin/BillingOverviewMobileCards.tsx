@@ -232,8 +232,6 @@ function CompanyTimeReports({
   rows: TimecardRow[];
   hasCustomer?: boolean;
 }) {
-  const prettyYMD = (s: string) => s;
-
   if (!rows?.length) {
     return (
       <div className="p-4 text-sm text-muted-foreground">
@@ -255,7 +253,7 @@ function CompanyTimeReports({
         <TableHeader>
           <TableRow>
             <TableHead>Date</TableHead>
-            <TableHead className="min-w-[220px]">Description</TableHead>
+            <TableHead className="min-w-[220px]">Desc</TableHead>
             <TableHead className="text-right">Hours</TableHead>
             <TableHead className="text-center">Articles</TableHead>
           </TableRow>
