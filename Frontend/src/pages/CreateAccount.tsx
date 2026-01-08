@@ -2,13 +2,15 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { TenantService } from "../services/tenantService";
 import { UserService } from "../services/userService";
+import { Eye, EyeOff } from "lucide-react";
+
 
 export const CreateAccount = () => {
   const navigate = useNavigate();
 
   const [tenants, setTenants] = useState<{ id: number; name: string }[]>([]);
   const [loadingTenants, setLoadingTenants] = useState(true);
-
+  const [showPassword, setShowPassword] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -157,20 +159,35 @@ export const CreateAccount = () => {
             />
           </div>
 
-          <div>
-            <label className="block text-sm mb-1" htmlFor="password">
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              autoComplete="new-password"
-              required
-              className="w-full border rounded px-3 py-2 text-sm bg-background text-foreground"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
+         <div>
+  <label className="block text-sm mb-1" htmlFor="password">
+    Password
+  </label>
+
+  <div className="relative">
+    <input
+      id="password"
+      type={showPassword ? "text" : "password"}
+      autoComplete="new-password"
+      required
+      className="w-full border rounded px-3 py-2 pr-10 text-sm bg-background text-foreground appearance-none"
+      value={password}
+      onChange={(e) => setPassword(e.target.value)}
+    />
+
+    {/* ✅ Vårt öga: bara mobil */}
+    <button
+      type="button"
+      onClick={() => setShowPassword((v) => !v)}
+      className="absolute right-2 top-1/2 -translate-y-1/2 p-1 md:hidden"
+      aria-label={showPassword ? "Hide password" : "Show password"}
+    >
+      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+    </button>
+  </div>
+</div>
+
+
 
           <div>
             <label className="block text-sm mb-1" htmlFor="tenant">
