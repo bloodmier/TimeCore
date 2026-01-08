@@ -44,7 +44,7 @@ export const AccountAvatarSection = ({
         >
           <Avatar className="h-28 w-28">
             {previewUrl && (
-              <AvatarImage src={previewUrl} alt="Profile picture" />
+              <AvatarImage src={previewUrl}  />
             )}
             <AvatarFallback>{getInitials()}</AvatarFallback>
           </Avatar>
