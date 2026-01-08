@@ -10,10 +10,8 @@ export const TimeRegisterLayoutpage = () => {
 
   return (
     <div className="w-full min-w-0">
-      {/* Tabs */}
-      <div className="w-full overflow-x-auto">
-        {/* ✅ remove min-w-max, allow shrink */}
-        <ul className="flex flex-wrap gap-2 mb-4 border-b pb-2 min-w-0">
+      <div className="w-full overflow-x-auto overscroll-x-contain">
+        <ul className="flex flex-nowrap gap-2 mb-4 border-b pb-2 min-w-max">
           <li>
             <NavLink
               to="/account/timeregister/labor"

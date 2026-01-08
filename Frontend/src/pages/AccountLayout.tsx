@@ -17,7 +17,7 @@ export const AccountLayout = () => {
   }
 
   return (
-    <div className="rounded-(--radius-xl) w-full min-h-0 bg-(--color-background-lighter) text-(--color-foreground) md:mx-auto ">
+    <div className="rounded-(--radius-xl) w-full min-h-0 bg-(--color-background-lighter) text-(--color-foreground) md:mx-auto overflow-x-hidden">
       <div className="mx-auto w-full flex min-h-0">
         <aside className="max-md:hidden          
     w-64 shrink-0 flex flex-col 

@@ -208,8 +208,8 @@ export const TimeRegisterForm: React.FC<Props> = ({
             )}
           </div>
 
-          <div className="flex flex-row gap-4 items-end">
-            <div className="flex-1 space-y-2">
+          <div className="flex flex-col gap-4 md:flex-row md:items-end">
+            <div className="flex-1 space-y-2 min-w-0">
               <Label>Customer</Label>
               <CustomerSearchPopover
                 value={values.customerId ?? null}
@@ -342,47 +342,41 @@ export const TimeRegisterForm: React.FC<Props> = ({
             }}
           />
 
-          {items.length > 0 && (
-            <div className="grid gap-2" aria-label="Added articles">
-              <div className="flex flex-col gap-2">
-                {items.map((it, idx) => (
-                  <div key={idx} className="flex items-center gap-2">
-                    <Input
-                      value={it.description ?? ""}
-                      onChange={(e) =>
-                        updateItem(idx, { description: e.target.value })
-                      }
-                      placeholder="Description"
-                      className="flex-1"
-                      aria-label={`Article ${idx + 1} description`}
-                    />
-                    <Input
-                      type="number"
-                      min={1}
-                      value={it.amount ?? 1}
-                      onChange={(e) =>
-                        setItemAmount(idx, Number(e.target.value))
-                      }
-                      className="w-16"
-                      aria-label={`Article ${idx + 1} quantity`}
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => removeItem(idx)}
-                    >
-                      Remove
-                    </Button>
-                  </div>
-                ))}
-              </div>
-              <div className="flex justify-end">
-                <Button type="button" variant="ghost" onClick={clearItems}>
-                  Clear all
+          {items.map((it, idx) => (
+            <div
+              key={idx}
+              className="flex flex-col gap-2 sm:flex-row sm:items-center min-w-0"
+            >
+              <Input
+                value={it.description ?? ""}
+                onChange={(e) =>
+                  updateItem(idx, { description: e.target.value })
+                }
+                placeholder="Description"
+                className="w-full sm:flex-1 min-w-0"
+                aria-label={`Article ${idx + 1} description`}
+              />
+
+              <div className="flex items-center gap-2">
+                <Input
+                  type="number"
+                  min={1}
+                  value={it.amount ?? 1}
+                  onChange={(e) => setItemAmount(idx, Number(e.target.value))}
+                  className="w-24"
+                  aria-label={`Article ${idx + 1} quantity`}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => removeItem(idx)}
+                  className="shrink-0"
+                >
+                  Remove
                 </Button>
               </div>
             </div>
-          )}
+          ))}
 
           <div className="text-xs text-muted-foreground">
             Saved as: <em>{summarizeItems() || "—"}</em>
@@ -459,10 +453,10 @@ export const TimeRegisterForm: React.FC<Props> = ({
         </div>
 
         {/* Save template */}
-        <div className="flex gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center min-w-0">
           <Input
             type="text"
-            placeholder="Name your template"
+            placeholder="Name template"
             onChange={(e) => setTemplateName(e.target.value)}
             value={templateName}
             aria-label="Template name"

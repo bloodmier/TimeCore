@@ -71,12 +71,12 @@ export const TimeRegisterDraftsPanel: React.FC<Props> = ({
               return (
                 <div
                   key={key}
-                  className={`p-3 grid gap-2 md:grid-cols-[1fr_auto] md:items-center rounded-xl border mb-2 m-2 ${
+                  className={`p-3 grid gap-2 md:grid-cols-[1fr_auto] md:items-center rounded-xl border mb-2 m-2 min-w-0 overflow-hidden ${
                     editingDraftId === it.draft_id ? "opacity-50" : ""
                   } ${it.billable ? "" : "bg-orange-600/20"}`}
                 >
                   <div className="space-y-1">
-                    <div className="text-sm">
+                    <div className="text-sm min-w-0">
                       <span className="font-medium">{it.customerName}</span> •{" "}
                       {it.category_name} • {it.hours} h • {it.date}
                     </div>
@@ -108,7 +108,7 @@ export const TimeRegisterDraftsPanel: React.FC<Props> = ({
                       type="button"
                       onClick={() => onDuplicateDraft(it)}
                     >
-                      Duplicate
+                      Copy
                     </Button>
 
                     <Button
