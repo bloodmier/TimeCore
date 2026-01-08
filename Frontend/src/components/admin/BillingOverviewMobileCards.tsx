@@ -270,7 +270,10 @@ function CompanyTimeReports({
         key={r.id}
         className={billedTimecard ? "!bg-slate-200/60 dark:!bg-slate-300/40" : ""}
       >
-              <TableCell>{prettyYMD(r.date)}</TableCell>
+              <TableCell className="align-top">
+  <span className="block tabular-nums">{r.date?.slice(0, 7)}</span>
+  <span className="block tabular-nums">{r.date?.slice(8, 10)}</span>
+</TableCell>
               <TableCell className="align-top">
                 <div className="font-medium whitespace-normal break-words">
                   {r.work_labor ?? r.note ?? "—"}
@@ -294,16 +297,16 @@ function CompanyTimeReports({
           
               <TableCell className="text-center align-top">
                 {r.items?.length ? (
-                  <div className="flex flex-col items-end gap-1 w-full divide-y">
+                  <div className="flex flex-col gap-1 w-full min-w-0 divide-y">
                     {r.items.map((i) => (
                       <div
                         key={i.id}
-                        className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-x-2 w-full pb-2"
+                        className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-x-2 w-full pb-2 min-w-0 "
                       >
-                        <span className="whitespace-normal break-words leading-tight text-left">
+                        <span className="min-w-0 whitespace-normal break-words [overflow-wrap:anywhere] leading-tight text-left">
                           {i.description}
                         </span>
-                        <span className="whitespace-nowrap self-end text-muted-foreground tabular-nums">
+                        <span className="self-end text-muted-foreground tabular-nums">
                           {i.amount} pcs
                         </span>
                       </div>
