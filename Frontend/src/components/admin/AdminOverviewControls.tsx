@@ -21,7 +21,7 @@ type Props = {
 };
 
 export const AdminOverviewControls: React.FC<Props> = ({
-  title = "Time overview Admin",
+  title = "Admin summary",
   start,
   end,
   onChangeRange,
@@ -38,7 +38,7 @@ export const AdminOverviewControls: React.FC<Props> = ({
     <div className="flex flex-col gap-3">
       {/* Top row */}
       <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
-        <h1 className="text-2xl font-semibold text-center lg:text-left">
+        <h1 className="text-2xl font-semibold text-center lg:text-left whitespace-nowrap">
           {title}
         </h1>
 

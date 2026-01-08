@@ -17,7 +17,7 @@ type Props = {
 };
 
 export const UserOverviewControls: React.FC<Props> = ({
-  title = "Time overview",
+  title = "Time summary",
   start,
   end,
   onChangeRange,
@@ -30,7 +30,7 @@ export const UserOverviewControls: React.FC<Props> = ({
   return (
     <div className="w-full min-w-full flex flex-col gap-3">
       <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
-        <h1 className="text-2xl font-semibold text-center lg:text-left">{title}</h1>
+        <h1 className="text-2xl font-semibold text-center lg:text-left whitespace-nowrap">{title}</h1>
         <MonthSwitcher start={start} end={end} onChange={onChangeRange as any} />
       </div>
 
