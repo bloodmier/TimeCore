@@ -9,7 +9,7 @@
 
 
 import { useEffect, useState, type MouseEvent } from "react";
-import { initialValues, today } from "../helpers/TimeHelpersfunctions";
+import { today } from "../helpers/TimeHelpersfunctions";
 import type { FormState, ReportTemplate } from "../models/Draft";
 import { TimeReportService } from "../services/timeReportService";
 
