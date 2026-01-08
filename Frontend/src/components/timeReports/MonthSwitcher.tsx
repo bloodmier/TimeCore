@@ -161,13 +161,20 @@ export const MonthSwitcher: React.FC<Props> = ({ start, end, onChange, AllUnbill
   const endLabel = end ?? "—";
 
   return (
-    <div className="flex w-full items-center gap-2 flex-wrap lg:flex-nowrap justify-center">
-      <div className="flex gap-2">
+    <div className="flex w-full items-center gap-2 flex-wrap justify-center lg:flex-nowrap ">
+      <div className={`flex w-full flex-col items-center gap-2 md:flex-row ${
+    AllUnbilled
+      ? "lg:justify-between"
+      : "justify-center lg:justify-end"
+  }`}>
         {AllUnbilled && (
+          <div className=""> 
           <Button variant="outline" className="mr-5" onClick={setNoDate}>
             All Unbilled
           </Button>
+          </div>
         )}
+        <div>
         <Button variant="outline" size="sm" onClick={() => changeBy(-1)} aria-label="Previous month range">
           Prev
         </Button>
@@ -177,6 +184,7 @@ export const MonthSwitcher: React.FC<Props> = ({ start, end, onChange, AllUnbill
         <Button variant="outline" size="sm" onClick={() => changeBy(+1)} aria-label="Next month range">
           Next
         </Button>
+        </div>
       </div>
 
       <Popover open={open} onOpenChange={setOpen}>
@@ -184,7 +192,7 @@ export const MonthSwitcher: React.FC<Props> = ({ start, end, onChange, AllUnbill
           <Button
             variant="outline"
             size="sm"
-            className="ml-auto lg:ml-2 flex items-center gap-2"
+            className=" lg: flex items-center gap-2"
             title="Pick dates (left=start, right=end)"
             aria-label="Open date range picker"
           >
