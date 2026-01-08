@@ -262,6 +262,7 @@
   padding: 0.6em 2em;
   border: none;
   outline: none;
+  background: #2f2e2efb;
   color: rgb(255, 255, 255);
   cursor: pointer;
   position: relative;
@@ -277,6 +278,7 @@
   white-space: nowrap;
   font-size: 0.875rem;
   font-weight: 500;
+  
 }
 
 .button-85::before {
@@ -305,6 +307,10 @@
   animation: glowing-button-85 20s linear infinite;
   transition: opacity 0.3s ease-in-out;
   border-radius: 10px;
+  transform: translateZ(0);
+  will-change: transform, filter, opacity;
+  backface-visibility: hidden;
+   translate: 0 0;
 }
 
 @keyframes glowing-button-85 {
