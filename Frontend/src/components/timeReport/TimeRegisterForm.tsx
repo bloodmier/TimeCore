@@ -481,7 +481,7 @@ export const TimeRegisterForm: React.FC<Props> = ({
             Save template
           </Button>
         </div>
-
+ 
         {/* Form actions */}
         <div className="flex gap-3">
           <Button type="submit" disabled={submitting}>
