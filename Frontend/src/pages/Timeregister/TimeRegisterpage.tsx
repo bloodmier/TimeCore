@@ -198,6 +198,7 @@ export const TimeRegisterpage = () => {
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    
     const fieldErrors = validate(values);
     if (Object.keys(fieldErrors).length) {
       setErrors(fieldErrors);
@@ -229,6 +230,12 @@ export const TimeRegisterpage = () => {
         await refreshDrafts();
         setSuccess("Draft updated ✔");
         setEditingDraftId(null);
+        resetTemplate();
+        setAppliedTemplateId(null);
+        setTimeout(() => {
+  console.log("after reset (timeout)", { selectedTemplateId });
+}, 0);
+
         clearItems();
         setValues({
           ...initialValues,
@@ -255,6 +262,7 @@ export const TimeRegisterpage = () => {
         await saveDraft(newEntry);
         await refreshDrafts();
         resetTemplate();
+        setAppliedTemplateId(null);
         clearItems();
         setValues({
           ...initialValues,
@@ -326,6 +334,8 @@ export const TimeRegisterpage = () => {
     setServerError(null);
     setSuccess(null);
     clearItems();
+    resetTemplate();
+        setAppliedTemplateId(null);
     setEditingDraftId(null);
   };
 
@@ -370,6 +380,8 @@ export const TimeRegisterpage = () => {
       setEditingDraftId(null);
     }
   };
+  
+
 
   return (
     <div className="w-full flex flex-col gap-6">

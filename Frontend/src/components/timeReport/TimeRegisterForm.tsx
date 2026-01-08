@@ -144,16 +144,19 @@ export const TimeRegisterForm: React.FC<Props> = ({
             <Label htmlFor="template-select">Templates</Label>
             <Select
               value={
-                selectedTemplateId !== null && selectedTemplateId !== ""
-                  ? String(selectedTemplateId)
-                  : undefined
+                selectedTemplateId ? String(selectedTemplateId) : "__none__"
               }
-              onValueChange={(val) => pickTemplate(val)}
+              onValueChange={(val) => {
+                if (val === "__none__") return;
+                pickTemplate(val);
+              }}
             >
               <SelectTrigger id="template-select" aria-label="Choose template">
                 <SelectValue placeholder="Choose template" />
               </SelectTrigger>
+
               <SelectContent>
+                <SelectItem value="__none__">None</SelectItem>
                 {templates.map((c) => (
                   <SelectItem key={c.id} value={String(c.id)}>
                     {c.name}
@@ -346,7 +349,10 @@ export const TimeRegisterForm: React.FC<Props> = ({
             <div className="grid gap-2" aria-label="Added articles">
               <div className="flex flex-col gap-2">
                 {items.map((it, idx) => (
-                  <div key={idx} className="flex flex-col gap-2 sm:flex-row sm:items-center min-w-0">
+                  <div
+                    key={idx}
+                    className="flex flex-col gap-2 sm:flex-row sm:items-center min-w-0"
+                  >
                     <Input
                       value={it.description ?? ""}
                       onChange={(e) =>
@@ -481,7 +487,7 @@ export const TimeRegisterForm: React.FC<Props> = ({
             Save template
           </Button>
         </div>
- 
+
         {/* Form actions */}
         <div className="flex gap-3">
           <Button type="submit" disabled={submitting}>

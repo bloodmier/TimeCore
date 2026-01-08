@@ -61,8 +61,6 @@ export const useReportTemplates = () => {
     try {
       await TimeReportService.saveTimeRegisterTemplate(template, name);
       await loadAllTemplates();
-      setSelectedTemplate(null);
-      setSelectedTemplateId("");
       resetTemplate();
     } catch {
       console.error("Failed to save template!");
@@ -96,9 +94,14 @@ export const useReportTemplates = () => {
   };
 
   const resetTemplate = () => {
-    setSelectedTemplate(initialValues);
+    setSelectedTemplate(null);
     setSelectedTemplateId("");
   };
+
+  useEffect(() => {
+  console.log("selectedTemplateId changed:", selectedTemplateId);
+}, [selectedTemplateId]);
+
 
   return {
     templates,
