@@ -17,7 +17,6 @@ import { StatusLegend } from "./StatusLegend";
 type Props = {
   data: BillingEnvelope[];
   loading: boolean;
-  handleInvoiceTarget: () => void;
   selectMode?: boolean;
   isSelected?: (id: number) => boolean;
   onToggleSelect?: (row: BillingEnvelope) => void;
@@ -36,7 +35,6 @@ const totalArticles = (t: BillingEnvelope["total"]) =>
 export function BillingOverviewMobileCards({
   data,
   loading,
-  handleInvoiceTarget,
   selectMode = false,
   isSelected,
   onToggleSelect,
@@ -162,17 +160,7 @@ export function BillingOverviewMobileCards({
 
                 <div className="flex flex-col items-end gap-2 shrink-0">
                   {!hasCustomer ? (
-                    <Button
-                      size="sm"
-                      className="!opacity-100"
-                      variant="outline"
-                      onClick={(e) => {
-                        e.stopPropagation(); // inte toggla select
-                        handleInvoiceTarget();
-                      }}
-                    >
-                      Connect
-                    </Button>
+                    <span className="text-xs text-muted-foreground italic">Not connected</span>
                   ) : null}
 
                   <Button

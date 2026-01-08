@@ -16,7 +16,6 @@ import { StatusLegend } from "./StatusLegend";
 type Props = {
   data: BillingEnvelope[];
   loading: boolean;
-  handleInvoiceTarget: () => void;
   selectMode?: boolean;
   isSelected?: (id: number) => boolean;
   onToggleSelect?: (row: BillingEnvelope) => void;
@@ -32,7 +31,6 @@ const fmtHours = (n: number | null | undefined) =>
 export function BillingOverviewDesktopTable({
   data,
   loading,
-  handleInvoiceTarget,
   selectMode = false,
   isSelected,
   onToggleSelect,
@@ -156,16 +154,10 @@ export function BillingOverviewDesktopTable({
                           {c.billingInfo.customer_id}
                         </span>
                       ) : (
-                        <Button
-                          variant="ghost"
-                          onClick={(e) => {
-                            e.stopPropagation(); // don’t toggle selection
-                            handleInvoiceTarget();
-                          }}
-                        >
-                          connect
-                        </Button>
-                      )}
+    <span className="text-xs text-muted-foreground italic">
+      Not connected
+    </span>
+  )}
                     </TableCell>
 
                     <TableCell className="align-top text-center">

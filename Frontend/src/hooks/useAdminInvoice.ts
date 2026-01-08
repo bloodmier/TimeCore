@@ -193,11 +193,6 @@ export const useAdminInvoice = () => {
     auto.resetBaseline();
   }, [range.start, range.end, status, onlyBillable]);
 
-  const handleInvoiceTarget = async () => {
-    // Placeholder for future invoice target selection logic (e.g. select a customer/company as target).
-    return;
-  };
-
   const onProceedSelected = async (
     rows: BillingEnvelope[],
     opts?: ProceedOptions,
@@ -250,7 +245,6 @@ export const useAdminInvoice = () => {
       invoiceDate: opts?.invoiceDate || getLastDayOfCurrentMonth(),
       dueInDays: 30,
     });
-    console.log(payloads);
     
 
     if (!payloads.length) {
@@ -661,7 +655,6 @@ export const useAdminInvoice = () => {
   return {
     env,
     customers,
-    handleInvoiceTarget,
     loading,
     error,
     range,

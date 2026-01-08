@@ -35,7 +35,6 @@ export const AdminInvoiceMain = () => {
     setOnlyBillable,
     status,
     setStatus,
-    handleInvoiceTarget,
     onProceedSelected,
     refetch,
     needsReauth,
@@ -52,7 +51,7 @@ export const AdminInvoiceMain = () => {
   return (
     <div className="grid gap-4 w-full min-w-0 max-w-full">
       <div className="flex items-center justify-between w-full min-w-0">
-        <h1 className="text-xl font-semibold">Billing overview</h1>
+        <h1 className="text-xl font-semibold">Invoice overview</h1>
         <Button variant="nohover" onClick={refetch} size="sm" className="group">
           <RefreshCcw
             strokeWidth={1.4}
@@ -95,7 +94,6 @@ export const AdminInvoiceMain = () => {
               <BillingOverviewList
                 data={customers as any}
                 loading={false}
-                handleInvoiceTarget={handleInvoiceTarget}
                 onProceedSelected={onProceedSelected}
                 needsReauth={needsReauth}
                 refetch={refetch}
@@ -120,7 +118,6 @@ export const AdminInvoiceMain = () => {
           <BillingOverviewList
             data={customers as any}
             loading={false}
-            handleInvoiceTarget={handleInvoiceTarget}
             onProceedSelected={onProceedSelected}
             needsReauth={needsReauth}
             refetch={refetch}

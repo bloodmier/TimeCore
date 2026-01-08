@@ -20,7 +20,8 @@ export const createTimeReport = async (req, res) => {
   // Normalize to an array so we support both single and bulk create.
   const payloads = Array.isArray(req.body) ? req.body : [req.body];
   const userId = req.user?.id;
-if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+  if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
   if (payloads.length === 0) {
     return res.status(400).json({ ok: false, error: "Empty payload" });
@@ -35,6 +36,7 @@ if (!userId) return res.status(401).json({ error: "Unauthorized" });
       typeof i.date === "string" &&
       Number.isFinite(i.hours)
   );
+
   if (!valid) {
     return res
       .status(400)
@@ -42,8 +44,24 @@ if (!userId) return res.status(401).json({ error: "Unauthorized" });
   }
 
   const conn = await db.getConnection();
+
   try {
     await conn.beginTransaction();
+
+    // ------------------------------------------------------------
+    // Determine tenant's "own company" customer_id once
+    // If a time report is registered on this customer_id => force billable=0
+    // ------------------------------------------------------------
+    const [[tenantRow]] = await conn.query(
+      `SELECT t.customer_id
+       FROM users u
+       JOIN tenants t ON t.id = u.tenant_id
+       WHERE u.id = ?
+       LIMIT 1`,
+      [userId]
+    );
+
+    const tenantCustomerId = tenantRow?.customer_id ?? null;
 
     const INSERT_ITEM_SQL = `
       INSERT INTO time_report_item (time_report_id, article_id, amount, description, purchase_price)
@@ -53,9 +71,17 @@ if (!userId) return res.status(401).json({ error: "Unauthorized" });
     for (let idx = 0; idx < payloads.length; idx++) {
       const i = payloads[idx];
 
+      // ------------------------------------------------------------
+      // NEW: force unbillable if user registers time on own company
+      // ------------------------------------------------------------
+      const isOwnCompany =
+        tenantCustomerId != null &&
+        Number(i.customer_id) === Number(tenantCustomerId);
+
       // Convert various truthy/falsey representations to 0/1 or undefined
       // (undefined means we let the DB default apply).
-      const billable = toBoolOrUndefined(i.billable);
+      // But if own company => always 0.
+      const billable = isOwnCompany ? 0 : toBoolOrUndefined(i.billable);
 
       // === 1) Insert time_report header =====================================
       const baseCols = [
@@ -68,6 +94,7 @@ if (!userId) return res.status(401).json({ error: "Unauthorized" });
         "`hours`",
         "`project_id`",
       ];
+
       const baseVals = [
         userId,
         i.customer_id,
@@ -80,7 +107,8 @@ if (!userId) return res.status(401).json({ error: "Unauthorized" });
       ];
 
       // If billable is undefined, we omit the column and let DB default.
-      let sql = `
+      // If own company => billable is 0, so it will ALWAYS be included.
+      const sql = `
         INSERT INTO time_report (${baseCols.join(", ")}${
         billable === undefined ? "" : ", `billable`"
       })
@@ -99,6 +127,7 @@ if (!userId) return res.status(401).json({ error: "Unauthorized" });
       await conn.execute(`UPDATE customer SET last_used = NOW() WHERE id = ?`, [
         i.customer_id,
       ]);
+
       await conn.execute(
         `INSERT INTO time_report_user_company_usage (user_id, customer_id, last_used)
          VALUES (?, ?, NOW())
@@ -112,11 +141,12 @@ if (!userId) return res.status(401).json({ error: "Unauthorized" });
       if (Array.isArray(i.items) && i.items.length > 0) {
         for (const raw of i.items) {
           const articleId = raw.article_id ?? raw.articleId ?? null;
+
           const n = Number(raw.amount);
           const amount = Number.isFinite(n) && n > 0 ? Math.floor(n) : 1;
 
           let description = String(raw.description ?? "").trim();
-          let purchasePrice = raw.purchasePrice ?? null;
+          const purchasePrice = raw.purchasePrice ?? null;
 
           // If description is empty but an articleId is provided, resolve name.
           if (!description && articleId != null) {
@@ -127,6 +157,7 @@ if (!userId) return res.status(401).json({ error: "Unauthorized" });
             if (!art) throw new Error(`Article not found: ${articleId}`);
             description = String(art.name || "").trim();
           }
+
           if (!description) description = "Item";
 
           await conn.execute(INSERT_ITEM_SQL, [
@@ -136,6 +167,7 @@ if (!userId) return res.status(401).json({ error: "Unauthorized" });
             description,
             purchasePrice,
           ]);
+
           insertedItems++;
         }
       }
@@ -166,13 +198,16 @@ if (!userId) return res.status(401).json({ error: "Unauthorized" });
     }
 
     await conn.commit();
-    return res
-      .status(201)
-      .json({ ok: true, message: "Time reports created successfully" });
+
+    return res.status(201).json({
+      ok: true,
+      message: "Time reports created successfully",
+    });
   } catch (err) {
     try {
       await conn.rollback();
     } catch {}
+
     console.error("createTimeReport error:", err);
     return res
       .status(500)
@@ -181,6 +216,7 @@ if (!userId) return res.status(401).json({ error: "Unauthorized" });
     conn.release();
   }
 };
+
 
 /**
  * Get all items for a given draft (time_report_item_draft).

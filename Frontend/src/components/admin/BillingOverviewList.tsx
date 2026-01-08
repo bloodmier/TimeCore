@@ -19,7 +19,6 @@ type Props = {
   data: BillingEnvelope[];
   loading?: boolean;
   className?: string;
-  handleInvoiceTarget: () => void;
 
   onProceedSelected?: (
     rows: BillingEnvelope[],
@@ -69,7 +68,6 @@ export function BillingOverviewList({
   data,
   loading,
   className = "",
-  handleInvoiceTarget,
   onProceedSelected,
   needsReauth,
   refetch,
@@ -189,7 +187,6 @@ export function BillingOverviewList({
         <BillingOverviewDesktopTable
           data={ordered}
           loading={!!loading}
-          handleInvoiceTarget={handleInvoiceTarget}
           selectMode={selectMode}
           isSelected={isSelected}
           onToggleSelect={toggleOne}
@@ -201,7 +198,6 @@ export function BillingOverviewList({
         <BillingOverviewMobileCards
           data={ordered}
           loading={!!loading}
-          handleInvoiceTarget={handleInvoiceTarget}
           selectMode={selectMode}
           isSelected={isSelected}
           onToggleSelect={toggleOne}
