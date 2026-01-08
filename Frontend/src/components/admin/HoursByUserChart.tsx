@@ -81,9 +81,9 @@ export function HoursByUserChart({ data }: Props) {
             barCategoryGap={barCategoryGap}
           >
             <text
-              x="50%"
+              x="98%"
               y={20}
-              textAnchor="middle"
+              textAnchor="end"
               fill="currentColor"
               fontSize={14}
               fontWeight={500}

@@ -83,16 +83,6 @@ export function HoursByCustomerChart({ data }: Props) {
             barGap={0}
             barCategoryGap={barCategoryGap}
           >
-            <text
-              x="50%"
-              y={20}
-              textAnchor="middle"
-              fill="currentColor"
-              fontSize={14}
-              fontWeight={500}
-            >
-              Hours on customers
-            </text>
 
             <defs>
               <linearGradient
@@ -155,6 +145,16 @@ export function HoursByCustomerChart({ data }: Props) {
                 <Cell key={i} fill={`url(#barFill-${gradientId})`} />
               ))}
             </Bar>
+              <text
+                x="98%"
+                y={20}
+                textAnchor="end"
+                fill="currentColor"
+                fontSize={14}
+                fontWeight={500}
+              >
+                Hours on customers
+              </text>
           </BarChart>
         </ResponsiveContainer>
       </div>

@@ -178,9 +178,9 @@ export const AdminFilters = ({
           />
         </div>
 
-        <div className="flex flex-col gap-3 bg-muted/30 p-3 rounded-xl">
-          <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-col justify-center items-center gap-3 bg-muted/30 p-3 rounded-xl md:flex-row w-full">
             <span className="text-sm font-medium">Articles</span>
+          <div className="flex flex-col items-center gap-3  ">
             <ArticleModeSwitch
               value={draft.articleMode ?? "all"}
               onChange={(m) =>
@@ -213,7 +213,7 @@ export const AdminFilters = ({
           )}
         </div>
 
-        <div className="w-full flex-none sm:flex-1 sm:basis-0 sm:min-w-[220px]">
+        <div className="flex w-full justify-center flex-none sm:flex-1 sm:basis-0 sm:min-w-[220px]">
           <BillableTriSwitch
             label="Billable"
             value={draft.billable == null ? "all" : draft.billable ? "true" : "false"}
@@ -223,7 +223,7 @@ export const AdminFilters = ({
           />
         </div>
 
-        <div className="w-full flex-none sm:flex-1 sm:basis-0 sm:min-w-[220px]">
+        <div className="flex w-full justify-center flex-none sm:flex-1 sm:basis-0 sm:min-w-[220px]">
           <BillableTriSwitch
             label="Billed"
             value={draft.billed == null ? "all" : draft.billed ? "true" : "false"}
