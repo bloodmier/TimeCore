@@ -82,7 +82,7 @@ export const Homepage = () => {
 
 
 
-      <div className="mt-6 flex gap-3">
+      <div className="mt-6 flex gap-4">
         <Button asChild className="button-85">
           <Link to="/create-account">Create account</Link>
         </Button>
