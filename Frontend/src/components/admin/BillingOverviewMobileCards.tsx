@@ -51,13 +51,12 @@ export function BillingOverviewMobileCards({
   const isOpen = openId === c.company.id;
   const selected = isSelected?.(c.company.id) ?? false;
 
-  // Samma flaggor som desktop
-  const hasUnbilledBefore = c.meta.flags.hasUnbilledBeforeStart; // amber
-  const hasUnbilledAfter  = c.meta.flags.hasUnbilledAfterEnd;    // sky
+  const hasUnbilledBefore = c.meta.flags.hasUnbilledBeforeStart; 
+  const hasUnbilledAfter  = c.meta.flags.hasUnbilledAfterEnd;    
   const isBilledLocked =
     c.meta?.billing?.state === "billed" ||
-    (c.meta.flags.isFullyBilledInRange && !c.meta.flags.hasUnbilledInRange); // slate
-  const isPartiallyBilled = c.meta.billing.state === "mixed";     // gradient
+    (c.meta.flags.isFullyBilledInRange && !c.meta.flags.hasUnbilledInRange); 
+  const isPartiallyBilled = c.meta.billing.state === "mixed";   
 
   const statusClass = [
     hasUnbilledBefore && "!bg-amber-300/40 dark:!bg-amber-700/30",
@@ -92,20 +91,12 @@ export function BillingOverviewMobileCards({
                 ? "cursor-pointer hover:bg-emerald-100 dark:hover:bg-emerald-900/80"
                 : "",
               !hasCustomer ? "!bg-red-800/30 cursor-not-allowed" : "",
-
-              // Statusfärg (matchar desktop)
-        
-
-              // Öppet läge: ring/skugga (ingen bg-override)
               isOpen ? "ring-1 ring-muted-foreground/20 shadow-sm" : "",
-
-              // Selected
               selected
                 ? "bg-emerald-100 dark:bg-emerald-900/80 ring-2 ring-emerald-500 ring-inset shadow-md"
                 : "",
             ].join(" ")}
           >
-            {/* Hörntriangel + check */}
             {selected && (
               <>
                 <span
@@ -133,9 +124,9 @@ export function BillingOverviewMobileCards({
           ].join(" ")}
         />
             <CardHeader className="p-4">
-              <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start justify-between gap-3 min-w-0">
                 <div className="min-w-0">
-                  <CardTitle className="truncate">
+                  <CardTitle className="max-w-full break-words whitespace-normal">
                     {c.company.name ?? "—"}
                   </CardTitle>
                   <div className="mt-1 text-xs text-muted-foreground">
@@ -169,7 +160,7 @@ export function BillingOverviewMobileCards({
                   </div>
                 </div>
 
-                <div className="flex flex-col items-end gap-2">
+                <div className="flex flex-col items-end gap-2 shrink-0">
                   {!hasCustomer ? (
                     <Button
                       size="sm"
@@ -212,7 +203,7 @@ export function BillingOverviewMobileCards({
               <CardContent className="p-0 border-t">
                 <CompanyTimeReports
                   rows={c.timecards?.rows ?? []}
-                  hasCustomer={hasCustomer} // (valfritt) för border
+                  hasCustomer={hasCustomer} 
                 />
               </CardContent>
             )}
@@ -300,7 +291,7 @@ function CompanyTimeReports({
                 {fmtHours(r.hours)}
               </TableCell>
 
-              {/* ITEMS: lista per rad, som i desktop */}
+          
               <TableCell className="text-center align-top">
                 {r.items?.length ? (
                   <div className="flex flex-col items-end gap-1 w-full divide-y">
