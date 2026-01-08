@@ -5,7 +5,6 @@
  * - Creating new users
  * - (Later) updating users
  * - (Later) deactivating users
- * You can change user creation role on row 50
  */
 
 import bcrypt from "bcryptjs";
@@ -46,8 +45,8 @@ export async function createUser(req, res) {
         message: "Password must be at least 8 characters long",
       });
     }
-    // user or admin
-    const finalRole = "admin"
+
+    const finalRole = "user"
 
     const [tenantRows] = await db.query(
       "SELECT id FROM tenants WHERE id = ?",
